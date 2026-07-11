@@ -1,0 +1,30 @@
+from enum import StrEnum
+
+
+class Fact(StrEnum):
+
+    JWT = "JWT"
+
+    OAUTH = "OAUTH"
+
+    SESSION_COOKIE = "SESSION_COOKIE"
+
+    CSRF = "CSRF"
+
+    GRAPHQL = "GRAPHQL"
+
+    REST_API = "REST_API"
+
+    WEBSOCKET = "WEBSOCKET"
+
+    SOURCE_MAP = "SOURCE_MAP"
+
+    NEXTJS = "NEXTJS"
+
+    DRUPAL = "DRUPAL"
+
+    CLOUDFLARE = "CLOUDFLARE"
+
+    LARAVEL = "LARAVEL"
+
+    WORDPRESS = "WORDPRESS"
