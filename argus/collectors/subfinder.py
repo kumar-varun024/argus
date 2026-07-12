@@ -24,8 +24,6 @@ class SubfinderCollector(BaseCollector):
             ],
         )
 
-        mission.subdomains = ReconParser.parse_subfinder(
-            result["stdout"]
-        )
+        mission.subdomains = ReconParser.parse_subfinder(result["stdout"])
 
         print(f"✓ Found {len(mission.subdomains)} subdomains")

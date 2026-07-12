@@ -23,41 +23,35 @@ class JavaScriptAnalyzer:
         re.compile(r'axios\.(?:get|post|put|delete|patch)\(["\']([^"\']+)["\']'),
     ]
 
-    ROUTE_PATTERN = re.compile(
-        r'["\'](/[a-zA-Z0-9_\-/]{2,})["\']'
-    )
+    ROUTE_PATTERN = re.compile(r'["\'](/[a-zA-Z0-9_\-/]{2,})["\']')
 
     GRAPHQL_PATTERNS = [
-        re.compile(r'graphql', re.I),
-        re.compile(r'__typename'),
-        re.compile(r'\bquery\b'),
-        re.compile(r'\bmutation\b'),
-        re.compile(r'\bsubscription\b'),
-        re.compile(r'Apollo', re.I),
-        re.compile(r'Relay', re.I),
-        re.compile(r'urql', re.I),
+        re.compile(r"graphql", re.I),
+        re.compile(r"__typename"),
+        re.compile(r"\bquery\b"),
+        re.compile(r"\bmutation\b"),
+        re.compile(r"\bsubscription\b"),
+        re.compile(r"Apollo", re.I),
+        re.compile(r"Relay", re.I),
+        re.compile(r"urql", re.I),
     ]
 
-    WEBSOCKET_PATTERN = re.compile(
-        r'wss?://[^"\']+'
-    )
+    WEBSOCKET_PATTERN = re.compile(r'wss?://[^"\']+')
 
-    SOURCE_MAP_PATTERN = re.compile(
-        r'//# sourceMappingURL=(.+)'
-    )
+    SOURCE_MAP_PATTERN = re.compile(r"//# sourceMappingURL=(.+)")
 
     JWT_PATTERNS = [
-        re.compile(r'Bearer'),
-        re.compile(r'access_token'),
-        re.compile(r'refresh_token'),
-        re.compile(r'Authorization'),
+        re.compile(r"Bearer"),
+        re.compile(r"access_token"),
+        re.compile(r"refresh_token"),
+        re.compile(r"Authorization"),
     ]
 
     SECRET_PATTERNS = [
-        re.compile(r'AIza[0-9A-Za-z\-_]{35}'),
-        re.compile(r'sk_live_[0-9A-Za-z]+'),
-        re.compile(r'AKIA[0-9A-Z]{16}'),
-        re.compile(r'ghp_[A-Za-z0-9]{36}'),
+        re.compile(r"AIza[0-9A-Za-z\-_]{35}"),
+        re.compile(r"sk_live_[0-9A-Za-z]+"),
+        re.compile(r"AKIA[0-9A-Z]{16}"),
+        re.compile(r"ghp_[A-Za-z0-9]{36}"),
     ]
 
     def analyze(self, javascript: str):
@@ -67,17 +61,11 @@ class JavaScriptAnalyzer:
         for pattern in self.API_PATTERNS:
             result.apis.extend(pattern.findall(javascript))
 
-        result.routes.extend(
-            self.ROUTE_PATTERN.findall(javascript)
-        )
+        result.routes.extend(self.ROUTE_PATTERN.findall(javascript))
 
-        result.websockets.extend(
-            self.WEBSOCKET_PATTERN.findall(javascript)
-        )
+        result.websockets.extend(self.WEBSOCKET_PATTERN.findall(javascript))
 
-        result.source_maps.extend(
-            self.SOURCE_MAP_PATTERN.findall(javascript)
-        )
+        result.source_maps.extend(self.SOURCE_MAP_PATTERN.findall(javascript))
 
         for pattern in self.GRAPHQL_PATTERNS:
             if pattern.search(javascript):
@@ -88,9 +76,7 @@ class JavaScriptAnalyzer:
                 result.jwt.append(pattern.pattern)
 
         for pattern in self.SECRET_PATTERNS:
-            result.secrets.extend(
-                pattern.findall(javascript)
-            )
+            result.secrets.extend(pattern.findall(javascript))
 
         result.apis = sorted(set(result.apis))
         result.routes = sorted(set(result.routes))

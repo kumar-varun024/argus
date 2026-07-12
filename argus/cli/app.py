@@ -9,9 +9,7 @@ from argus.core.scheduler import Scheduler
 from argus.planner import Planner
 from argus.agents import ReconAgent
 
-app = typer.Typer(
-    help="Argus - Autonomous Offensive Security Platform"
-)
+app = typer.Typer(help="Argus - Autonomous Offensive Security Platform")
 
 console = Console()
 

@@ -30,8 +30,6 @@ class HttpxCollector(BaseCollector):
             stdin=input_data,
         )
 
-        mission.live_hosts = ReconParser.parse_httpx(
-            result["stdout"]
-        )
+        mission.live_hosts = ReconParser.parse_httpx(result["stdout"])
 
         print(f"✓ Found {len(mission.live_hosts)} live hosts")

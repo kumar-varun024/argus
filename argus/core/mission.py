@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from argus.evidence import EvidenceStore
 from argus.facts import FactStore
+from argus.models import AuthenticationModel
 
 
 @dataclass
@@ -49,6 +50,8 @@ class Mission:
     notes: list[str] = field(default_factory=list)
 
     hypotheses: list = field(default_factory=list)
+
+    authentication: AuthenticationModel = field(default_factory=AuthenticationModel)
 
     def start(self):
 

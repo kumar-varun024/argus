@@ -34,9 +34,7 @@ class KatanaCollector(BaseCollector):
                 ],
             )
 
-            endpoints = ReconParser.parse_katana(
-                result["stdout"]
-            )
+            endpoints = ReconParser.parse_katana(result["stdout"])
 
             for endpoint in endpoints:
 

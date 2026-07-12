@@ -6,11 +6,7 @@ class ReconParser:
     @staticmethod
     def parse_subfinder(output: str):
 
-        return [
-            line.strip()
-            for line in output.splitlines()
-            if line.strip()
-        ]
+        return [line.strip() for line in output.splitlines() if line.strip()]
 
     @staticmethod
     def parse_httpx(output: str):
@@ -47,8 +43,4 @@ class ReconParser:
     @staticmethod
     def parse_katana(output: str):
 
-        return [
-            line.strip()
-            for line in output.splitlines()
-            if line.strip()
-        ]
+        return [line.strip() for line in output.splitlines() if line.strip()]

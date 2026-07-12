@@ -63,10 +63,7 @@ class ReconAgent(BaseAgent):
 
             for hypothesis in mission.hypotheses:
 
-                print(
-                    f"\n[{hypothesis.confidence:.2f}] "
-                    f"{hypothesis.title}"
-                )
+                print(f"\n[{hypothesis.confidence:.2f}] " f"{hypothesis.title}")
 
                 print(hypothesis.description)
 

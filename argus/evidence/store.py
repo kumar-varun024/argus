@@ -17,11 +17,7 @@ class EvidenceStore:
 
     def filter(self, category: str):
 
-        return [
-            item
-            for item in self._items
-            if item.category == category
-        ]
+        return [item for item in self._items if item.category == category]
 
     def count(self):
 

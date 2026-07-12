@@ -20,32 +20,21 @@ class ReasoningEngine:
             if self._matches(rule.requires, observations):
 
                 hypotheses.append(
-
                     Hypothesis(
-
                         title=rule.name,
-
                         description=rule.hypothesis,
-
                         confidence=self._confidence(
                             rule.requires,
                             observations,
                         ),
-
                         severity=rule.severity,
-
                         evidence=rule.requires,
-
                         reasoning=[
                             rule.description,
                         ],
-
                         next_actions=rule.investigation,
-
                         tags=rule.tags,
-
                     )
-
                 )
 
         return hypotheses
@@ -66,10 +55,6 @@ class ReasoningEngine:
 
     def _confidence(self, required, observed):
 
-        matched = sum(
-            1
-            for item in required
-            if item in observed
-        )
+        matched = sum(1 for item in required if item in observed)
 
         return round(matched / len(required), 2)
