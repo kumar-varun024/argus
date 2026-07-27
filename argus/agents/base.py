@@ -6,8 +6,11 @@ class BaseAgent(ABC):
     Base class for every Argus agent.
     """
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, description: str = "", dependencies: list[str] = None, supported_inputs: list[str] = None):
         self.name = name
+        self.description = description
+        self.dependencies = dependencies or []
+        self.supported_inputs = supported_inputs or []
 
     def run(self, mission):
         """
@@ -36,3 +39,13 @@ class BaseAgent(ABC):
     @abstractmethod
     def evaluate(self, mission):
         pass
+
+    def produce(self) -> list:
+        return []
+
+    def confidence(self) -> float:
+        return 1.0
+
+    def health(self) -> str:
+        from argus.agents.results import AgentHealth
+        return AgentHealth.HEALTHY

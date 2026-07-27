@@ -8,8 +8,18 @@ from argus.core.mission import Mission
 from argus.core.scheduler import Scheduler
 from argus.planner import Planner
 from argus.agents import ReconAgent
+from argus.cli.knowledge import app as knowledge_app
+from argus.cli.queue_cli import app as queue_app
+from argus.cli.workflow_cli import app as workflow_app
+from argus.cli.auth_cli import app as auth_app
+from argus.cli.agent_cli import app as agent_app
 
 app = typer.Typer(help="Argus - Autonomous Offensive Security Platform")
+app.add_typer(knowledge_app, name="knowledge")
+app.add_typer(queue_app, name="queue")
+app.add_typer(workflow_app, name="workflow")
+app.add_typer(auth_app, name="auth")
+app.add_typer(agent_app, name="agent")
 
 console = Console()
 

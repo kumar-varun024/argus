@@ -1,7 +1,9 @@
-from .graph import EvidenceGraph
+from .graph import KnowledgeGraph
 from .node import Node
+from .edge import Edge
 
 __all__ = [
-    "EvidenceGraph",
+    "KnowledgeGraph",
     "Node",
+    "Edge",
 ]
