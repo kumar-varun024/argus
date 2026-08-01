@@ -4,6 +4,7 @@ from uuid import uuid4
 from datetime import datetime
 from enum import Enum
 import typing
+from typing import Any
 
 from argus.evidence import EvidenceStore
 from argus.facts import FactStore
@@ -44,6 +45,8 @@ class GraphQLState:
     crud: list = field(default_factory=list)
     relationship_graph: Any = None
     investigations: list = field(default_factory=list)
+    priority_queue: list = field(default_factory=list)
+    reasoning: list = field(default_factory=list)
 
 @dataclass
 class Mission:

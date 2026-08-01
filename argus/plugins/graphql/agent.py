@@ -16,6 +16,8 @@ class GraphQLSpecialist:
         self.schema_analyzer = GraphQLSchemaAnalyzer()
         from argus.plugins.graphql.business import BusinessKnowledgeAnalyzer
         self.business_analyzer = BusinessKnowledgeAnalyzer()
+        from argus.plugins.graphql.reasoning import GraphQLReasoningEngine
+        self.reasoning_engine = GraphQLReasoningEngine()
 
     def discover(self, mission: ControlledMission):
         logger.info("GraphQLSpecialist: Discovering endpoints...")
@@ -87,7 +89,7 @@ class GraphQLSpecialist:
 
     def generate_investigations(self, mission: ControlledMission):
         logger.info("GraphQLSpecialist: Generating investigations...")
-        # Placeholder for PR3
+        self.reasoning_engine.analyze(mission)
 
     def explain(self, identifier: str) -> str:
         logger.info(f"GraphQLSpecialist: Explaining {identifier}...")

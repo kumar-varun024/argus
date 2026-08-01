@@ -154,11 +154,66 @@ def business_objects(mission_id: str = typer.Option(None, "--mission", "-m", hel
         console.print("[yellow]No GraphQL business objects discovered.[/yellow]")
 
 @app.command()
-def explain():
-    """Explain a GraphQL finding."""
-    console.print("[cyan]Explaining GraphQL finding (Placeholder)...[/cyan]")
+def investigations(mission_id: str = typer.Option(None, "--mission", "-m", help="Mission ID")):
+    """List GraphQL investigations."""
+    mission = _get_or_mock_mission(mission_id)
+    specialist = GraphQLSpecialist()
+    specialist.discover(mission)
+    specialist.generate_investigations(mission)
+    
+    graphql = getattr(mission, "graphql", None)
+    if graphql and graphql.investigations:
+        console.print("\n[bold green]Investigations[/bold green]\n")
+        for inv in graphql.investigations:
+            console.print(f"[bold]{inv.title}[/bold] (ID: {inv.id})")
+            console.print(f"Priority: [magenta]{inv.priority}[/magenta] | Confidence: {inv.confidence:.2f}")
+            console.print(f"{inv.reasoning}\n")
+    else:
+        console.print("[yellow]No GraphQL investigations generated.[/yellow]")
 
 @app.command()
-def investigations():
-    """List GraphQL investigations."""
-    console.print("[cyan]Listing GraphQL investigations (Placeholder)...[/cyan]")
+def explain(investigation_id: str):
+    """Explain a GraphQL finding."""
+    # Since we don't have persistent state here easily without full DB, 
+    # we'd normally query it. For CLI demo we mock it if not found.
+    mission = _get_or_mock_mission()
+    specialist = GraphQLSpecialist()
+    specialist.discover(mission)
+    specialist.generate_investigations(mission)
+    
+    graphql = getattr(mission, "graphql", None)
+    if graphql and graphql.investigations:
+        for inv in graphql.investigations:
+            if inv.id == investigation_id or investigation_id == "mock":
+                console.print(f"\n[bold green]Investigation: {inv.title}[/bold green]\n")
+                console.print(f"[bold]Priority:[/bold] {inv.priority}")
+                console.print(f"[bold]Confidence:[/bold] {inv.confidence * 100:.0f}%")
+                console.print(f"[bold]Reason:[/bold]\n{inv.reasoning}\n")
+                
+                console.print("[bold]Evidence:[/bold]")
+                for ev in inv.evidence:
+                    console.print(f"✓ {ev}")
+                
+                if inv.business_objects:
+                    console.print(f"\n[bold]Business Objects:[/bold] {', '.join(inv.business_objects)}")
+                    
+                console.print(f"\n[bold]Manual Validation:[/bold]\n{inv.manual_validation_guidance}\n")
+                return
+                
+    console.print(f"[yellow]Investigation {investigation_id} not found.[/yellow]")
+
+@app.command()
+def priority(mission_id: str = typer.Option(None, "--mission", "-m", help="Mission ID")):
+    """List investigations by priority."""
+    mission = _get_or_mock_mission(mission_id)
+    specialist = GraphQLSpecialist()
+    specialist.discover(mission)
+    specialist.generate_investigations(mission)
+    
+    graphql = getattr(mission, "graphql", None)
+    if graphql and hasattr(graphql, "priority_queue") and graphql.priority_queue:
+        console.print("\n[bold green]Priority Queue[/bold green]\n")
+        for inv in graphql.priority_queue:
+            console.print(f"[{inv.priority}] {inv.title} ({inv.confidence:.2f})")
+    else:
+        console.print("[yellow]No GraphQL investigations in priority queue.[/yellow]")

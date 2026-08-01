@@ -156,3 +156,21 @@ class GraphQLWorkflow:
     business_objects: List[str] = field(default_factory=list)
     evidence: List[Any] = field(default_factory=list)
     confidence: float = 1.0
+
+@dataclass
+class GraphQLInvestigation:
+    title: str
+    description: str
+    category: str
+    reasoning: str
+    evidence: List[Any] = field(default_factory=list)
+    confidence: float = 0.0
+    priority: str = "Informational"
+    business_objects: List[str] = field(default_factory=list)
+    related_operations: List[str] = field(default_factory=list)
+    related_workflow: Optional[str] = None
+    related_nodes: List[str] = field(default_factory=list)
+    manual_validation_guidance: str = ""
+    status: str = "Pending"
+    tags: List[str] = field(default_factory=list)
+    id: str = field(default_factory=lambda: str(uuid4()))
