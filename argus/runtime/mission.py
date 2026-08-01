@@ -35,8 +35,14 @@ class GraphQLState:
     schemas: list = field(default_factory=list)
     types: dict = field(default_factory=dict)
     operations: list = field(default_factory=list)
+    enums: list = field(default_factory=list)
+    interfaces: list = field(default_factory=list)
+    unions: list = field(default_factory=list)
     relationships: list = field(default_factory=list)
     workflows: list = field(default_factory=list)
+    business_objects: list = field(default_factory=list)
+    crud: list = field(default_factory=list)
+    relationship_graph: Any = None
     investigations: list = field(default_factory=list)
 
 @dataclass

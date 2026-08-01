@@ -12,6 +12,10 @@ class GraphQLSpecialist:
     
     def __init__(self):
         self.discovery = GraphQLDiscovery()
+        from argus.plugins.graphql.schema import GraphQLSchemaAnalyzer
+        self.schema_analyzer = GraphQLSchemaAnalyzer()
+        from argus.plugins.graphql.business import BusinessKnowledgeAnalyzer
+        self.business_analyzer = BusinessKnowledgeAnalyzer()
 
     def discover(self, mission: ControlledMission):
         logger.info("GraphQLSpecialist: Discovering endpoints...")
@@ -64,6 +68,12 @@ class GraphQLSpecialist:
                 logger.info(obs_text)
             else:
                 logger.debug(f"GraphQLSpecialist: Duplicate endpoint skipped {ep.url}")
+                
+        # 4. Schema Discovery & Inference
+        self.schema_analyzer.analyze(mission)
+        
+        # 5. Business Logic Discovery
+        self.business_analyzer.analyze(mission)
 
     def collect_context(self, mission: ControlledMission):
         logger.info("GraphQLSpecialist: Collecting context...")
