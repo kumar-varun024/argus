@@ -139,3 +139,59 @@ def export(mission_id: str = typer.Argument(default="dummy"), format: str = type
         console.print(json.dumps(data, indent=2))
     else:
         console.print(f"[red]Format {format} not supported.[/red]")
+
+@app.command()
+def analyze(mission_id: str):
+    """Run the Business Logic Specialist to find investigation opportunities."""
+    from argus.runtime.manager import mission_manager
+    from argus.agents.business_logic.agent import BusinessLogicSpecialist
+    
+    try:
+        if mission_id == "dummy":
+            mission = __import__("argus.runtime.mission", fromlist=["Mission"]).Mission("dummy")
+            mission.workflows = get_dummy_workflows()
+        else:
+            mission = mission_manager.get_mission(mission_id)
+    except Exception as e:
+        console.print(f"[red]Error loading mission:[/red] {e}")
+        return
+        
+    console.print(f"[cyan]Running Business Logic Specialist on Mission {mission_id}...[/cyan]")
+    specialist = BusinessLogicSpecialist()
+    specialist.analyze(mission)
+    
+    if mission_id != "dummy":
+        mission_manager.checkpointer.checkpoint(mission)
+    
+    console.print(f"[green]Analysis complete! Generated {len(mission.business_logic)} investigations.[/green]")
+
+@app.command()
+def states(mission_id: str):
+    """Show extracted state machines for workflows."""
+    from argus.runtime.manager import mission_manager
+    
+    try:
+        if mission_id == "dummy":
+            mission = __import__("argus.runtime.mission", fromlist=["Mission"]).Mission("dummy")
+            mission.workflows = get_dummy_workflows()
+            from argus.agents.business_logic.agent import BusinessLogicSpecialist
+            BusinessLogicSpecialist().analyze(mission)
+        else:
+            mission = mission_manager.get_mission(mission_id)
+    except Exception as e:
+        console.print(f"[red]Error loading mission:[/red] {e}")
+        return
+        
+    if not mission.state_machines:
+        console.print("[yellow]No state machines found.[/yellow]")
+        return
+        
+    for sm_id, sm in mission.state_machines.items():
+        console.print(f"\n[bold cyan]State Machine: {sm.name}[/bold cyan]")
+        states_str = " -> ".join([s.name for s in sm.states])
+        console.print(f"[bold green]States:[/bold green] {states_str}")
+        if sm.transitions:
+            console.print("[bold]Transitions:[/bold]")
+            for t in sm.transitions:
+                console.print(f"  - {t['from']} -> {t['to']} ({t.get('action', 'unknown')})")
+
