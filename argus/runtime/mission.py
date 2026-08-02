@@ -49,6 +49,22 @@ class GraphQLState:
     reasoning: list = field(default_factory=list)
 
 @dataclass
+class JavaScriptState:
+    files: list = field(default_factory=list)
+    manifests: list = field(default_factory=list)
+    sourcemaps: list = field(default_factory=list)
+    endpoints: list = field(default_factory=list)
+    frameworks: list = field(default_factory=list)
+    observations: list = field(default_factory=list)
+    investigations: list = field(default_factory=list)
+    ast: list = field(default_factory=list)
+    modules: list = field(default_factory=list)
+    symbols: list = field(default_factory=list)
+    routes: list = field(default_factory=list)
+    websocket: list = field(default_factory=list)
+    processed_hashes: set = field(default_factory=set)
+
+@dataclass
 class Mission:
     target: str
     id: str = field(default_factory=lambda: str(uuid4()))
@@ -73,7 +89,7 @@ class Mission:
     technologies: list[str] = field(default_factory=list)
     endpoints: list[dict] = field(default_factory=list)
     parameters: list[str] = field(default_factory=list)
-    javascript: list[dict] = field(default_factory=list)
+    javascript: Any = None
     apis: list[str] = field(default_factory=list)
     cookies: list[str] = field(default_factory=list)
     tokens: list[str] = field(default_factory=list)
