@@ -88,17 +88,33 @@ class Mission:
     live_hosts: list[dict] = field(default_factory=list)
     technologies: list[str] = field(default_factory=list)
     endpoints: list[dict] = field(default_factory=list)
-    parameters: list[str] = field(default_factory=list)
-    javascript: Any = None
-    apis: list[str] = field(default_factory=list)
-    cookies: list[str] = field(default_factory=list)
-    tokens: list[str] = field(default_factory=list)
+    evidence: EvidenceStore = field(default_factory=EvidenceStore)
+    plan: Optional[Any] = None
     
-    findings: list[dict] = field(default_factory=list)
-    notes: list[str] = field(default_factory=list)
-    hypotheses: list = field(default_factory=list)
+    # Existing lists/states
+    findings: list = field(default_factory=list)
+    api_inventory: list = field(default_factory=list)
+    business_objects: list = field(default_factory=list)
+    business_logic: list = field(default_factory=list)
     investigations: list = field(default_factory=list)
     priority_queue: list = field(default_factory=list)
+    
+    # Universal Observation Model
+    observations: Any = field(default_factory=list)  # Replaced in __post_init__
+    correlations: Any = field(default_factory=list)  # Replaced in __post_init__
+    correlation_graph: Any = None                    # Replaced in __post_init__
+    
+    # Evidence Fusion Engine
+    evidence_bundles: Any = field(default_factory=list) # Replaced in __post_init__
+    evidence_strength: dict = field(default_factory=dict)
+    
+    def __post_init__(self):
+        from argus.correlation.registry import ObservationRegistry, CorrelationRegistry, EvidenceBundleRegistry
+        from argus.correlation.graph import CorrelationGraph
+        self.observations = ObservationRegistry()
+        self.correlations = CorrelationRegistry()
+        self.correlation_graph = CorrelationGraph()
+        self.evidence_bundles = EvidenceBundleRegistry()
     
     # Playbook Tracking
     playbooks: list[str] = field(default_factory=list)

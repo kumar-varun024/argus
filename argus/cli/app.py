@@ -25,6 +25,8 @@ from argus.cli.authn_cli import app as authn_app
 from argus.cli.upload_cli import app as upload_app
 from argus.plugins.graphql.cli import app as graphql_app
 from argus.plugins.javascript.cli import app as javascript_app
+from argus.correlation.cli import app as correlation_app
+from argus.correlation.cli import correlations_app
 from argus.cli.execution_cli import get_dummy_registry, get_dummy_plan
 from argus.execution.engine import ExecutionEngine
 
@@ -46,6 +48,11 @@ app.add_typer(authn_app, name="authn")
 app.add_typer(upload_app, name="upload")
 app.add_typer(graphql_app, name="graphql")
 app.add_typer(javascript_app, name="javascript")
+app.add_typer(correlation_app, name="observations")
+app.add_typer(correlations_app, name="correlations")
+
+from argus.correlation.cli import evidence_app
+app.add_typer(evidence_app, name="evidence")
 
 console = Console()
 
