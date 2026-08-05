@@ -4,7 +4,7 @@ from uuid import uuid4
 from datetime import datetime
 from enum import Enum
 import typing
-from typing import Any
+from typing import Any, Optional
 
 from argus.evidence import EvidenceStore
 from argus.facts import FactStore
@@ -96,8 +96,8 @@ class Mission:
     api_inventory: list = field(default_factory=list)
     business_objects: list = field(default_factory=list)
     business_logic: list = field(default_factory=list)
-    investigations: list = field(default_factory=list)
     priority_queue: list = field(default_factory=list)
+    priority_scores: dict = field(default_factory=dict)
     
     # Universal Observation Model
     observations: Any = field(default_factory=list)  # Replaced in __post_init__
@@ -108,12 +108,21 @@ class Mission:
     evidence_bundles: Any = field(default_factory=list) # Replaced in __post_init__
     evidence_strength: dict = field(default_factory=dict)
     
+    # Investigation Builder
+    investigations: Any = field(default_factory=list) # Replaced in __post_init__
+    investigation_queue: list = field(default_factory=list)
+    reasoning_tree: dict = field(default_factory=dict)
+    
     def __post_init__(self):
         from argus.correlation.registry import ObservationRegistry, CorrelationRegistry, EvidenceBundleRegistry
         from argus.correlation.graph import CorrelationGraph
+        from argus.investigation.registry import InvestigationRegistry
+        
         self.observations = ObservationRegistry()
         self.correlations = CorrelationRegistry()
         self.correlation_graph = CorrelationGraph()
+        self.evidence_bundles = EvidenceBundleRegistry()
+        self.investigations = InvestigationRegistry()
         self.evidence_bundles = EvidenceBundleRegistry()
     
     # Playbook Tracking

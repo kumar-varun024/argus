@@ -40,7 +40,7 @@ app.add_typer(execution_app, name="execution")
 app.add_typer(plugin_app, name="plugin")
 app.add_typer(provenance_app, name="provenance")
 app.add_typer(mission_app, name="mission")
-app.add_typer(intelligence_app, name="investigations")
+app.add_typer(intelligence_app, name="intelligence")
 app.add_typer(playbook_app, name="playbooks")
 app.add_typer(business_app, name="business")
 app.add_typer(api_app, name="api")
@@ -53,6 +53,9 @@ app.add_typer(correlations_app, name="correlations")
 
 from argus.correlation.cli import evidence_app
 app.add_typer(evidence_app, name="evidence")
+
+from argus.cli.investigation_cli import investigations_app
+app.add_typer(investigations_app, name="investigations")
 
 console = Console()
 
