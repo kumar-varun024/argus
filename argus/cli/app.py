@@ -57,6 +57,21 @@ app.add_typer(evidence_app, name="evidence")
 from argus.cli.investigation_cli import investigations_app
 app.add_typer(investigations_app, name="investigations")
 
+from argus.cli.explain_cli import app as explain_app
+app.add_typer(explain_app, name="explain")
+
+from argus.cli.performance_cli import app as performance_app
+app.add_typer(performance_app)
+
+from argus.cli.plan_cli import app as plan_app
+app.add_typer(plan_app, name="plan")
+
+from argus.cli.research_cli import app as research_app
+app.add_typer(research_app, name="research")
+
+from argus.cli.scheduler_cli import app as scheduler_app
+app.add_typer(scheduler_app, name="scheduler")
+
 console = Console()
 
 
@@ -85,13 +100,6 @@ def execute(plan_id: str = typer.Argument(default="dummy")):
     console.print(f"\n[bold]Plan Final Status:[/bold] {result.status}")
     console.print(f"[bold]Total Time:[/bold] {result.total_execution_time_ms:.2f} ms\n")
 
-@app.command()
-def explain(artifact_id: str):
-    """Outputs a human-readable text trace explaining the given artifact's lineage."""
-    from argus.provenance.engine import provenance_engine
-    console.print(f"\n[bold cyan]Provenance Trace for:[/bold cyan] {artifact_id}\n")
-    console.print(provenance_engine.explain(artifact_id))
-    console.print("\n")
 
 @app.command()
 def trace(artifact_id: str):

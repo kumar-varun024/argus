@@ -1,4 +1,4 @@
-from .models import KnowledgeRule
+from .models import KnowledgeEntry
 
 
 class KnowledgeBase:

@@ -1,7 +1,7 @@
 from .base import KnowledgeBase
-from .models import KnowledgeRule
+from .models import KnowledgeEntry
 
 __all__ = [
     "KnowledgeBase",
-    "KnowledgeRule",
+    "KnowledgeEntry",
 ]

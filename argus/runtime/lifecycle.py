@@ -43,3 +43,60 @@ class MissionLifecycle:
         mission.status = MissionState.COMPLETED
         mission.phase = "finished"
         mission.updated_at = datetime.utcnow().isoformat()
+
+class TaskLifecycle:
+    """Manages strict state machine transitions for a ScheduledTask."""
+
+    @staticmethod
+    def ready(task) -> None:
+        from argus.runtime.models import TaskState
+        if task.state not in (TaskState.PENDING, TaskState.BLOCKED):
+            raise ValueError(f"Cannot transition to READY from {task.state}")
+        task.state = TaskState.READY
+
+    @staticmethod
+    def start(task) -> None:
+        from argus.runtime.models import TaskState
+        from datetime import datetime, timezone
+        if task.state != TaskState.READY:
+            raise ValueError(f"Cannot start task from state {task.state}")
+        task.state = TaskState.RUNNING
+        task.started_at = datetime.now(timezone.utc).isoformat()
+
+    @staticmethod
+    def complete(task) -> None:
+        from argus.runtime.models import TaskState
+        from datetime import datetime, timezone
+        if task.state != TaskState.RUNNING:
+            raise ValueError(f"Cannot complete task from state {task.state}")
+        task.state = TaskState.COMPLETED
+        task.completed_at = datetime.now(timezone.utc).isoformat()
+
+    @staticmethod
+    def fail(task, error: str = "") -> None:
+        from argus.runtime.models import TaskState
+        from datetime import datetime, timezone
+        if task.state != TaskState.RUNNING:
+            raise ValueError(f"Cannot fail task from state {task.state}")
+        task.state = TaskState.FAILED
+        task.error = error
+        task.completed_at = datetime.now(timezone.utc).isoformat()
+
+    @staticmethod
+    def skip(task) -> None:
+        from argus.runtime.models import TaskState
+        from datetime import datetime, timezone
+        if task.state not in (TaskState.PENDING, TaskState.READY, TaskState.BLOCKED):
+            raise ValueError(f"Cannot skip task from state {task.state}")
+        task.state = TaskState.SKIPPED
+        task.completed_at = datetime.now(timezone.utc).isoformat()
+
+    @staticmethod
+    def cancel(task) -> None:
+        from argus.runtime.models import TaskState
+        from datetime import datetime, timezone
+        if task.state in (TaskState.COMPLETED, TaskState.FAILED, TaskState.SKIPPED, TaskState.CANCELLED):
+            raise ValueError(f"Cannot cancel task that is already {task.state}")
+        task.state = TaskState.CANCELLED
+        task.completed_at = datetime.now(timezone.utc).isoformat()
+

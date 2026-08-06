@@ -5,6 +5,7 @@ from .hypothesis import HypothesisGenerator
 from .confidence import ConfidenceScorer
 from .prioritizer import InvestigationPrioritizer
 from .engine import VulnerabilityIntelligenceEngine
+from .api import APIIntelligence
 
 __all__ = [
     "Investigation",
@@ -13,5 +14,6 @@ __all__ = [
     "HypothesisGenerator",
     "ConfidenceScorer",
     "InvestigationPrioritizer",
-    "VulnerabilityIntelligenceEngine"
+    "VulnerabilityIntelligenceEngine",
+    "APIIntelligence"
 ]

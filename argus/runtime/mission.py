@@ -90,6 +90,20 @@ class Mission:
     endpoints: list[dict] = field(default_factory=list)
     evidence: EvidenceStore = field(default_factory=EvidenceStore)
     plan: Optional[Any] = None
+    plan_steps: list = field(default_factory=list)
+    plan_dependencies: list = field(default_factory=list)
+    
+    # Research Planner
+    research_tasks: list = field(default_factory=list)
+    research_queue: list = field(default_factory=list)
+    coverage: dict = field(default_factory=dict)
+    coverage_gaps: list = field(default_factory=list)
+    
+    # Task Scheduler
+    execution_queue: dict = field(default_factory=dict)
+    execution_history: list = field(default_factory=list)
+    task_states: dict = field(default_factory=dict)
+    retry_history: list = field(default_factory=list)
     
     # Existing lists/states
     findings: list = field(default_factory=list)
@@ -112,6 +126,9 @@ class Mission:
     investigations: Any = field(default_factory=list) # Replaced in __post_init__
     investigation_queue: list = field(default_factory=list)
     reasoning_tree: dict = field(default_factory=dict)
+    explanations: dict = field(default_factory=dict)
+    reasoning_chains: dict = field(default_factory=dict)
+    explanation_graph: dict = field(default_factory=dict)
     
     def __post_init__(self):
         from argus.correlation.registry import ObservationRegistry, CorrelationRegistry, EvidenceBundleRegistry
