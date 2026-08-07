@@ -41,6 +41,7 @@ class BenchmarkMetrics:
     total_execution_time_ms: float = 0.0
 
 from argus.benchmark.ground_truth.models import ComparisonResult
+from argus.benchmark.metrics.models import BenchmarkScore, CoverageReport, PerformanceReport
 
 @dataclass
 class BenchmarkResult:
@@ -48,6 +49,9 @@ class BenchmarkResult:
     benchmark_id: str
     mission_id: str
     metrics: BenchmarkMetrics
+    scores: Optional[BenchmarkScore] = None
+    coverage: Optional[CoverageReport] = None
+    performance: Optional[PerformanceReport] = None
     runtime_history: List[Dict[str, Any]] = field(default_factory=list)
     raw_outputs: Dict[str, Any] = field(default_factory=dict)
     ground_truth_comparison: Optional[ComparisonResult] = None

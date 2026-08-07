@@ -69,6 +69,28 @@ def show(benchmark_id: str):
     console.print(f"[bold]Category:[/bold] {benchmark.category}")
     console.print(f"[bold]Target:[/bold] {benchmark.target}")
 
+@app.command()
+def metrics(benchmark_id: str):
+    """Shows raw metrics logic and values for a benchmark."""
+    # Placeholder for a command that would pull from a saved run or re-run
+    console.print(f"[yellow]Metrics tracking for {benchmark_id}.[/yellow] Run the benchmark first to generate metrics.")
+
+@app.command()
+def score(benchmark_id: str):
+    """Shows the normalized scorecard for a benchmark."""
+    # Placeholder to show scores. In a real scenario we'd query the registry or DB for the last run
+    console.print(f"[yellow]Scorecard for {benchmark_id}.[/yellow] Run the benchmark first to generate scores.")
+
+@app.command()
+def coverage(benchmark_id: str):
+    """Shows coverage reports against ground truth."""
+    console.print(f"[yellow]Coverage for {benchmark_id}.[/yellow] Run the benchmark first to generate coverage.")
+
+@app.command()
+def performance(benchmark_id: str):
+    """Shows mission profiling and performance results."""
+    console.print(f"[yellow]Performance for {benchmark_id}.[/yellow] Run the benchmark first to generate performance data.")
+
 from argus.cli.dataset_cli import app as dataset_app
 app.add_typer(dataset_app, name="datasets")
 

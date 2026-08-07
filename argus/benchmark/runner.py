@@ -99,10 +99,17 @@ class BenchmarkRunner:
             hypothesis_recall=self._calculate_recall(benchmark.ground_truth.expected_hypotheses, actual_observations)
         )
         
+        from argus.benchmark.metrics.engine import MetricsEngine
+        metrics_engine = MetricsEngine()
+        score, coverage, quality, performance = metrics_engine.evaluate(mission, comparison_result, execution_time_ms)
+        
         result = BenchmarkResult(
             benchmark_id=benchmark.id,
             mission_id=mission.id,
             metrics=metrics,
+            scores=score,
+            coverage=coverage,
+            performance=performance,
             runtime_history=getattr(mission, "state_transitions", []),
             raw_outputs={
                 "status": mission.status.value
