@@ -73,11 +73,9 @@ class BenchmarkRunner:
             expected_business_objects=benchmark.ground_truth.expected_business_objects,
             expected_workflows=benchmark.ground_truth.expected_workflows,
             expected_investigation_areas=benchmark.ground_truth.expected_investigation_areas,
-            expected_routes=benchmark.ground_truth.expected_routes,
-            expected_api_endpoints=benchmark.ground_truth.expected_api_endpoints,
+            expected_endpoints=benchmark.ground_truth.expected_routes + benchmark.ground_truth.expected_api_endpoints,
             expected_graphql_types=benchmark.ground_truth.expected_graphql_types,
-            expected_investigations=benchmark.ground_truth.expected_investigations,
-            expected_hypotheses=benchmark.ground_truth.expected_hypotheses,
+            expected_observations=benchmark.ground_truth.expected_investigations + benchmark.ground_truth.expected_hypotheses,
             expected_correlations=benchmark.ground_truth.expected_correlations,
             expected_evidence_bundles=benchmark.ground_truth.expected_evidence
         )
@@ -86,8 +84,19 @@ class BenchmarkRunner:
         mission.dataset_id = benchmark.id # tag the mission
         comparison_result = gt_engine.evaluate(mission)
         
+        actual_business_objects = [bo.get('name') if isinstance(bo, dict) else str(bo) for bo in getattr(mission, "business_objects", [])]
+        actual_correlations = [corr.title for corr in mission.correlations.get_all()] if hasattr(mission, "correlations") and hasattr(mission.correlations, "get_all") else []
+        actual_evidence = [bundle.title for bundle in mission.evidence_bundles.get_all()] if hasattr(mission, "evidence_bundles") and hasattr(mission.evidence_bundles, "get_all") else []
+        actual_observations = [obs.title for obs in mission.observations.get_all()] if hasattr(mission, "observations") and hasattr(mission.observations, "get_all") else []
+
         metrics = BenchmarkMetrics(
-            total_execution_time_ms=execution_time_ms
+            total_execution_time_ms=execution_time_ms,
+            technology_recall=self._calculate_recall(benchmark.ground_truth.expected_technologies, getattr(mission, "technologies", [])),
+            business_object_recall=self._calculate_recall(benchmark.ground_truth.expected_business_objects, actual_business_objects),
+            correlation_recall=self._calculate_recall(benchmark.ground_truth.expected_correlations, actual_correlations),
+            evidence_recall=self._calculate_recall(benchmark.ground_truth.expected_evidence, actual_evidence),
+            investigation_recall=self._calculate_recall(benchmark.ground_truth.expected_investigations, actual_observations),
+            hypothesis_recall=self._calculate_recall(benchmark.ground_truth.expected_hypotheses, actual_observations)
         )
         
         result = BenchmarkResult(
