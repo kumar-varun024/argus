@@ -30,6 +30,42 @@ class MissionMetrics:
         mission.metrics["counters"][counter_name] = current + amount
 
     @staticmethod
+    def record_task_executed(mission: Mission):
+        MissionMetrics.increment_counter(mission, "tasks_executed")
+
+    @staticmethod
+    def record_observation_produced(mission: Mission):
+        MissionMetrics.increment_counter(mission, "observations_produced")
+
+    @staticmethod
+    def record_correlation_created(mission: Mission):
+        MissionMetrics.increment_counter(mission, "correlations_created")
+        
+    @staticmethod
+    def record_evidence_bundle(mission: Mission):
+        MissionMetrics.increment_counter(mission, "evidence_bundles")
+
+    @staticmethod
+    def record_investigation(mission: Mission):
+        MissionMetrics.increment_counter(mission, "investigations")
+
+    @staticmethod
+    def record_hypothesis(mission: Mission):
+        MissionMetrics.increment_counter(mission, "hypotheses")
+        
+    @staticmethod
+    def record_planner_update(mission: Mission):
+        MissionMetrics.increment_counter(mission, "planner_updates")
+
+    @staticmethod
+    def record_checkpoint(mission: Mission):
+        MissionMetrics.increment_counter(mission, "checkpoint_count")
+
+    @staticmethod
+    def record_recovery_event(mission: Mission):
+        MissionMetrics.increment_counter(mission, "recovery_events")
+
+    @staticmethod
     def get_summary(mission: Mission) -> Dict:
         return {
             "durations": mission.metrics.get("durations", {}),

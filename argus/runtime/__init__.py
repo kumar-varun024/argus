@@ -5,6 +5,9 @@ from .scheduler import MissionScheduler
 from .context import MissionContext
 from .metrics import MissionMetrics
 from .manager import MissionManager, mission_manager
+from .models import Tool, ToolExecutionResult, ToolExecutionStatus
+from .registry import ToolRegistry, registry
+from .orchestrator import ToolOrchestrator
 
 __all__ = [
     "Mission",
@@ -15,5 +18,12 @@ __all__ = [
     "MissionContext",
     "MissionMetrics",
     "MissionManager",
-    "mission_manager"
+    "mission_manager",
+    "Tool",
+    "ToolRegistry",
+    "registry",
+    "ToolOrchestrator",
+    "ToolExecutionResult",
+    "ToolExecutionStatus"
 ]
+

@@ -23,10 +23,12 @@ from argus.cli.business_cli import app as business_app
 from argus.cli.api_cli import app as api_app
 from argus.cli.authn_cli import app as authn_app
 from argus.cli.upload_cli import app as upload_app
+from argus.cli.tools_cli import app as tools_app
 from argus.plugins.graphql.cli import app as graphql_app
 from argus.plugins.javascript.cli import app as javascript_app
 from argus.correlation.cli import app as correlation_app
 from argus.correlation.cli import correlations_app
+from argus.cli.benchmark_cli import app as benchmark_app
 from argus.cli.execution_cli import get_dummy_registry, get_dummy_plan
 from argus.execution.engine import ExecutionEngine
 
@@ -46,10 +48,12 @@ app.add_typer(business_app, name="business")
 app.add_typer(api_app, name="api")
 app.add_typer(authn_app, name="authn")
 app.add_typer(upload_app, name="upload")
+app.add_typer(tools_app, name="tools")
 app.add_typer(graphql_app, name="graphql")
 app.add_typer(javascript_app, name="javascript")
 app.add_typer(correlation_app, name="observations")
 app.add_typer(correlations_app, name="correlations")
+app.add_typer(benchmark_app, name="benchmark")
 
 from argus.correlation.cli import evidence_app
 app.add_typer(evidence_app, name="evidence")
@@ -71,6 +75,12 @@ app.add_typer(research_app, name="research")
 
 from argus.cli.scheduler_cli import app as scheduler_app
 app.add_typer(scheduler_app, name="scheduler")
+
+from argus.cli.learning_cli import learning_app
+app.add_typer(learning_app, name="learning")
+
+from argus.cli.hypothesis_cli import hypothesis_app
+app.add_typer(hypothesis_app, name="hypothesis")
 
 console = Console()
 

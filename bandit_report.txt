@@ -1,0 +1,609 @@
+Working... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:02
+Run started:2026-08-07 14:35:50.877287+00:00
+
+Test results:
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/agents/business_logic/tests/test_business_logic.py:20:4
+19	    
+20	    assert len(machines) == 1
+21	    sm = machines[wf.id]
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/agents/business_logic/tests/test_business_logic.py:22:4
+21	    sm = machines[wf.id]
+22	    assert len(sm.states) == 2
+23	    assert any(s.name == "Draft" for s in sm.states)
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/agents/business_logic/tests/test_business_logic.py:23:4
+22	    assert len(sm.states) == 2
+23	    assert any(s.name == "Draft" for s in sm.states)
+24	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/agents/business_logic/tests/test_business_logic.py:33:4
+32	    
+33	    assert len(rules) == 1
+34	    assert rules[0]["type"] == "dependency"
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/agents/business_logic/tests/test_business_logic.py:34:4
+33	    assert len(rules) == 1
+34	    assert rules[0]["type"] == "dependency"
+35	    assert "Payment" in rules[0]["depends_on"]
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/agents/business_logic/tests/test_business_logic.py:35:4
+34	    assert rules[0]["type"] == "dependency"
+35	    assert "Payment" in rules[0]["depends_on"]
+36	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/agents/business_logic/tests/test_business_logic.py:50:4
+49	    
+50	    assert len(mission.business_logic) > 0
+51	    # Should trigger MissingPrerequisiteHeuristic and ReplayableTransactionHeuristic (checkout) and WorkflowShortcutHeuristic
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/agents/business_logic/tests/test_business_logic.py:54:4
+53	    
+54	    assert any("shortcut" in t.lower() for t in titles)
+55	    assert any("replayable" in t.lower() for t in titles)
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/agents/business_logic/tests/test_business_logic.py:55:4
+54	    assert any("shortcut" in t.lower() for t in titles)
+55	    assert any("replayable" in t.lower() for t in titles)
+56	    assert any("prerequisite" in t.lower() for t in titles)
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/agents/business_logic/tests/test_business_logic.py:56:4
+55	    assert any("replayable" in t.lower() for t in titles)
+56	    assert any("prerequisite" in t.lower() for t in titles)
+57	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/agents/business_logic/tests/test_business_logic.py:79:4
+78	    invs = [inv for inv in mission.business_logic if inv.title == "A"]
+79	    assert len(invs) == 1 # Suppressed exactly one
+80	    
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/agents/business_logic/tests/test_business_logic.py:97:4
+96	    
+97	    assert any(inv.title == "Plugin Rule" for inv in mission.business_logic)
+98	    
+
+--------------------------------------------------
+>> Issue: [B105:hardcoded_password_string] Possible hardcoded password: 'Bearer JWT'
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html
+   Location: argus/analyzers/authentication.py:55:30
+54	        if jwt_found:
+55	            auth.token_type = "Bearer JWT"
+56	            auth.observations.append("JWT indicators detected")
+
+--------------------------------------------------
+>> Issue: [B110:try_except_pass] Try, Except, Pass detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b110_try_except_pass.html
+   Location: argus/cli/learning_cli.py:49:8
+48	            return mission_manager.get_mission(mission_id)
+49	        except Exception:
+50	            pass
+51	    from argus.runtime.mission import Mission
+
+--------------------------------------------------
+>> Issue: [B110:try_except_pass] Try, Except, Pass detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b110_try_except_pass.html
+   Location: argus/correlation/cli.py:20:8
+19	            return mission_manager.get_mission(mission_id)
+20	        except Exception:
+21	            pass
+22	    # Create a mock mission with some observations for demonstration if no active mission
+
+--------------------------------------------------
+>> Issue: [B110:try_except_pass] Try, Except, Pass detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b110_try_except_pass.html
+   Location: argus/correlation/fusion.py:93:16
+92	                        break # Only need one match to fuse
+93	                except Exception:
+94	                    pass
+95	
+
+--------------------------------------------------
+>> Issue: [B110:try_except_pass] Try, Except, Pass detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b110_try_except_pass.html
+   Location: argus/correlation/matcher.py:21:12
+20	                    matched_rules.append(rule_name)
+21	            except Exception:
+22	                # If a rule fails unexpectedly, we continue with others
+23	                pass
+24	        return matched_rules
+
+--------------------------------------------------
+>> Issue: [B110:try_except_pass] Try, Except, Pass detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b110_try_except_pass.html
+   Location: argus/correlation/scoring.py:54:16
+53	                    evidence_set.add(str(ev))
+54	                except Exception:
+55	                    pass
+56	        score_evidence = min(len(evidence_set) * 3, 15)
+
+--------------------------------------------------
+>> Issue: [B105:hardcoded_password_string] Possible hardcoded password: 'UNKNOWN'
+   Severity: Low   Confidence: Medium
+   CWE: CWE-259 (https://cwe.mitre.org/data/definitions/259.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b105_hardcoded_password_string.html
+   Location: argus/graph/builder.py:75:72
+74	                auth_nodes.append(get_or_create(a_id, "Authentication", auth.authentication_type))
+75	            if getattr(auth, "token_type", None) and auth.token_type != "UNKNOWN":
+76	                t_id = f"auth_{auth.token_type}"
+
+--------------------------------------------------
+>> Issue: [B110:try_except_pass] Try, Except, Pass detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b110_try_except_pass.html
+   Location: argus/graph/builder.py:104:8
+103	                    get_or_create(ev_id, "Evidence", val)
+104	        except Exception:
+105	            pass
+106	            
+
+--------------------------------------------------
+>> Issue: [B110:try_except_pass] Try, Except, Pass detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b110_try_except_pass.html
+   Location: argus/knowledge/manager.py:27:12
+26	                    self._entries[entry.id] = entry
+27	            except Exception as e:
+28	                pass  # Skip malformed files for now
+29	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/api/tests/test_api_intelligence.py:17:4
+16	    resources = parser.parse_endpoints(endpoints)
+17	    assert "/users" in resources
+18	    assert resources["/users"].is_collection is True
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/api/tests/test_api_intelligence.py:18:4
+17	    assert "/users" in resources
+18	    assert resources["/users"].is_collection is True
+19	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/api/tests/test_api_intelligence.py:27:4
+26	    rels = inferencer.infer(resources)
+27	    assert len(rels) == 1
+28	    assert rels[0].parent == "orgs"
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/api/tests/test_api_intelligence.py:28:4
+27	    assert len(rels) == 1
+28	    assert rels[0].parent == "orgs"
+29	    assert rels[0].child == "projects"
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/api/tests/test_api_intelligence.py:29:4
+28	    assert rels[0].parent == "orgs"
+29	    assert rels[0].child == "projects"
+30	    assert rels[0].relationship_type == "owns"
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/api/tests/test_api_intelligence.py:30:4
+29	    assert rels[0].child == "projects"
+30	    assert rels[0].relationship_type == "owns"
+31	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/api/tests/test_api_intelligence.py:45:4
+44	    
+45	    assert len(mission.api_inventory) > 0
+46	    titles = [inv.title.lower() for inv in mission.api_inventory]
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/api/tests/test_api_intelligence.py:49:4
+48	    # Should flag administrative and bulk operations and incomplete CRUD
+49	    assert any("admin" in t for t in titles)
+50	    assert any("bulk" in t for t in titles)
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/api/tests/test_api_intelligence.py:50:4
+49	    assert any("admin" in t for t in titles)
+50	    assert any("bulk" in t for t in titles)
+51	    assert any("incomplete crud" in t or "hidden delete" in t for t in titles)
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/api/tests/test_api_intelligence.py:51:4
+50	    assert any("bulk" in t for t in titles)
+51	    assert any("incomplete crud" in t or "hidden delete" in t for t in titles)
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/authentication/tests/test_authentication.py:16:4
+15	    
+16	    assert len(mission.authentication_workflows) > 0
+17	    titles = [inv.title.lower() for inv in mission.authentication_workflows]
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/authentication/tests/test_authentication.py:20:4
+19	    # Should flag session attributes, account recovery, and oauth
+20	    assert any("session cookie" in t for t in titles)
+21	    assert any("recovery workflow" in t for t in titles)
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/authentication/tests/test_authentication.py:21:4
+20	    assert any("session cookie" in t for t in titles)
+21	    assert any("recovery workflow" in t for t in titles)
+22	    assert any("oauth trust" in t for t in titles)
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/authentication/tests/test_authentication.py:22:4
+21	    assert any("recovery workflow" in t for t in titles)
+22	    assert any("oauth trust" in t for t in titles)
+23	    
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/authentication/tests/test_authentication.py:25:4
+24	    # Check extractions
+25	    assert len(mission.sessions) == 1
+26	    assert mission.sessions[0].name == "session_id"
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/authentication/tests/test_authentication.py:26:4
+25	    assert len(mission.sessions) == 1
+26	    assert mission.sessions[0].name == "session_id"
+27	    assert mission.sessions[0].http_only is True
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/authentication/tests/test_authentication.py:27:4
+26	    assert mission.sessions[0].name == "session_id"
+27	    assert mission.sessions[0].http_only is True
+28	    assert mission.sessions[0].secure_flag is False
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/authentication/tests/test_authentication.py:28:4
+27	    assert mission.sessions[0].http_only is True
+28	    assert mission.sessions[0].secure_flag is False
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/file_upload/tests/test_file_upload.py:19:4
+18	    
+19	    assert len(mission.upload_workflows) > 0
+20	    titles = [inv.title.lower() for inv in mission.upload_workflows]
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/file_upload/tests/test_file_upload.py:23:4
+22	    # Should flag avatar processing, csv import, temporary storage, and attachment ownership
+23	    assert any("file processing workflow" in t and "avatar" in t for t in titles)
+24	    assert any("data import" in t for t in titles)
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/file_upload/tests/test_file_upload.py:24:4
+23	    assert any("file processing workflow" in t and "avatar" in t for t in titles)
+24	    assert any("data import" in t for t in titles)
+25	    assert any("temporary storage" in t for t in titles)
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/file_upload/tests/test_file_upload.py:25:4
+24	    assert any("data import" in t for t in titles)
+25	    assert any("temporary storage" in t for t in titles)
+26	    assert any("attachment" in t for t in titles)
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/file_upload/tests/test_file_upload.py:26:4
+25	    assert any("temporary storage" in t for t in titles)
+26	    assert any("attachment" in t for t in titles)
+27	    
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/file_upload/tests/test_file_upload.py:29:4
+28	    # Check inventory
+29	    assert len(mission.file_inventory) == 4
+
+--------------------------------------------------
+>> Issue: [B110:try_except_pass] Try, Except, Pass detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b110_try_except_pass.html
+   Location: argus/plugins/graphql/cli.py:15:8
+14	            mission = mission_manager.get_mission(mission_id)
+15	        except Exception:
+16	            pass
+17	            
+
+--------------------------------------------------
+>> Issue: [B324:hashlib] Use of weak MD5 hash for security. Consider usedforsecurity=False
+   Severity: High   Confidence: High
+   CWE: CWE-327 (https://cwe.mitre.org/data/definitions/327.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b324_hashlib.html
+   Location: argus/plugins/graphql/schema.py:32:24
+31	            # Try cache first
+32	            cache_key = hashlib.md5(ep.url.encode()).hexdigest()
+33	            cache_path = os.path.join(self.cache_dir, f"{cache_key}.json")
+
+--------------------------------------------------
+>> Issue: [B110:try_except_pass] Try, Except, Pass detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b110_try_except_pass.html
+   Location: argus/plugins/graphql/schema.py:223:8
+222	                    return s
+223	        except Exception:
+224	            pass
+225	        return None
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/graphql/tests/test_graphql.py:6:4
+5	    specialist = GraphQLSpecialist()
+6	    assert specialist is not None
+7	
+
+--------------------------------------------------
+>> Issue: [B101:assert_used] Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b101_assert_used.html
+   Location: argus/plugins/graphql/tests/test_graphql.py:11:4
+10	    specialist.discover()
+11	    assert True
+
+--------------------------------------------------
+>> Issue: [B110:try_except_pass] Try, Except, Pass detected.
+   Severity: Low   Confidence: High
+   CWE: CWE-703 (https://cwe.mitre.org/data/definitions/703.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b110_try_except_pass.html
+   Location: argus/plugins/javascript/cli.py:18:8
+17	            mission = mission_manager.get_mission(mission_id)
+18	        except Exception:
+19	            pass
+20	            
+
+--------------------------------------------------
+>> Issue: [B403:blacklist] Consider possible security implications associated with pickle module.
+   Severity: Low   Confidence: High
+   CWE: CWE-502 (https://cwe.mitre.org/data/definitions/502.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b403-import-pickle
+   Location: argus/runtime/checkpoint.py:2:0
+1	import os
+2	import pickle
+3	from argus.runtime.mission import Mission
+
+--------------------------------------------------
+>> Issue: [B301:blacklist] Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.
+   Severity: Medium   Confidence: High
+   CWE: CWE-502 (https://cwe.mitre.org/data/definitions/502.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_calls.html#b301-pickle
+   Location: argus/runtime/checkpoint.py:29:22
+28	        with open(path, 'rb') as f:
+29	            mission = pickle.load(f)
+30	            return mission
+
+--------------------------------------------------
+>> Issue: [B404:blacklist] Consider possible security implications associated with the subprocess module.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess
+   Location: argus/runtime/local.py:1:0
+1	import subprocess
+2	
+3	from argus.runtime.base import Runtime
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: argus/runtime/local.py:18:17
+17	
+18	        result = subprocess.run(
+19	            [executable, *args],
+20	            input=stdin,
+21	            text=True,
+22	            capture_output=True,
+23	        )
+24	
+
+--------------------------------------------------
+>> Issue: [B404:blacklist] Consider possible security implications associated with the subprocess module.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/blacklists/blacklist_imports.html#b404-import-subprocess
+   Location: argus/runtime/sandbox.py:1:0
+1	import subprocess
+2	import logging
+3	from typing import List, Dict, Any
+
+--------------------------------------------------
+>> Issue: [B603:subprocess_without_shell_equals_true] subprocess call - check for execution of untrusted input.
+   Severity: Low   Confidence: High
+   CWE: CWE-78 (https://cwe.mitre.org/data/definitions/78.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.4/plugins/b603_subprocess_without_shell_equals_true.html
+   Location: argus/runtime/sandbox.py:108:21
+107	        try:
+108	            result = subprocess.run(
+109	                [executable, *args],
+110	                capture_output=True,
+111	                text=True,
+112	                timeout=timeout
+113	            )
+114	            return {
+
+--------------------------------------------------
+
+Code scanned:
+	Total lines of code: 16355
+	Total lines skipped (#nosec): 0
+	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
+
+Run metrics:
+	Total issues (by severity):
+		Undefined: 0
+		Low: 55
+		Medium: 1
+		High: 1
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 0
+		Medium: 2
+		High: 55
+Files skipped (0):

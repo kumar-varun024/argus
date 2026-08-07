@@ -22,13 +22,18 @@ if typing.TYPE_CHECKING:
 
 class MissionState(str, Enum):
     CREATED = "CREATED"
-    VALIDATING = "VALIDATING"
-    READY = "READY"
-    RUNNING = "RUNNING"
-    PAUSED = "PAUSED"
-    FAILED = "FAILED"
+    PLANNING = "PLANNING"
+    RESEARCHING = "RESEARCHING"
+    COLLECTING_EVIDENCE = "COLLECTING_EVIDENCE"
+    CORRELATING = "CORRELATING"
+    BUILDING_INVESTIGATIONS = "BUILDING_INVESTIGATIONS"
+    GENERATING_HYPOTHESES = "GENERATING_HYPOTHESES"
+    WAITING_FOR_APPROVAL = "WAITING_FOR_APPROVAL"
     COMPLETED = "COMPLETED"
+    PAUSED = "PAUSED"
     CANCELLED = "CANCELLED"
+    FAILED = "FAILED"
+    RECOVERING = "RECOVERING"
 
 @dataclass
 class GraphQLState:
@@ -104,6 +109,7 @@ class Mission:
     execution_history: list = field(default_factory=list)
     task_states: dict = field(default_factory=dict)
     retry_history: list = field(default_factory=list)
+    state_transitions: list = field(default_factory=list)
     
     # Existing lists/states
     findings: list = field(default_factory=list)
@@ -129,18 +135,34 @@ class Mission:
     explanations: dict = field(default_factory=dict)
     reasoning_chains: dict = field(default_factory=dict)
     explanation_graph: dict = field(default_factory=dict)
+
+    # Hypothesis Engine (PR5)
+    hypotheses: Any = field(default_factory=list)       # Replaced in __post_init__
+    hypothesis_history: list = field(default_factory=list)
+    hypothesis_queue: list = field(default_factory=list)
+
+    # Learning & Feedback Engine (PR6)
+    learning: Any = None                                # LearningRecord after process_mission()
+    feedback: list = field(default_factory=list)        # List[FeedbackEntry]
+    patterns: list = field(default_factory=list)        # List[Recommendation]
     
     def __post_init__(self):
         from argus.correlation.registry import ObservationRegistry, CorrelationRegistry, EvidenceBundleRegistry
         from argus.correlation.graph import CorrelationGraph
         from argus.investigation.registry import InvestigationRegistry
-        
+
         self.observations = ObservationRegistry()
         self.correlations = CorrelationRegistry()
         self.correlation_graph = CorrelationGraph()
         self.evidence_bundles = EvidenceBundleRegistry()
         self.investigations = InvestigationRegistry()
-        self.evidence_bundles = EvidenceBundleRegistry()
+
+        # Hypothesis Engine registry (graceful if module not yet installed)
+        try:
+            from argus.hypothesis.registry import HypothesisRegistry
+            self.hypotheses = HypothesisRegistry()
+        except ImportError:
+            pass  # Hypothesis engine not yet installed — field stays as []
     
     # Playbook Tracking
     playbooks: list[str] = field(default_factory=list)

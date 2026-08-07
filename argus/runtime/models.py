@@ -108,3 +108,113 @@ class ExecutionQueue(BaseModel):
     @property
     def failed_count(self) -> int:
         return sum(1 for t in self.tasks if t.state == TaskState.FAILED)
+
+
+class ToolType(str, Enum):
+    """Supported types of tools."""
+    INTERNAL = "internal"
+    EXTERNAL = "external"
+    REMOTE = "remote"
+
+
+class ToolExecutionStatus(str, Enum):
+    """Execution lifecycle status for a tool."""
+    PREPARING = "Preparing"
+    RUNNING = "Running"
+    SUCCEEDED = "Succeeded"
+    FAILED = "Failed"
+    CANCELLED = "Cancelled"
+    TIMED_OUT = "Timed Out"
+
+
+class OrchestratorEventType(str, Enum):
+    """Event types emitted by the Tool Orchestrator."""
+    TOOL_SELECTED = "ToolSelected"
+    TOOL_STARTED = "ToolStarted"
+    TOOL_COMPLETED = "ToolCompleted"
+    TOOL_FAILED = "ToolFailed"
+    TOOL_TIMED_OUT = "ToolTimedOut"
+    TOOL_CANCELLED = "ToolCancelled"
+    ARTIFACTS_PRODUCED = "ArtifactsProduced"
+
+
+class Tool(BaseModel):
+    """Metadata representing an executable tool or capability."""
+    id: str = ""
+    name: str
+    version: str = "1.0.0"
+    description: str = ""
+    supported_tasks: List[str] = Field(default_factory=list)
+    required_inputs: List[str] = Field(default_factory=list)
+    produced_outputs: List[str] = Field(default_factory=list)
+    capabilities: List[str] = Field(default_factory=list)
+    safety_requirements: Dict[str, Any] = Field(default_factory=dict)
+    timeout: float = 300.0
+    priority: int = 100
+
+    # Backwards compatibility
+    command: Optional[str] = None
+    capability: Optional[str] = None
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        if not self.id:
+            self.id = self.name.lower().replace(" ", "_")
+        if self.capability and self.capability not in self.capabilities:
+            self.capabilities.append(self.capability)
+
+
+class ToolExecutionContext(BaseModel):
+    """The context injected into tools for execution."""
+    mission: Any
+    scope: List[str] = Field(default_factory=list)
+    policy: Dict[str, Any] = Field(default_factory=dict)
+    task: Any
+    knowledge_graph: Optional[Any] = None
+    workflow_graph: Optional[Any] = None
+    evidence_store: Optional[Any] = None
+    configuration: Dict[str, Any] = Field(default_factory=dict)
+
+    class Config:
+        arbitrary_types_allowed = True
+
+
+class ToolArtifact(BaseModel):
+    """Artifact produced by a tool, stored with provenance."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    type: str  # e.g., "observation", "evidence", "knowledge_graph_update", "workflow_update", "file", "log", "metric"
+    data: Any
+    provenance: Dict[str, Any] = Field(default_factory=dict)
+    created_at: str = Field(default_factory=_utc_now)
+
+
+class ToolExecutionResult(BaseModel):
+    """Standardized result wrapper for all tool execution types."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    tool_id: str
+    task_id: str
+    status: ToolExecutionStatus
+    observations: List[Any] = Field(default_factory=list)
+    evidence: List[Any] = Field(default_factory=list)
+    knowledge_graph_updates: List[Any] = Field(default_factory=list)
+    workflow_updates: List[Any] = Field(default_factory=list)
+    files: List[Dict[str, Any]] = Field(default_factory=list)
+    logs: List[str] = Field(default_factory=list)
+    metrics: Dict[str, Any] = Field(default_factory=dict)
+    artifacts: List[ToolArtifact] = Field(default_factory=list)
+    error: Optional[str] = None
+    execution_time_ms: float = 0.0
+    started_at: str = Field(default_factory=_utc_now)
+    completed_at: Optional[str] = None
+
+
+class OrchestratorEvent(BaseModel):
+    """An event emitted by the Tool Orchestrator."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    event_type: OrchestratorEventType
+    task_id: str
+    tool_id: str
+    timestamp: str = Field(default_factory=_utc_now)
+    details: Dict[str, Any] = Field(default_factory=dict)
+
