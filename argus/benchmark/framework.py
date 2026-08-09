@@ -1,7 +1,7 @@
 from typing import List, Optional
-from argus.benchmark.models import Benchmark, BenchmarkResult, BenchmarkGroundTruth
+from argus.benchmark.models import Benchmark, BenchmarkGroundTruth
 from argus.benchmark.registry import BenchmarkRegistry
-from argus.benchmark.runner import BenchmarkRunner
+from argus.benchmark.runner.runner import EvaluationRunner
 from argus.benchmark.datasets.manager import DatasetManager
 from argus.benchmark.datasets.models import BenchmarkDataset
 
@@ -10,7 +10,7 @@ class BenchmarkFramework:
     
     def __init__(self):
         self.registry = BenchmarkRegistry()
-        self.runner = BenchmarkRunner()
+        self.runner = EvaluationRunner(self.registry)
         self.dataset_manager = DatasetManager()
         
     def register_benchmark(self, benchmark: Benchmark):
@@ -54,12 +54,13 @@ class BenchmarkFramework:
     def list_benchmarks(self) -> List[Benchmark]:
         return self.registry.list_all()
         
-    def run_benchmark(self, benchmark_id: str) -> BenchmarkResult:
+    def run_benchmark(self, benchmark_id: str, dry_run: bool = False) -> 'EvaluationResult':
+        """Runs a single benchmark via the new EvaluationRunner."""
         benchmark = self.registry.get(benchmark_id)
         if not benchmark:
             raise ValueError(f"Benchmark {benchmark_id} not found in registry.")
             
-        return self.runner.run(benchmark)
+        return self.runner.run(benchmark_id, dry_run=dry_run)
 
 # Global instance for CLI usage
 benchmark_framework = BenchmarkFramework()

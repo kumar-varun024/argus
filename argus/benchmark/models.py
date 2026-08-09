@@ -28,6 +28,12 @@ class Benchmark:
     ground_truth: BenchmarkGroundTruth = field(default_factory=BenchmarkGroundTruth)
     metadata: Dict[str, Any] = field(default_factory=dict)
     dataset_path: Optional[str] = None
+    
+    # Mission Storage
+    evaluations: List[Any] = field(default_factory=list)
+    history: List[Any] = field(default_factory=list)
+    artifacts: List[Any] = field(default_factory=list)
+    runtime: Dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class BenchmarkMetrics:
