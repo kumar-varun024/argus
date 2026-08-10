@@ -5,6 +5,7 @@ from argus.workflows.builder import WorkflowBuilder
 from argus.workflows.models import Workflow, WorkflowStep
 from argus.core.mission import Mission
 import json
+import dataclasses
 
 def test_auth_workflow_detection():
     endpoints = [
@@ -109,6 +110,7 @@ def test_step_ordering():
 def test_authorization_attachment():
     endpoints = [
         APIEndpoint(method="POST", path="/api/admin/users", resource="users", operation="create", business_object="User"),
+        APIEndpoint(method="GET", path="/api/admin/users", resource="users", operation="list", business_object="User"),
     ]
     builder = WorkflowBuilder(endpoints=endpoints, business_objects=[BusinessObject(name="User")])
     wfs = builder.build()
@@ -121,7 +123,7 @@ def test_authorization_attachment():
 def test_mission_integration():
     mission = Mission(target="test")
     mission.endpoints = [
-        APIEndpoint(method="POST", path="/login", resource="login", operation="login").__dict__
+        dataclasses.asdict(APIEndpoint(method="POST", path="/login", resource="login", operation="login"))
     ]
     builder = WorkflowBuilder(mission=mission)
     wfs = builder.build()

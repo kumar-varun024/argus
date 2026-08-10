@@ -34,6 +34,7 @@ def test_api_intelligence_plugin():
     mission.endpoints = [
         {"path": "/api/v1/users", "method": "GET"},
         {"path": "/api/v1/users", "method": "POST"},
+        {"path": "/api/v1/users", "method": "PUT"},
         {"path": "/api/v1/users/bulk_update", "method": "POST"},
         {"path": "/api/v1/admin/settings", "method": "GET"}
     ]

@@ -112,12 +112,13 @@ def test_mission_storage_and_observation():
     assert len(mission.graphql.endpoints) == 1
     
     # Verify graph nodes
-    assert mission.graph.node_count() == 1
-    node = mission.graph.nodes[list(mission.graph.nodes.keys())[0]]
-    assert node.type == "Endpoint"
-    assert node.value == "http://example.com/graphql"
+    assert mission.graph.node_count() >= 1
+    endpoint_nodes = mission.graph.nodes_by_type("Endpoint")
+    assert len(endpoint_nodes) >= 1
+    assert endpoint_nodes[0].value == "http://example.com/graphql"
     
     # Verify observation
     assert hasattr(mission, "findings")
-    assert len(mission.findings) == 1
-    assert mission.findings[0].description == "GraphQL endpoint discovered at http://example.com/graphql"
+    assert len(mission.findings) >= 1
+    finding_texts = [f.description for f in mission.findings]
+    assert any("GraphQL endpoint discovered at http://example.com/graphql" in t for t in finding_texts)

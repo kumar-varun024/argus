@@ -48,6 +48,13 @@ def test_context_assembler():
     
 def test_research_context_engine():
     engine = ResearchContextEngine()
+    
+    # Mock sources to avoid hitting the actual database / managers
+    engine._retrieve_sources = lambda q: [
+        ContextSource(source_id="2", source_type="ev", title="Admin Token Bypass", content="The token was bypassed.", semantic_status="EVIDENCE", mission_id="m1"),
+        ContextSource(source_id="3", source_type="ev", title="Unrelated DB Leak", content="Leak", semantic_status="EVIDENCE", mission_id="m2")
+    ]
+    
     query = ContextQuery(conversation_id="c1", query="admin token bypass", mission_id="m1")
     
     final_prompt = engine.resolve_context(query)

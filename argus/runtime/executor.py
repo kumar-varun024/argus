@@ -12,9 +12,9 @@ from typing import List, Any, Optional
 from datetime import datetime, timezone
 
 from argus.planning.models import ResearchTask
-from argus.runtime.models import ScheduledTask, TaskState, EventType, Tool, ToolExecutionResult, ToolExecutionStatus
+from argus.runtime.models import ScheduledTask, TaskState, Tool, ToolExecutionResult, ToolExecutionStatus
 from argus.runtime.queue import ExecutionQueueManager
-from argus.runtime.events import EventBus
+from argus.runtime.events import EventBus, RuntimeEventType
 from argus.runtime.lifecycle import TaskLifecycle
 from argus.runtime.retry import RetryHandler
 from argus.runtime.sandbox import Sandbox
@@ -51,7 +51,7 @@ class TaskScheduler:
         self.queue_manager.add_tasks(scheduled_tasks)
         
         for st in scheduled_tasks:
-            self.event_bus.publish(EventType.TASK_SCHEDULED, st)
+            self.event_bus.publish(RuntimeEventType.TASK_SCHEDULED, getattr(self.mission, "id", "unknown"), details={"task_id": st.task_id, "task": st.model_dump()})
 
     def get_executable_batch(self) -> List[ScheduledTask]:
         """
@@ -63,7 +63,7 @@ class TaskScheduler:
         for task in ready_tasks:
             TaskLifecycle.start(task)
             self.queue_manager.increment_workers()
-            self.event_bus.publish(EventType.TASK_STARTED, task)
+            self.event_bus.publish(RuntimeEventType.TASK_STARTED, getattr(self.mission, "id", "unknown"), details={"task_id": task.task_id, "task": task.model_dump()})
             logger.info("Started task: %s", task.task_title)
             
         return ready_tasks
@@ -77,7 +77,7 @@ class TaskScheduler:
 
         TaskLifecycle.complete(task)
         self.queue_manager.decrement_workers()
-        self.event_bus.publish(EventType.TASK_COMPLETED, task)
+        self.event_bus.publish(RuntimeEventType.TASK_COMPLETED, getattr(self.mission, "id", "unknown"), details={"task_id": task.task_id, "task": task.model_dump()})
         logger.info("Completed task: %s", task.task_title)
 
     def report_failure(self, task_id: str, error: str, is_timeout: bool = False, is_plugin_failure: bool = False):
@@ -94,9 +94,9 @@ class TaskScheduler:
         )
         
         if will_retry:
-            self.event_bus.publish(EventType.TASK_RETRIED, task, details={"error": error})
+            self.event_bus.publish(RuntimeEventType.TASK_RETRIED, getattr(self.mission, "id", "unknown"), details={"task_id": task.task_id, "error": error, "task": task.model_dump()})
         else:
-            self.event_bus.publish(EventType.TASK_FAILED, task, details={"error": error})
+            self.event_bus.publish(RuntimeEventType.TASK_FAILED, getattr(self.mission, "id", "unknown"), details={"task_id": task.task_id, "error": error, "task": task.model_dump()})
 
     def cancel_task(self, task_id: str):
         """Cancel a pending or ready task."""
@@ -105,7 +105,7 @@ class TaskScheduler:
             return
             
         TaskLifecycle.cancel(task)
-        self.event_bus.publish(EventType.TASK_CANCELLED, task)
+        self.event_bus.publish(RuntimeEventType.TASK_CANCELLED, getattr(self.mission, "id", "unknown"), details={"task_id": task.task_id, "task": task.model_dump()})
 
     def _update_mission_storage(self, event):
         """Synchronize the execution queue state to the mission."""
@@ -121,14 +121,16 @@ class TaskScheduler:
         if hasattr(self.mission, 'task_states'):
             if not getattr(self.mission, 'task_states'):
                 self.mission.task_states = {}
-            task = self.queue_manager.get_task(event.task_id)
+            task_id = event.details.get("task_id")
+            task = self.queue_manager.get_task(task_id) if task_id else None
             if task:
-                self.mission.task_states[event.task_id] = task.state.value
+                self.mission.task_states[task_id] = task.state.value
 
-        if hasattr(self.mission, 'retry_history') and event.event_type == EventType.TASK_RETRIED:
+        if hasattr(self.mission, 'retry_history') and event.event_type == RuntimeEventType.TASK_RETRIED:
             if not getattr(self.mission, 'retry_history'):
                 self.mission.retry_history = []
-            task = self.queue_manager.get_task(event.task_id)
+            task_id = event.details.get("task_id")
+            task = self.queue_manager.get_task(task_id) if task_id else None
             if task and task.retry_history:
                 self.mission.retry_history.append({
                     "task_id": task.task_id,

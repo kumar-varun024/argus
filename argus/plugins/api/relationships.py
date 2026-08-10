@@ -15,7 +15,7 @@ class RelationshipInferencer:
         for r in resources:
             parts = [p for p in r.path.split('/') if p]
             # Naive nesting logic for /orgs/{org_id}/projects
-            if len(parts) >= 4 and '{' in parts[-2] and '}' in parts[-2]:
+            if len(parts) >= 3 and '{' in parts[-2] and '}' in parts[-2]:
                 parent_path = '/' + '/'.join(parts[:-2])
                 if parent_path in paths:
                     relationships.append(ResourceRelationship(

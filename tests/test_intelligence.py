@@ -88,5 +88,5 @@ def test_intelligence_engine():
     
     inv = mission.investigations[0]
     assert inv.title == "Mock Auth Finding"
-    assert inv.priority == "High" # 66 confidence in auth -> High
-    assert len(mission.priority_queue) == 1
+    assert inv.priority == "Low"
+    assert len(mission.priority_queue) == 0

@@ -1,0 +1,1523 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /home/varun/argus
+configfile: pyproject.toml
+plugins: anyio-4.12.1, typeguard-4.4.4
+collected 429 items
+
+argus/agents/business_logic/tests/test_business_logic.py FFF..           [  1%]
+argus/plugins/api/tests/test_api_intelligence.py .FF                     [  1%]
+argus/plugins/authentication/tests/test_authentication.py .              [  2%]
+argus/plugins/file_upload/tests/test_file_upload.py F                    [  2%]
+argus/plugins/graphql/tests/test_graphql.py .F                           [  2%]
+tests/authorization/test_authorization_gate.py ..                        [  3%]
+tests/authorization/test_scope_resolver.py ......                        [  4%]
+tests/benchmark/datasets/test_manager.py ...                             [  5%]
+tests/benchmark/ground_truth/test_engine.py ......                       [  6%]
+tests/benchmark/leaderboard/test_ci.py ....                              [  7%]
+tests/benchmark/leaderboard/test_comparison.py .....                     [  8%]
+tests/benchmark/leaderboard/test_leaderboard.py .                        [  9%]
+tests/benchmark/leaderboard/test_models.py .                             [  9%]
+tests/benchmark/leaderboard/test_regression.py ...                       [ 10%]
+tests/benchmark/metrics/test_coverage.py .                               [ 10%]
+tests/benchmark/metrics/test_engine.py .                                 [ 10%]
+tests/benchmark/metrics/test_performance.py .                            [ 10%]
+tests/benchmark/metrics/test_scoring.py ..                               [ 11%]
+tests/benchmark/reports/test_generator.py ..                             [ 11%]
+tests/benchmark/reports/test_renderers.py ....                           [ 12%]
+tests/benchmark/runner/test_artifacts.py .                               [ 12%]
+tests/benchmark/runner/test_executor.py ..                               [ 13%]
+tests/benchmark/runner/test_history.py .                                 [ 13%]
+tests/benchmark/runner/test_integration.py .                             [ 13%]
+tests/benchmark/runner/test_pipeline.py .                                [ 13%]
+tests/benchmark/test_framework.py .FF                                    [ 14%]
+tests/correlation/test_correlation_engine.py ..                          [ 15%]
+tests/correlation/test_deduplication.py ..                               [ 15%]
+tests/correlation/test_evidence_integration.py ..                        [ 16%]
+tests/correlation/test_fusion.py .                                       [ 16%]
+tests/correlation/test_graph.py .                                        [ 16%]
+tests/correlation/test_integration.py ..                                 [ 17%]
+tests/correlation/test_matcher.py .                                      [ 17%]
+tests/correlation/test_mission.py .                                      [ 17%]
+tests/correlation/test_observation.py ...                                [ 18%]
+tests/correlation/test_registry.py ...                                   [ 18%]
+tests/correlation/test_rules.py ......                                   [ 20%]
+tests/correlation/test_scoring.py ..                                     [ 20%]
+tests/correlation/test_serializer.py ...                                 [ 21%]
+tests/correlation/test_strength.py .                                     [ 21%]
+tests/evidence/test_evidence.py ...                                      [ 22%]
+tests/explain/test_explain.py .....                                      [ 23%]
+tests/hypothesis/test_confidence.py ..                                   [ 24%]
+tests/hypothesis/test_engine.py ...                                      [ 24%]
+tests/hypothesis/test_generator.py ...                                   [ 25%]
+tests/hypothesis/test_integration.py .                                   [ 25%]
+tests/hypothesis/test_lifecycle.py ..                                    [ 26%]
+tests/hypothesis/test_models.py ..                                       [ 26%]
+tests/hypothesis/test_ranking.py ..                                      [ 27%]
+tests/hypothesis/test_registry.py ......                                 [ 28%]
+tests/investigation/test_generator.py .                                  [ 28%]
+tests/investigation/test_investigation_integration.py ...                [ 29%]
+tests/investigation/test_investigation_registry.py .                     [ 29%]
+tests/investigation/test_manual_validation.py .                          [ 29%]
+tests/investigation/test_priority.py .......                             [ 31%]
+tests/learning/test_engine.py ............                               [ 34%]
+tests/learning/test_feedback.py ...........                              [ 36%]
+tests/learning/test_history.py ........                                  [ 38%]
+tests/learning/test_integration.py ......                                [ 40%]
+tests/learning/test_metrics.py ...........                               [ 42%]
+tests/learning/test_models.py .............                              [ 45%]
+tests/learning/test_patterns.py ............                             [ 48%]
+tests/learning/test_recommendations.py ..............                    [ 51%]
+tests/learning/test_registry.py ..........                               [ 54%]
+tests/orchestration/test_orchestrator.py ....                            [ 55%]
+tests/performance/test_performance.py .....                              [ 56%]
+tests/planning/test_planning.py ...                                      [ 56%]
+tests/planning/test_research_planner.py ...................              [ 61%]
+tests/plugins/graphql/test_business.py ....                              [ 62%]
+tests/plugins/graphql/test_discovery.py .......F                         [ 64%]
+tests/plugins/graphql/test_reasoning.py ....                             [ 65%]
+tests/plugins/graphql/test_schema.py .......                             [ 66%]
+tests/plugins/javascript/test_agent.py ..F                               [ 67%]
+tests/plugins/javascript/test_benchmark.py .                             [ 67%]
+tests/plugins/javascript/test_discovery.py ....                          [ 68%]
+tests/plugins/javascript/test_integration.py .                           [ 68%]
+tests/plugins/javascript/test_parser.py ....                             [ 69%]
+tests/plugins/javascript/test_plugin.py .F                               [ 70%]
+tests/plugins/javascript/test_stress.py ..                               [ 70%]
+tests/runtime/test_mission_runtime.py ....                               [ 71%]
+tests/runtime/test_runtime_orchestrator.py ............F...              [ 75%]
+tests/runtime/test_scheduler.py FFFFFF                                   [ 76%]
+tests/test_agents.py .....                                               [ 77%]
+tests/test_ai_research.py FF.F                                           [ 78%]
+tests/test_authorization.py ..F.F                                        [ 79%]
+tests/test_authz_specialist.py ..F.F..                                   [ 81%]
+tests/test_business_root.py ....                                         [ 82%]
+tests/test_execution.py ..F.                                             [ 83%]
+tests/test_graph_root.py ..........F                                     [ 86%]
+tests/test_intelligence.py ...F                                          [ 86%]
+tests/test_knowledge.py ......                                           [ 88%]
+tests/test_methodology.py ....                                           [ 89%]
+tests/test_plugins.py .....                                              [ 90%]
+tests/test_provenance.py ..                                              [ 90%]
+tests/test_research_cards.py ...                                         [ 91%]
+tests/test_runtime.py FFF.                                               [ 92%]
+tests/test_workflows.py ....FF                                           [ 93%]
+tests/workspace/test_api.py .                                            [ 94%]
+tests/workspace/test_context.py ...F                                     [ 95%]
+tests/workspace/test_engine.py .....                                     [ 96%]
+tests/workspace/test_graph_retrieval.py ...                              [ 96%]
+tests/workspace/test_mission_context.py ...                              [ 97%]
+tests/workspace/test_models.py .                                         [ 97%]
+tests/workspace/test_planner.py ....                                     [ 98%]
+tests/workspace/test_repository.py ..                                    [ 99%]
+tests/workspace/test_storage.py ..                                       [ 99%]
+tests/workspace/test_vision.py .                                         [100%]
+
+=================================== FAILURES ===================================
+___________________________ test_workflow_discovery ____________________________
+
+    def test_workflow_discovery():
+        builder = StateMachineBuilder()
+        wf = Workflow(name="Order Lifecycle", description="")
+>       wf.steps.append(WorkflowStep(title="Draft", endpoint="/order", expected_state="Draft"))
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: WorkflowStep.__init__() missing 1 required positional argument: 'http_method'
+
+argus/agents/business_logic/tests/test_business_logic.py:14: TypeError
+________________________ test_business_rule_extraction _________________________
+
+    def test_business_rule_extraction():
+        analyzer = WorkflowAnalyzer()
+>       wf1 = Workflow(name="Refund")
+              ^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Workflow.__init__() missing 1 required positional argument: 'description'
+
+argus/agents/business_logic/tests/test_business_logic.py:27: TypeError
+______________________ test_business_logic_specialist_run ______________________
+
+    def test_business_logic_specialist_run():
+        mission = Mission(target="test.local")
+>       wf1 = Workflow(name="Checkout Workflow")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Workflow.__init__() missing 1 required positional argument: 'description'
+
+argus/agents/business_logic/tests/test_business_logic.py:39: TypeError
+_________________________ test_relationship_inferencer _________________________
+
+    def test_relationship_inferencer():
+        resources = [
+            APICollection(name="orgs", path="/orgs"),
+            APICollection(name="projects", path="/orgs/{org_id}/projects")
+        ]
+        inferencer = RelationshipInferencer()
+        rels = inferencer.infer(resources)
+>       assert len(rels) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+argus/plugins/api/tests/test_api_intelligence.py:27: AssertionError
+_________________________ test_api_intelligence_plugin _________________________
+
+    def test_api_intelligence_plugin():
+        mission = Mission("test")
+        mission.endpoints = [
+            {"path": "/api/v1/users", "method": "GET"},
+            {"path": "/api/v1/users", "method": "POST"},
+            {"path": "/api/v1/users/bulk_update", "method": "POST"},
+            {"path": "/api/v1/admin/settings", "method": "GET"}
+        ]
+    
+        plugin = APIIntelligencePlugin()
+        controlled = ControlledMission(mission)
+        plugin.execute(controlled)
+    
+        assert len(mission.api_inventory) > 0
+        titles = [inv.title.lower() for inv in mission.api_inventory]
+    
+        # Should flag administrative and bulk operations and incomplete CRUD
+        assert any("admin" in t for t in titles)
+        assert any("bulk" in t for t in titles)
+>       assert any("incomplete crud" in t or "hidden delete" in t for t in titles)
+E       assert False
+E        +  where False = any(<generator object test_api_intelligence_plugin.<locals>.<genexpr> at 0x7f1a815f1150>)
+
+argus/plugins/api/tests/test_api_intelligence.py:51: AssertionError
+_____________________ test_file_upload_intelligence_plugin _____________________
+
+    def test_file_upload_intelligence_plugin():
+        mission = Mission("test")
+        mission.endpoints = [
+            {"path": "/api/upload/avatar", "method": "POST"},
+            {"path": "/api/import/csv", "method": "POST"},
+            {"path": "/api/attachments/upload", "method": "POST"},
+            {"path": "/api/tmp/download", "method": "GET"}
+        ]
+    
+        plugin = FileUploadPlugin()
+        controlled = ControlledMission(mission)
+        plugin.execute(controlled)
+    
+        assert len(mission.upload_workflows) > 0
+        titles = [inv.title.lower() for inv in mission.upload_workflows]
+    
+        # Should flag avatar processing, csv import, temporary storage, and attachment ownership
+        assert any("file processing workflow" in t and "avatar" in t for t in titles)
+        assert any("data import" in t for t in titles)
+>       assert any("temporary storage" in t for t in titles)
+E       assert False
+E        +  where False = any(<generator object test_file_upload_intelligence_plugin.<locals>.<genexpr> at 0x7f1a815f13c0>)
+
+argus/plugins/file_upload/tests/test_file_upload.py:25: AssertionError
+_______________________ test_graphql_specialist_discover _______________________
+
+    def test_graphql_specialist_discover():
+        specialist = GraphQLSpecialist()
+>       specialist.discover()
+E       TypeError: GraphQLSpecialist.discover() missing 1 required positional argument: 'mission'
+
+argus/plugins/graphql/tests/test_graphql.py:10: TypeError
+______________________ test_benchmark_runner_recall_logic ______________________
+
+    def test_benchmark_runner_recall_logic():
+        framework = BenchmarkFramework()
+        runner = framework.runner
+    
+        expected = ["vuln-1", "vuln-2", "vuln-3"]
+        actual = ["vuln-1", "vuln-3", "vuln-4"]
+    
+>       recall = runner._calculate_recall(expected, actual)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'EvaluationRunner' object has no attribute '_calculate_recall'
+
+tests/benchmark/test_framework.py:34: AttributeError
+__________________________ test_benchmark_run_mocked ___________________________
+
+    def test_benchmark_run_mocked():
+        framework = BenchmarkFramework()
+    
+        benchmark = Benchmark(
+            id="test-bench-mock",
+            name="Mock Benchmark",
+            description="Testing the runner",
+            category="auth",
+            target="http://example.com",
+            ground_truth=BenchmarkGroundTruth(
+                expected_technologies=["React", "Node"]
+            )
+        )
+    
+        # We mock the controller start to immediately complete the mission
+>       original_start = framework.runner.controller.start
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'EvaluationRunner' object has no attribute 'controller'
+
+tests/benchmark/test_framework.py:55: AttributeError
+_____________________ test_mission_storage_and_observation _____________________
+
+    def test_mission_storage_and_observation():
+        mission = Mission("test")
+        mission.graph = KnowledgeGraph()
+        mission.endpoints = [{"url": "http://example.com/graphql", "method": "POST"}]
+    
+        specialist = GraphQLSpecialist()
+        specialist.discover(mission)
+    
+        # Verify mission storage
+        assert hasattr(mission, "graphql")
+        assert len(mission.graphql.endpoints) == 1
+    
+        # Verify graph nodes
+>       assert mission.graph.node_count() == 1
+E       AssertionError: assert 2 == 1
+E        +  where 2 = node_count()
+E        +    where node_count = <argus.graph.graph.KnowledgeGraph object at 0x7f1a8141afd0>.node_count
+E        +      where <argus.graph.graph.KnowledgeGraph object at 0x7f1a8141afd0> = Mission(target='test', id='0a6a6ef1-6bf2-45ab-8d16-538955741a16', name='', workspace='default', created_at='2026-08-10...={}, agent_health={}, agent_metrics={}, execution_results={}, execution_metrics={}, reports=[], metrics={}, plugins=[]).graph
+
+tests/plugins/graphql/test_discovery.py:115: AssertionError
+______________ test_javascript_specialist_generate_investigations ______________
+
+    def test_javascript_specialist_generate_investigations():
+        specialist = JavaScriptSpecialist()
+        mission = Mission("test_target")
+        specialist.discover(mission)
+    
+        from argus.plugins.javascript.models import JavaScriptRoute, JavaScriptSymbol, JavaScriptWebSocket
+        mission.javascript.routes.append(JavaScriptRoute(path="/admin/dashboard", route_type="Client", source="app.js"))
+        mission.endpoints.append({"url": "https://api.example.com/v1/users", "source": "app.js"})
+        mission.javascript.symbols.append(JavaScriptSymbol(name="ENABLE_ADMIN", symbol_type="FeatureFlag", source="app.js"))
+        mission.javascript.symbols.append(JavaScriptSymbol(name="Auth0", symbol_type="AuthProvider", source="app.js"))
+        mission.javascript.symbols.append(JavaScriptSymbol(name="submitPayment", symbol_type="BusinessWorkflow", source="app.js"))
+        mission.javascript.symbols.append(JavaScriptSymbol(name="GraphQL Detected", symbol_type="GraphQLEndpoint", source="app.js"))
+        mission.javascript.websocket.append(JavaScriptWebSocket(url="wss://socket.example.com", source="app.js"))
+    
+>       specialist.generate_investigations(mission)
+
+tests/plugins/javascript/test_agent.py:30: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <argus.plugins.javascript.agent.JavaScriptSpecialist object at 0x7f1a84b11950>
+mission = Mission(target='test_target', id='a5869177-00f6-4af5-8a99-1a404de806ee', name='', workspace='default', created_at='202...={}, agent_health={}, agent_metrics={}, execution_results={}, execution_metrics={}, reports=[], metrics={}, plugins=[])
+
+    def generate_investigations(self, mission: ControlledMission):
+        logger.info("JavaScriptSpecialist: Generating investigations... (PR6)")
+        if not getattr(mission, "javascript", None):
+            return
+    
+        js_state = mission.javascript
+        new_invs = []
+    
+        # 1. Hidden admin route review
+        admin_routes = [r for r in js_state.routes if any(keyword in r.path.lower() for keyword in ["admin", "dashboard", "internal", "config", "debug"])]
+        if admin_routes:
+            inv = JavaScriptInvestigation(
+                title="Hidden Admin Route Review",
+                description="Review discovered client-side routes for potentially sensitive administrative or internal interfaces.",
+                category="Routing",
+                reasoning="Client-side routing tables reveal endpoints that may not be linked in the UI but could expose administrative functionality if server-side authorization is weak.",
+                evidence=[r.path for r in admin_routes],
+                confidence=0.7,
+                priority="Medium",
+                tags=["admin", "routes", "authorization"]
+            )
+            inv.reasoning += "\nManual validation guidance: Intercept traffic and attempt to access these routes with various privilege levels. Verify server-side enforcement."
+            new_invs.append(inv)
+            if hasattr(mission, "authorization_investigations"):
+                mission.authorization_investigations.append(inv)
+    
+        # 2. Hidden API review
+        hidden_apis = [e for e in mission.endpoints if isinstance(e, dict) and e.get("url") and "api" in e["url"].lower()]
+        if hidden_apis:
+            inv = JavaScriptInvestigation(
+                title="Hidden API Review",
+                description="Review extracted REST endpoints and Third-party APIs discovered in JavaScript bundles.",
+                category="API Intelligence",
+                reasoning="JavaScript bundles often contain hardcoded endpoints, including hidden or unauthenticated APIs.",
+                evidence=[e["url"] for e in hidden_apis],
+                confidence=0.8,
+                priority="Medium",
+                tags=["api", "endpoints"]
+            )
+            inv.reasoning += "\nManual validation guidance: Manually interact with these APIs to assess input validation and access controls."
+            new_invs.append(inv)
+    
+        # 3. Feature flag review
+        feature_flags = [s for s in js_state.symbols if s.symbol_type == "FeatureFlag"]
+        if feature_flags:
+            inv = JavaScriptInvestigation(
+                title="Feature Flag Review",
+                description="Review client-side feature flags for potential business logic exposure.",
+                category="Business Logic",
+                reasoning="Client-side toggles can sometimes be manipulated to access unreleased or premium features if the server does not validate the state.",
+                evidence=[s.name for s in feature_flags],
+                confidence=0.9,
+                priority="Low",
+                tags=["feature_flags", "business_logic"]
+            )
+            inv.reasoning += "\nManual validation guidance: Use browser dev tools to toggle these variables (e.g., from false to true) and observe application behavior."
+            new_invs.append(inv)
+    
+        # 4. Client authorization review
+        auth_providers = [s for s in js_state.symbols if s.symbol_type in ["AuthProvider", "OAuthProvider"]]
+        if auth_providers:
+            inv = JavaScriptInvestigation(
+                title="Client Authorization Review",
+                description="Review the integration of authentication and OAuth providers discovered in the client application.",
+                category="Authentication",
+                reasoning="Misconfigured client-side authentication logic can lead to token leakage or OAuth flow manipulation.",
+                evidence=[s.name for s in auth_providers],
+                confidence=0.8,
+                priority="High",
+                tags=["auth", "oauth", "identities"]
+            )
+            inv.reasoning += "\nManual validation guidance: Review OAuth redirect URIs, token storage mechanisms (localStorage vs HttpOnly cookies), and state parameters."
+            new_invs.append(inv)
+            if hasattr(mission, "authorization_investigations"):
+                mission.authorization_investigations.append(inv)
+    
+        # 5. Workflow review
+        workflows = [s for s in js_state.symbols if s.symbol_type == "BusinessWorkflow"]
+        if workflows:
+            inv = JavaScriptInvestigation(
+                title="Business Workflow Review",
+                description="Review extracted business workflows (e.g., payment, checkout, order processing).",
+                category="Business Logic",
+                reasoning="Critical business functions implemented in JavaScript should be analyzed to ensure all state and transitions are securely validated on the server.",
+                evidence=[s.name for s in workflows],
+                confidence=0.9,
+                priority="High",
+                tags=["workflow", "business_logic"]
+            )
+            inv.reasoning += "\nManual validation guidance: Walk through these workflows manually, altering request sequence and payload data to test state machine integrity."
+            new_invs.append(inv)
+    
+        # 6. GraphQL review
+        graphql_endpoints = [s for s in js_state.symbols if s.symbol_type == "GraphQLEndpoint"]
+        if graphql_endpoints:
+            inv = JavaScriptInvestigation(
+                title="GraphQL Configuration Review",
+                description="Review the discovered GraphQL integrations.",
+                category="GraphQL",
+                reasoning="GraphQL endpoints may be vulnerable to introspection, excessive query depth, or batching attacks if not properly secured.",
+                evidence=[s.name for s in graphql_endpoints],
+                confidence=0.9,
+                priority="High",
+                tags=["graphql", "api"]
+            )
+            inv.reasoning += "\nManual validation guidance: Attempt to run Introspection queries, test query depth limits, and check for field-level authorization."
+            new_invs.append(inv)
+            if hasattr(mission, "graphql"):
+                mission.graphql.investigations.append(inv)
+    
+        # 7. WebSocket review
+        if js_state.websocket:
+            inv = JavaScriptInvestigation(
+                title="WebSocket Security Review",
+                description="Review the discovered WebSocket endpoints for secure communication and authentication.",
+                category="Networking",
+                reasoning="WebSockets can be susceptible to Cross-Site WebSocket Hijacking (CSWSH) and lack proper message-level authorization.",
+                evidence=[ws.url for ws in js_state.websocket],
+                confidence=0.9,
+                priority="Medium",
+                tags=["websocket", "networking"]
+            )
+            inv.reasoning += "\nManual validation guidance: Analyze the WebSocket handshake for Origin validation and test the authorization of individual messages sent over the socket."
+            new_invs.append(inv)
+    
+        # Add all to mission investigations and priority queue
+>       mission.investigations.extend(new_invs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'InvestigationRegistry' object has no attribute 'extend'
+
+argus/plugins/javascript/agent.py:294: AttributeError
+________________________ test_javascript_plugin_execute ________________________
+
+    def test_javascript_plugin_execute():
+        plugin = JavaScriptPlugin()
+        mission = Mission("test_target")
+>       plugin.execute(mission)
+
+tests/plugins/javascript/test_plugin.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+argus/plugins/javascript/plugin.py:35: in execute
+    self.specialist.generate_investigations(mission)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <argus.plugins.javascript.agent.JavaScriptSpecialist object at 0x7f1a81443e30>
+mission = Mission(target='test_target', id='d3b2f9c9-64b2-4331-a3b7-54d5958ff497', name='', workspace='default', created_at='202...={}, agent_health={}, agent_metrics={}, execution_results={}, execution_metrics={}, reports=[], metrics={}, plugins=[])
+
+    def generate_investigations(self, mission: ControlledMission):
+        logger.info("JavaScriptSpecialist: Generating investigations... (PR6)")
+        if not getattr(mission, "javascript", None):
+            return
+    
+        js_state = mission.javascript
+        new_invs = []
+    
+        # 1. Hidden admin route review
+        admin_routes = [r for r in js_state.routes if any(keyword in r.path.lower() for keyword in ["admin", "dashboard", "internal", "config", "debug"])]
+        if admin_routes:
+            inv = JavaScriptInvestigation(
+                title="Hidden Admin Route Review",
+                description="Review discovered client-side routes for potentially sensitive administrative or internal interfaces.",
+                category="Routing",
+                reasoning="Client-side routing tables reveal endpoints that may not be linked in the UI but could expose administrative functionality if server-side authorization is weak.",
+                evidence=[r.path for r in admin_routes],
+                confidence=0.7,
+                priority="Medium",
+                tags=["admin", "routes", "authorization"]
+            )
+            inv.reasoning += "\nManual validation guidance: Intercept traffic and attempt to access these routes with various privilege levels. Verify server-side enforcement."
+            new_invs.append(inv)
+            if hasattr(mission, "authorization_investigations"):
+                mission.authorization_investigations.append(inv)
+    
+        # 2. Hidden API review
+        hidden_apis = [e for e in mission.endpoints if isinstance(e, dict) and e.get("url") and "api" in e["url"].lower()]
+        if hidden_apis:
+            inv = JavaScriptInvestigation(
+                title="Hidden API Review",
+                description="Review extracted REST endpoints and Third-party APIs discovered in JavaScript bundles.",
+                category="API Intelligence",
+                reasoning="JavaScript bundles often contain hardcoded endpoints, including hidden or unauthenticated APIs.",
+                evidence=[e["url"] for e in hidden_apis],
+                confidence=0.8,
+                priority="Medium",
+                tags=["api", "endpoints"]
+            )
+            inv.reasoning += "\nManual validation guidance: Manually interact with these APIs to assess input validation and access controls."
+            new_invs.append(inv)
+    
+        # 3. Feature flag review
+        feature_flags = [s for s in js_state.symbols if s.symbol_type == "FeatureFlag"]
+        if feature_flags:
+            inv = JavaScriptInvestigation(
+                title="Feature Flag Review",
+                description="Review client-side feature flags for potential business logic exposure.",
+                category="Business Logic",
+                reasoning="Client-side toggles can sometimes be manipulated to access unreleased or premium features if the server does not validate the state.",
+                evidence=[s.name for s in feature_flags],
+                confidence=0.9,
+                priority="Low",
+                tags=["feature_flags", "business_logic"]
+            )
+            inv.reasoning += "\nManual validation guidance: Use browser dev tools to toggle these variables (e.g., from false to true) and observe application behavior."
+            new_invs.append(inv)
+    
+        # 4. Client authorization review
+        auth_providers = [s for s in js_state.symbols if s.symbol_type in ["AuthProvider", "OAuthProvider"]]
+        if auth_providers:
+            inv = JavaScriptInvestigation(
+                title="Client Authorization Review",
+                description="Review the integration of authentication and OAuth providers discovered in the client application.",
+                category="Authentication",
+                reasoning="Misconfigured client-side authentication logic can lead to token leakage or OAuth flow manipulation.",
+                evidence=[s.name for s in auth_providers],
+                confidence=0.8,
+                priority="High",
+                tags=["auth", "oauth", "identities"]
+            )
+            inv.reasoning += "\nManual validation guidance: Review OAuth redirect URIs, token storage mechanisms (localStorage vs HttpOnly cookies), and state parameters."
+            new_invs.append(inv)
+            if hasattr(mission, "authorization_investigations"):
+                mission.authorization_investigations.append(inv)
+    
+        # 5. Workflow review
+        workflows = [s for s in js_state.symbols if s.symbol_type == "BusinessWorkflow"]
+        if workflows:
+            inv = JavaScriptInvestigation(
+                title="Business Workflow Review",
+                description="Review extracted business workflows (e.g., payment, checkout, order processing).",
+                category="Business Logic",
+                reasoning="Critical business functions implemented in JavaScript should be analyzed to ensure all state and transitions are securely validated on the server.",
+                evidence=[s.name for s in workflows],
+                confidence=0.9,
+                priority="High",
+                tags=["workflow", "business_logic"]
+            )
+            inv.reasoning += "\nManual validation guidance: Walk through these workflows manually, altering request sequence and payload data to test state machine integrity."
+            new_invs.append(inv)
+    
+        # 6. GraphQL review
+        graphql_endpoints = [s for s in js_state.symbols if s.symbol_type == "GraphQLEndpoint"]
+        if graphql_endpoints:
+            inv = JavaScriptInvestigation(
+                title="GraphQL Configuration Review",
+                description="Review the discovered GraphQL integrations.",
+                category="GraphQL",
+                reasoning="GraphQL endpoints may be vulnerable to introspection, excessive query depth, or batching attacks if not properly secured.",
+                evidence=[s.name for s in graphql_endpoints],
+                confidence=0.9,
+                priority="High",
+                tags=["graphql", "api"]
+            )
+            inv.reasoning += "\nManual validation guidance: Attempt to run Introspection queries, test query depth limits, and check for field-level authorization."
+            new_invs.append(inv)
+            if hasattr(mission, "graphql"):
+                mission.graphql.investigations.append(inv)
+    
+        # 7. WebSocket review
+        if js_state.websocket:
+            inv = JavaScriptInvestigation(
+                title="WebSocket Security Review",
+                description="Review the discovered WebSocket endpoints for secure communication and authentication.",
+                category="Networking",
+                reasoning="WebSockets can be susceptible to Cross-Site WebSocket Hijacking (CSWSH) and lack proper message-level authorization.",
+                evidence=[ws.url for ws in js_state.websocket],
+                confidence=0.9,
+                priority="Medium",
+                tags=["websocket", "networking"]
+            )
+            inv.reasoning += "\nManual validation guidance: Analyze the WebSocket handshake for Origin validation and test the authorization of individual messages sent over the socket."
+            new_invs.append(inv)
+    
+        # Add all to mission investigations and priority queue
+>       mission.investigations.extend(new_invs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'InvestigationRegistry' object has no attribute 'extend'
+
+argus/plugins/javascript/agent.py:294: AttributeError
+___________ TestOrchestratorIntegrations.test_scheduler_integration ____________
+
+self = <tests.runtime.test_runtime_orchestrator.TestOrchestratorIntegrations object at 0x7f1a82c81310>
+test_mission = Mission(target='test.example.com', id='f838b8c6-0546-4f00-a432-0c3afd2c0d3e', name='', workspace='default', created_at...={}, agent_health={}, agent_metrics={}, execution_results={}, execution_metrics={}, reports=[], metrics={}, plugins=[])
+test_registry = <argus.runtime.registry.ToolRegistry object at 0x7f1a803df150>
+
+    def test_scheduler_integration(self, test_mission, test_registry):
+        """Verify scheduler cycles trigger orchestrator execution."""
+        # Setup scheduler
+        scheduler = TaskScheduler(test_mission, max_workers=1)
+    
+        # Add task matching API Discovery
+        t1 = ResearchTask(
+            id="scheduler-task-1",
+            title="Discovery",
+            description="Recon",
+            goal="API lists",
+            category=TaskCategory.API_DISCOVERY
+        )
+>       scheduler.schedule_tasks([t1])
+
+tests/runtime/test_runtime_orchestrator.py:313: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+argus/runtime/executor.py:54: in schedule_tasks
+    self.event_bus.publish(EventType.TASK_SCHEDULED, st)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <argus.runtime.events.EventBus object at 0x7f1a817d7360>
+event_type = <EventType.TASK_SCHEDULED: 'TaskScheduled'>
+mission_id = ScheduledTask(id='f46d3872-021e-48b4-aa3c-cb977c8e18e2', task_id='scheduler-task-1', task_title='Discovery', state=<Ta...None, completed_at=None, error=None, execution_time_ms=0.0, metadata={}, created_at='2026-08-10T17:14:01.993016+00:00')
+details = None
+
+    def publish(self, event_type: RuntimeEventType, mission_id: str, details: Any = None):
+        """Create and publish an event to all subscribers."""
+>       event = RuntimeEvent(
+            event_type=event_type,
+            mission_id=mission_id,
+            details=details or {}
+        )
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for RuntimeEvent
+E       mission_id
+E         Input should be a valid string [type=string_type, input_value=ScheduledTask(id='f46d387...T17:14:01.993016+00:00'), input_type=ScheduledTask]
+E           For further information visit https://errors.pydantic.dev/2.13/v/string_type
+
+argus/runtime/events.py:55: ValidationError
+______ TestSchedulerDependencies.test_dependency_resolution_blocks_tasks _______
+
+self = <tests.runtime.test_scheduler.TestSchedulerDependencies object at 0x7f1a82c81590>
+scheduler = <argus.runtime.executor.TaskScheduler object at 0x7f1a80208050>
+sample_tasks = [ResearchTask(id='49207bf7-8ffe-4ea6-8bac-4558d0e11261', title='Task A', description='Desc', goal='G', category=<TaskC...es=5, status='PENDING', reason='', supporting_evidence=[], metadata={}, created_at='2026-08-10T17:14:02.115378+00:00')]
+
+    def test_dependency_resolution_blocks_tasks(self, scheduler, sample_tasks):
+>       scheduler.schedule_tasks(sample_tasks)
+
+tests/runtime/test_scheduler.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+argus/runtime/executor.py:54: in schedule_tasks
+    self.event_bus.publish(EventType.TASK_SCHEDULED, st)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <argus.runtime.events.EventBus object at 0x7f1a803b8380>
+event_type = <EventType.TASK_SCHEDULED: 'TaskScheduled'>
+mission_id = ScheduledTask(id='4f5e6cbe-d39c-47f1-ab4b-dcd4718330b8', task_id='49207bf7-8ffe-4ea6-8bac-4558d0e11261', task_title='T...None, completed_at=None, error=None, execution_time_ms=0.0, metadata={}, created_at='2026-08-10T17:14:02.115643+00:00')
+details = None
+
+    def publish(self, event_type: RuntimeEventType, mission_id: str, details: Any = None):
+        """Create and publish an event to all subscribers."""
+>       event = RuntimeEvent(
+            event_type=event_type,
+            mission_id=mission_id,
+            details=details or {}
+        )
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for RuntimeEvent
+E       mission_id
+E         Input should be a valid string [type=string_type, input_value=ScheduledTask(id='4f5e6cb...T17:14:02.115643+00:00'), input_type=ScheduledTask]
+E           For further information visit https://errors.pydantic.dev/2.13/v/string_type
+
+argus/runtime/events.py:55: ValidationError
+______ TestSchedulerDependencies.test_completing_dependency_unblocks_task ______
+
+self = <tests.runtime.test_scheduler.TestSchedulerDependencies object at 0x7f1a82c816d0>
+scheduler = <argus.runtime.executor.TaskScheduler object at 0x7f1a8143b610>
+sample_tasks = [ResearchTask(id='70fe89a5-3d8f-4211-972d-92448032718b', title='Task A', description='Desc', goal='G', category=<TaskC...es=5, status='PENDING', reason='', supporting_evidence=[], metadata={}, created_at='2026-08-10T17:14:02.127447+00:00')]
+
+    def test_completing_dependency_unblocks_task(self, scheduler, sample_tasks):
+>       scheduler.schedule_tasks(sample_tasks)
+
+tests/runtime/test_scheduler.py:44: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+argus/runtime/executor.py:54: in schedule_tasks
+    self.event_bus.publish(EventType.TASK_SCHEDULED, st)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <argus.runtime.events.EventBus object at 0x7f1a81416140>
+event_type = <EventType.TASK_SCHEDULED: 'TaskScheduled'>
+mission_id = ScheduledTask(id='3e55566a-d637-48b9-9ce0-6a4f969ff430', task_id='70fe89a5-3d8f-4211-972d-92448032718b', task_title='T...None, completed_at=None, error=None, execution_time_ms=0.0, metadata={}, created_at='2026-08-10T17:14:02.127724+00:00')
+details = None
+
+    def publish(self, event_type: RuntimeEventType, mission_id: str, details: Any = None):
+        """Create and publish an event to all subscribers."""
+>       event = RuntimeEvent(
+            event_type=event_type,
+            mission_id=mission_id,
+            details=details or {}
+        )
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for RuntimeEvent
+E       mission_id
+E         Input should be a valid string [type=string_type, input_value=ScheduledTask(id='3e55566...T17:14:02.127724+00:00'), input_type=ScheduledTask]
+E           For further information visit https://errors.pydantic.dev/2.13/v/string_type
+
+argus/runtime/events.py:55: ValidationError
+____ TestSchedulerConcurrency.test_parallel_scheduling_respects_max_workers ____
+
+self = <tests.runtime.test_scheduler.TestSchedulerConcurrency object at 0x7f1a82c81810>
+base_mission = Mission(target='test.example.com', id='ef61bd70-5f76-4fe9-acd5-961541de9003', name='', workspace='default', created_at...={}, agent_health={}, agent_metrics={}, execution_results={}, execution_metrics={}, reports=[], metrics={}, plugins=[])
+
+    def test_parallel_scheduling_respects_max_workers(self, base_mission):
+        sched = TaskScheduler(base_mission, max_workers=1)
+        tasks = [
+            ResearchTask(title="T1", description="Desc", goal="G", category=TaskCategory.API_DISCOVERY, priority=0.9),
+            ResearchTask(title="T2", description="Desc", goal="G", category=TaskCategory.TECHNOLOGY_DISCOVERY, priority=0.8),
+        ]
+>       sched.schedule_tasks(tasks)
+
+tests/runtime/test_scheduler.py:75: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+argus/runtime/executor.py:54: in schedule_tasks
+    self.event_bus.publish(EventType.TASK_SCHEDULED, st)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <argus.runtime.events.EventBus object at 0x7f1a81427450>
+event_type = <EventType.TASK_SCHEDULED: 'TaskScheduled'>
+mission_id = ScheduledTask(id='cb82da48-1f79-4c10-97d3-b9ebfbb9f738', task_id='7cf50463-c533-41f0-abc6-d8d93014780f', task_title='T...None, completed_at=None, error=None, execution_time_ms=0.0, metadata={}, created_at='2026-08-10T17:14:02.137611+00:00')
+details = None
+
+    def publish(self, event_type: RuntimeEventType, mission_id: str, details: Any = None):
+        """Create and publish an event to all subscribers."""
+>       event = RuntimeEvent(
+            event_type=event_type,
+            mission_id=mission_id,
+            details=details or {}
+        )
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for RuntimeEvent
+E       mission_id
+E         Input should be a valid string [type=string_type, input_value=ScheduledTask(id='cb82da4...T17:14:02.137611+00:00'), input_type=ScheduledTask]
+E           For further information visit https://errors.pydantic.dev/2.13/v/string_type
+
+argus/runtime/events.py:55: ValidationError
+_________________ TestRetryPolicy.test_task_retries_on_failure _________________
+
+self = <tests.runtime.test_scheduler.TestRetryPolicy object at 0x7f1a82c81950>
+scheduler = <argus.runtime.executor.TaskScheduler object at 0x7f1a817d76f0>
+
+    def test_task_retries_on_failure(self, scheduler):
+        t1 = ResearchTask(title="Fail Task", description="Desc", goal="G", category=TaskCategory.API_DISCOVERY)
+>       scheduler.schedule_tasks([t1])
+
+tests/runtime/test_scheduler.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+argus/runtime/executor.py:54: in schedule_tasks
+    self.event_bus.publish(EventType.TASK_SCHEDULED, st)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <argus.runtime.events.EventBus object at 0x7f1a803d9f50>
+event_type = <EventType.TASK_SCHEDULED: 'TaskScheduled'>
+mission_id = ScheduledTask(id='96ee9ec0-aa83-4a6f-8095-d549fdedab7a', task_id='58d80b7d-19b8-441a-aa29-f9f673a8dc71', task_title='F...None, completed_at=None, error=None, execution_time_ms=0.0, metadata={}, created_at='2026-08-10T17:14:02.148235+00:00')
+details = None
+
+    def publish(self, event_type: RuntimeEventType, mission_id: str, details: Any = None):
+        """Create and publish an event to all subscribers."""
+>       event = RuntimeEvent(
+            event_type=event_type,
+            mission_id=mission_id,
+            details=details or {}
+        )
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for RuntimeEvent
+E       mission_id
+E         Input should be a valid string [type=string_type, input_value=ScheduledTask(id='96ee9ec...T17:14:02.148235+00:00'), input_type=ScheduledTask]
+E           For further information visit https://errors.pydantic.dev/2.13/v/string_type
+
+argus/runtime/events.py:55: ValidationError
+_________ TestRetryPolicy.test_task_fails_terminally_after_max_retries _________
+
+self = <tests.runtime.test_scheduler.TestRetryPolicy object at 0x7f1a82c81a90>
+scheduler = <argus.runtime.executor.TaskScheduler object at 0x7f1a81442d50>
+
+    def test_task_fails_terminally_after_max_retries(self, scheduler):
+        t1 = ResearchTask(title="Fail Task", description="Desc", goal="G", category=TaskCategory.API_DISCOVERY)
+>       scheduler.schedule_tasks([t1])
+
+tests/runtime/test_scheduler.py:106: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+argus/runtime/executor.py:54: in schedule_tasks
+    self.event_bus.publish(EventType.TASK_SCHEDULED, st)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <argus.runtime.events.EventBus object at 0x7f1a81313020>
+event_type = <EventType.TASK_SCHEDULED: 'TaskScheduled'>
+mission_id = ScheduledTask(id='c465076b-0572-426e-baaf-ef086c73b7cf', task_id='f0ccfa61-d5eb-4c09-9c60-634c7da2a95d', task_title='F...None, completed_at=None, error=None, execution_time_ms=0.0, metadata={}, created_at='2026-08-10T17:14:02.157862+00:00')
+details = None
+
+    def publish(self, event_type: RuntimeEventType, mission_id: str, details: Any = None):
+        """Create and publish an event to all subscribers."""
+>       event = RuntimeEvent(
+            event_type=event_type,
+            mission_id=mission_id,
+            details=details or {}
+        )
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for RuntimeEvent
+E       mission_id
+E         Input should be a valid string [type=string_type, input_value=ScheduledTask(id='c465076...T17:14:02.157862+00:00'), input_type=ScheduledTask]
+E           For further information visit https://errors.pydantic.dev/2.13/v/string_type
+
+argus/runtime/events.py:55: ValidationError
+__________ TestEventEmission.test_events_emitted_on_lifecycle_changes __________
+
+self = <tests.runtime.test_scheduler.TestEventEmission object at 0x7f1a82c81bd0>
+scheduler = <argus.runtime.executor.TaskScheduler object at 0x7f1a803b88d0>
+sample_tasks = [ResearchTask(id='30b6ed94-8a76-4741-afea-63dcc258fc29', title='Task A', description='Desc', goal='G', category=<TaskC...es=5, status='PENDING', reason='', supporting_evidence=[], metadata={}, created_at='2026-08-10T17:14:02.167854+00:00')]
+
+    def test_events_emitted_on_lifecycle_changes(self, scheduler, sample_tasks):
+        # schedule emits TASK_SCHEDULED (x3)
+>       scheduler.schedule_tasks(sample_tasks)
+
+tests/runtime/test_scheduler.py:129: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+argus/runtime/executor.py:54: in schedule_tasks
+    self.event_bus.publish(EventType.TASK_SCHEDULED, st)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <argus.runtime.events.EventBus object at 0x7f1a81312b70>
+event_type = <EventType.TASK_SCHEDULED: 'TaskScheduled'>
+mission_id = ScheduledTask(id='53b28dbb-6e31-4018-808c-0fc7eaa80e73', task_id='30b6ed94-8a76-4741-afea-63dcc258fc29', task_title='T...None, completed_at=None, error=None, execution_time_ms=0.0, metadata={}, created_at='2026-08-10T17:14:02.168147+00:00')
+details = None
+
+    def publish(self, event_type: RuntimeEventType, mission_id: str, details: Any = None):
+        """Create and publish an event to all subscribers."""
+>       event = RuntimeEvent(
+            event_type=event_type,
+            mission_id=mission_id,
+            details=details or {}
+        )
+E       pydantic_core._pydantic_core.ValidationError: 1 validation error for RuntimeEvent
+E       mission_id
+E         Input should be a valid string [type=string_type, input_value=ScheduledTask(id='53b28db...T17:14:02.168147+00:00'), input_type=ScheduledTask]
+E           For further information visit https://errors.pydantic.dev/2.13/v/string_type
+
+argus/runtime/events.py:55: ValidationError
+_____________________________ test_context_builder _____________________________
+
+    def test_context_builder():
+        mission = Mission("https://hackerone.com")
+        mission.technologies = ["Cloudflare"]
+        mission.authentication = DummyAuth()
+        mission.business_objects = [DummyBO()]
+        mission.api_intelligence = [DummyEndpoint()]
+    
+        builder = ContextBuilder()
+        context = builder.build(mission)
+    
+>       assert context["Mission Target"] == "https://hackerone.com"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'Mission Target'
+
+tests/test_ai_research.py:33: KeyError
+_____________________________ test_prompt_builder ______________________________
+
+    def test_prompt_builder():
+        mission = Mission("https://example.com")
+>       prompt = build_research_prompt(mission)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_ai_research.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+argus/ai/prompts.py:6: in build_research_prompt
+    context = builder.build(mission)
+              ^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <argus.ai.context.ContextBuilder object at 0x7f1a8143a0d0>
+mission = Mission(target='https://example.com', id='3b07834f-2f99-422a-a83c-91286ed77301', name='', workspace='default', created...={}, agent_health={}, agent_metrics={}, execution_results={}, execution_metrics={}, reports=[], metrics={}, plugins=[])
+
+    def build(self, mission) -> dict:
+        workflows = getattr(mission, "workflows", [])
+    
+        workflow_summary = []
+        auth_summary = []
+        for wf in workflows:
+            workflow_summary.append({
+                "Name": wf.name,
+                "Description": wf.description,
+                "Steps": len(wf.steps),
+                "Business Objects": list(wf.business_objects),
+                "Risk Score": wf.risk_score
+            })
+            if wf.roles or any(s.required_role for s in wf.steps):
+                # Fallback auth summary if graph doesn't exist
+                auth_summary.append({
+                    "Workflow": wf.name,
+                    "Roles": list(wf.roles),
+                    "Step Roles": {s.title: s.required_role for s in wf.steps if s.required_role}
+                })
+    
+        # If we have an AuthorizationGraph, use its richer analysis
+        auth_graph = getattr(mission, "authorization_graph", None)
+        if auth_graph:
+            from argus.authorization.analyzer import AuthorizationAnalyzer
+            analyzer = AuthorizationAnalyzer(auth_graph)
+            auth_summary = {
+                "Role Hierarchy": analyzer.get_role_hierarchy(),
+                "Ownership Chains": analyzer.get_ownership_chains(),
+                "Authorization Boundaries": analyzer.get_authorization_boundaries()
+            }
+    
+        context = {
+            "Application Overview": {
+                "Target": mission.target,
+                "Technologies": getattr(mission, "technologies", []),
+                "Authentication": f"Auth Type: {mission.authentication.authentication_type}, Token Type: {mission.authentication.token_type}" if getattr(mission, "authentication", None) and mission.authentication.authentication_type else "None detected.",
+            },
+>           "Business Objects": [bo.name for bo in getattr(mission, "business_objects", [])] if hasattr(mission, 'business_objects') and hasattr(mission.business_objects[0], 'name') else getattr(mission, "business_objects", []),
+                                                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            "Workflow Summary": workflow_summary,
+            "Authorization Summary": auth_summary,
+            "Evidence": len(getattr(mission, "evidence", [])),
+            "Knowledge Base Matches": getattr(mission, "knowledge_matches", []) # Placeholder for KB matches if any
+        }
+E       IndexError: list index out of range
+
+argus/ai/context.py:41: IndexError
+_________________________ test_researcher_integration __________________________
+
+mock_get_ai_client = <MagicMock name='get_ai_client' id='139751813434064'>
+
+    @patch('argus.ai.researcher.get_ai_client')
+    def test_researcher_integration(mock_get_ai_client):
+        mock_client = MagicMock()
+        mock_client.research.return_value = AIResponse(executive_summary="Done")
+        mock_get_ai_client.return_value = mock_client
+    
+        researcher = Researcher()
+        mission = Mission("https://test.com")
+    
+>       result = researcher.analyze(mission)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_ai_research.py:77: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+argus/ai/researcher.py:10: in analyze
+    prompt = build_research_prompt(mission)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+argus/ai/prompts.py:6: in build_research_prompt
+    context = builder.build(mission)
+              ^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <argus.ai.context.ContextBuilder object at 0x7f1a8143a350>
+mission = Mission(target='https://test.com', id='617a2a4e-c4a3-4c11-9aa3-735a9f9eaae8', name='', workspace='default', created_at...={}, agent_health={}, agent_metrics={}, execution_results={}, execution_metrics={}, reports=[], metrics={}, plugins=[])
+
+    def build(self, mission) -> dict:
+        workflows = getattr(mission, "workflows", [])
+    
+        workflow_summary = []
+        auth_summary = []
+        for wf in workflows:
+            workflow_summary.append({
+                "Name": wf.name,
+                "Description": wf.description,
+                "Steps": len(wf.steps),
+                "Business Objects": list(wf.business_objects),
+                "Risk Score": wf.risk_score
+            })
+            if wf.roles or any(s.required_role for s in wf.steps):
+                # Fallback auth summary if graph doesn't exist
+                auth_summary.append({
+                    "Workflow": wf.name,
+                    "Roles": list(wf.roles),
+                    "Step Roles": {s.title: s.required_role for s in wf.steps if s.required_role}
+                })
+    
+        # If we have an AuthorizationGraph, use its richer analysis
+        auth_graph = getattr(mission, "authorization_graph", None)
+        if auth_graph:
+            from argus.authorization.analyzer import AuthorizationAnalyzer
+            analyzer = AuthorizationAnalyzer(auth_graph)
+            auth_summary = {
+                "Role Hierarchy": analyzer.get_role_hierarchy(),
+                "Ownership Chains": analyzer.get_ownership_chains(),
+                "Authorization Boundaries": analyzer.get_authorization_boundaries()
+            }
+    
+        context = {
+            "Application Overview": {
+                "Target": mission.target,
+                "Technologies": getattr(mission, "technologies", []),
+                "Authentication": f"Auth Type: {mission.authentication.authentication_type}, Token Type: {mission.authentication.token_type}" if getattr(mission, "authentication", None) and mission.authentication.authentication_type else "None detected.",
+            },
+>           "Business Objects": [bo.name for bo in getattr(mission, "business_objects", [])] if hasattr(mission, 'business_objects') and hasattr(mission.business_objects[0], 'name') else getattr(mission, "business_objects", []),
+                                                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            "Workflow Summary": workflow_summary,
+            "Authorization Summary": auth_summary,
+            "Evidence": len(getattr(mission, "evidence", [])),
+            "Knowledge Base Matches": getattr(mission, "knowledge_matches", []) # Placeholder for KB matches if any
+        }
+E       IndexError: list index out of range
+
+argus/ai/context.py:41: IndexError
+____________________________ test_ownership_chains _____________________________
+
+    def test_ownership_chains():
+        mission = Mission(target="test")
+>       wf1 = Workflow(name="Organization Management")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Workflow.__init__() missing 1 required positional argument: 'description'
+
+tests/test_authorization.py:44: TypeError
+________________________ test_authorization_boundaries _________________________
+
+    def test_authorization_boundaries():
+        mission = Mission(target="test")
+>       wf = Workflow(name="Settings")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: Workflow.__init__() missing 1 required positional argument: 'description'
+
+tests/test_authorization.py:81: TypeError
+______________________________ test_role_analyzer ______________________________
+
+    def test_role_analyzer():
+        analyzer = RoleAnalyzer()
+        context = AuthzContext(mission_id="t", target="t", roles=["User", "Admin", "SuperAdmin", "Guest"],
+                               hierarchy={"Admin": ["Admin_Support", "Admin_Billing"], "Admin_Support": ["Admin_L1"]})
+    
+        admin_roles = analyzer.get_admin_roles(context)
+        assert len(admin_roles) == 2
+        assert "Admin" in admin_roles
+        assert "SuperAdmin" in admin_roles
+    
+        # Hierarchy analysis
+        overlaps = analyzer.get_overlapping_roles(context)
+        # Admin -> Admin_Support, Admin -> Admin_Billing, Admin -> Admin_L1, Admin_Support -> Admin_L1
+>       assert len(overlaps) == 4
+E       AssertionError: assert 3 == 4
+E        +  where 3 = len([('Admin', 'Admin_Support'), ('Admin', 'Admin_Billing'), ('Admin_Support', 'Admin_L1')])
+
+tests/test_authz_specialist.py:56: AssertionError
+___________________________ test_ownership_analyzer ____________________________
+
+    def test_ownership_analyzer():
+        analyzer = OwnershipAnalyzer()
+    
+        # Mocking graph behavior for ownership analyzer
+        graph = AuthorizationGraph()
+        n1 = AuthNode(name="User", node_type=AuthNodeType.IDENTITY)
+        n2 = AuthNode(name="Document", node_type=AuthNodeType.PROTECTED_RESOURCE)
+        graph.add_node(n1)
+        graph.add_node(n2)
+>       graph.add_edge(AuthEdge(source="User", target="Document", relation="owns"))
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: AuthEdge.__init__() got an unexpected keyword argument 'source'. Did you mean 'source_id'?
+
+tests/test_authz_specialist.py:81: TypeError
+____________________________ test_validator_blocked ____________________________
+
+    def test_validator_blocked():
+        mission = Mission("test")
+        engine = ExecutionEngine(setup_registry())
+    
+        plan = ExecutionPlan(
+            title="Blocked Plan",
+            objective="Should be blocked by missing evidence.",
+            required_evidence=["MissingKey"] # This should block the plan based on the strict validator check, unless it's mock
+        )
+        plan.steps.append(ExecutionStep(order=1, agent="MockAgentPass", action="Test"))
+    
+        result = engine.execute_plan(plan, mission)
+    
+        # Because plan.title does not contain 'mock' in lower case, it will fail validator in our simplistic mock check
+>       assert result.status == ExecutionStatus.BLOCKED
+E       AssertionError: assert <ExecutionSta...: 'Completed'> == <ExecutionSta...ED: 'Blocked'>
+E         
+E         - Blocked
+E         + Completed
+
+tests/test_execution.py:85: AssertionError
+----------------------------- Captured stdout call -----------------------------
+
+[MockAgentPass] Thinking...
+[MockAgentPass] Executing...
+[MockAgentPass] Evaluating...
+[MockAgentPass] Finished.
+
+_________________ TestKnowledgeGraphBuilder.test_empty_mission _________________
+
+self = <tests.test_graph_root.TestKnowledgeGraphBuilder testMethod=test_empty_mission>
+
+    def test_empty_mission(self):
+        mission = Mission(target="example.com")
+        builder = KnowledgeGraphBuilder()
+        builder.build(mission)
+    
+        self.assertIsNotNone(mission.graph)
+>       self.assertEqual(mission.graph.node_count(), 0)
+E       AssertionError: 1 != 0
+
+tests/test_graph_root.py:116: AssertionError
+___________________________ test_intelligence_engine ___________________________
+
+    def test_intelligence_engine():
+        registry = HeuristicRegistry()
+        registry.register(MockHeuristic())
+    
+        engine = VulnerabilityIntelligenceEngine(registry)
+        mission = Mission("test.local")
+    
+        engine.run(mission)
+    
+        assert len(mission.investigations) == 1
+    
+        inv = mission.investigations[0]
+        assert inv.title == "Mock Auth Finding"
+>       assert inv.priority == "High" # 66 confidence in auth -> High
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'Low' == 'High'
+E         
+E         - High
+E         + Low
+
+tests/test_intelligence.py:91: AssertionError
+______________________ test_mission_lifecycle_transitions ______________________
+
+    def test_mission_lifecycle_transitions():
+        mission = MissionLifecycle.create("target.local")
+        assert mission.status == MissionState.CREATED
+    
+>       MissionLifecycle.start(mission)
+
+tests/test_runtime.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mission = Mission(target='target.local', id='9e61d236-aa26-4f9a-ae76-143ef5b6ae2f', name='', workspace='default', created_at='20...={}, agent_health={}, agent_metrics={}, execution_results={}, execution_metrics={}, reports=[], metrics={}, plugins=[])
+
+    @staticmethod
+    def start(mission: Mission):
+>       if mission.status not in (MissionState.CREATED, MissionState.READY):
+                                                        ^^^^^^^^^^^^^^^^^^
+E       AttributeError: type object 'MissionState' has no attribute 'READY'
+
+argus/runtime/lifecycle.py:13: AttributeError
+__________________________ test_mission_checkpointing __________________________
+
+    def test_mission_checkpointing():
+        test_dir = ".argus/test_checkpoints"
+        checkpointer = MissionCheckpointer(storage_dir=test_dir)
+    
+>       mission = Mission(target="example.com", status=MissionState.RUNNING, phase="recon")
+                                                       ^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: type object 'MissionState' has no attribute 'RUNNING'. Did you mean: 'PLANNING'?
+
+tests/test_runtime.py:38: AttributeError
+________________________ test_mission_scheduler_phases _________________________
+
+    def test_mission_scheduler_phases():
+        scheduler = MissionScheduler()
+>       mission = Mission(target="test.local", status=MissionState.RUNNING, phase="planning")
+                                                      ^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: type object 'MissionState' has no attribute 'RUNNING'. Did you mean: 'PLANNING'?
+
+tests/test_runtime.py:55: AttributeError
+________________________ test_authorization_attachment _________________________
+
+    def test_authorization_attachment():
+        endpoints = [
+            APIEndpoint(method="POST", path="/api/admin/users", resource="users", operation="create", business_object="User"),
+        ]
+        builder = WorkflowBuilder(endpoints=endpoints, business_objects=[BusinessObject(name="User")])
+        wfs = builder.build()
+    
+>       assert len(wfs) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/test_workflows.py:116: AssertionError
+___________________________ test_mission_integration ___________________________
+
+    def test_mission_integration():
+        mission = Mission(target="test")
+        mission.endpoints = [
+>           APIEndpoint(method="POST", path="/login", resource="login", operation="login").__dict__
+        ]
+E       AttributeError: 'APIEndpoint' object has no attribute '__dict__'. Did you mean: '__dir__'?
+
+tests/test_workflows.py:124: AttributeError
+_________________________ test_research_context_engine _________________________
+
+    def test_research_context_engine():
+        engine = ResearchContextEngine()
+        query = ContextQuery(conversation_id="c1", query="admin token bypass", mission_id="m1")
+    
+        final_prompt = engine.resolve_context(query)
+>       assert "Admin Token Bypass" in final_prompt
+E       AssertionError: assert 'Admin Token Bypass' in '=========================================================\nARGUS RESEARCH CONTEXT\n=========================================================\n\nCONTEXT STATUS: INSUFFICIENT_CONTEXT\nNo relevant research evidence found for this query.'
+
+tests/workspace/test_context.py:54: AssertionError
+------------------------------ Captured log call -------------------------------
+ERROR    argus.workspace.context.mission:mission.py:19 Failed to load mission m1: No checkpoint found for mission m1
+ERROR    argus.workspace.context.graph:graph.py:29 Failed to load mission m1: No checkpoint found for mission m1
+=============================== warnings summary ===============================
+argus/runtime/models.py:167
+  /home/varun/argus/argus/runtime/models.py:167: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class ToolExecutionContext(BaseModel):
+
+argus/agents/business_logic/tests/test_business_logic.py: 3 warnings
+argus/plugins/api/tests/test_api_intelligence.py: 1 warning
+argus/plugins/authentication/tests/test_authentication.py: 1 warning
+argus/plugins/file_upload/tests/test_file_upload.py: 1 warning
+tests/authorization/test_authorization_gate.py: 2 warnings
+tests/authorization/test_scope_resolver.py: 6 warnings
+tests/benchmark/ground_truth/test_engine.py: 2 warnings
+tests/benchmark/metrics/test_engine.py: 1 warning
+tests/benchmark/metrics/test_performance.py: 1 warning
+tests/benchmark/runner/test_artifacts.py: 1 warning
+tests/benchmark/runner/test_executor.py: 5 warnings
+tests/benchmark/runner/test_integration.py: 1 warning
+tests/benchmark/runner/test_pipeline.py: 1 warning
+tests/correlation/test_evidence_integration.py: 2 warnings
+tests/correlation/test_integration.py: 2 warnings
+tests/correlation/test_mission.py: 1 warning
+tests/explain/test_explain.py: 5 warnings
+tests/hypothesis/test_integration.py: 1 warning
+tests/investigation/test_investigation_integration.py: 6 warnings
+tests/investigation/test_priority.py: 2 warnings
+tests/learning/test_engine.py: 13 warnings
+tests/learning/test_feedback.py: 4 warnings
+tests/learning/test_history.py: 8 warnings
+tests/learning/test_integration.py: 11 warnings
+tests/learning/test_metrics.py: 11 warnings
+tests/learning/test_recommendations.py: 1 warning
+tests/orchestration/test_orchestrator.py: 4 warnings
+tests/planning/test_planning.py: 2 warnings
+tests/planning/test_research_planner.py: 19 warnings
+tests/plugins/graphql/test_business.py: 4 warnings
+tests/plugins/graphql/test_discovery.py: 8 warnings
+tests/plugins/graphql/test_reasoning.py: 4 warnings
+tests/plugins/graphql/test_schema.py: 8 warnings
+tests/plugins/javascript/test_agent.py: 2 warnings
+tests/plugins/javascript/test_discovery.py: 4 warnings
+tests/plugins/javascript/test_integration.py: 1 warning
+tests/plugins/javascript/test_plugin.py: 1 warning
+tests/runtime/test_mission_runtime.py: 4 warnings
+tests/runtime/test_runtime_orchestrator.py: 12 warnings
+tests/runtime/test_scheduler.py: 6 warnings
+tests/test_agents.py: 2 warnings
+tests/test_ai_research.py: 3 warnings
+tests/test_authorization.py: 5 warnings
+tests/test_authz_specialist.py: 2 warnings
+tests/test_business_root.py: 4 warnings
+tests/test_execution.py: 4 warnings
+tests/test_graph_root.py: 2 warnings
+tests/test_intelligence.py: 2 warnings
+tests/test_methodology.py: 3 warnings
+tests/test_runtime.py: 2 warnings
+tests/test_workflows.py: 1 warning
+tests/workspace/test_engine.py: 1 warning
+tests/workspace/test_graph_retrieval.py: 3 warnings
+tests/workspace/test_mission_context.py: 2 warnings
+  /home/varun/argus/argus/runtime/mission.py:80: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+argus/agents/business_logic/tests/test_business_logic.py: 3 warnings
+argus/plugins/api/tests/test_api_intelligence.py: 1 warning
+argus/plugins/authentication/tests/test_authentication.py: 1 warning
+argus/plugins/file_upload/tests/test_file_upload.py: 1 warning
+tests/authorization/test_authorization_gate.py: 2 warnings
+tests/authorization/test_scope_resolver.py: 6 warnings
+tests/benchmark/ground_truth/test_engine.py: 2 warnings
+tests/benchmark/metrics/test_engine.py: 1 warning
+tests/benchmark/metrics/test_performance.py: 1 warning
+tests/benchmark/runner/test_artifacts.py: 1 warning
+tests/benchmark/runner/test_executor.py: 5 warnings
+tests/benchmark/runner/test_integration.py: 1 warning
+tests/benchmark/runner/test_pipeline.py: 1 warning
+tests/correlation/test_evidence_integration.py: 2 warnings
+tests/correlation/test_integration.py: 2 warnings
+tests/correlation/test_mission.py: 1 warning
+tests/explain/test_explain.py: 5 warnings
+tests/hypothesis/test_integration.py: 1 warning
+tests/investigation/test_investigation_integration.py: 6 warnings
+tests/investigation/test_priority.py: 2 warnings
+tests/learning/test_engine.py: 13 warnings
+tests/learning/test_feedback.py: 4 warnings
+tests/learning/test_history.py: 8 warnings
+tests/learning/test_integration.py: 11 warnings
+tests/learning/test_metrics.py: 11 warnings
+tests/learning/test_recommendations.py: 1 warning
+tests/orchestration/test_orchestrator.py: 4 warnings
+tests/planning/test_planning.py: 2 warnings
+tests/planning/test_research_planner.py: 19 warnings
+tests/plugins/graphql/test_business.py: 4 warnings
+tests/plugins/graphql/test_discovery.py: 8 warnings
+tests/plugins/graphql/test_reasoning.py: 4 warnings
+tests/plugins/graphql/test_schema.py: 8 warnings
+tests/plugins/javascript/test_agent.py: 2 warnings
+tests/plugins/javascript/test_discovery.py: 4 warnings
+tests/plugins/javascript/test_integration.py: 1 warning
+tests/plugins/javascript/test_plugin.py: 1 warning
+tests/runtime/test_mission_runtime.py: 4 warnings
+tests/runtime/test_runtime_orchestrator.py: 12 warnings
+tests/runtime/test_scheduler.py: 6 warnings
+tests/test_agents.py: 2 warnings
+tests/test_ai_research.py: 3 warnings
+tests/test_authorization.py: 5 warnings
+tests/test_authz_specialist.py: 2 warnings
+tests/test_business_root.py: 4 warnings
+tests/test_execution.py: 4 warnings
+tests/test_graph_root.py: 2 warnings
+tests/test_intelligence.py: 2 warnings
+tests/test_methodology.py: 3 warnings
+tests/test_runtime.py: 2 warnings
+tests/test_workflows.py: 1 warning
+tests/workspace/test_engine.py: 1 warning
+tests/workspace/test_graph_retrieval.py: 3 warnings
+tests/workspace/test_mission_context.py: 2 warnings
+  /home/varun/argus/argus/runtime/mission.py:81: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    updated_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/benchmark/reports/test_generator.py::test_report_generator_summary
+tests/benchmark/reports/test_generator.py::test_historical_comparison
+tests/benchmark/reports/test_renderers.py::test_markdown_renderer
+tests/benchmark/reports/test_renderers.py::test_html_renderer
+tests/benchmark/reports/test_renderers.py::test_json_renderer
+tests/benchmark/reports/test_renderers.py::test_pdf_renderer
+  /home/varun/argus/argus/benchmark/reports/generator.py:78: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp=datetime.utcnow().isoformat(),
+
+tests/evidence/test_evidence.py: 6 warnings
+tests/orchestration/test_orchestrator.py: 1 warning
+tests/plugins/graphql/test_discovery.py: 10 warnings
+tests/plugins/graphql/test_schema.py: 15 warnings
+tests/plugins/javascript/test_discovery.py: 8 warnings
+tests/plugins/javascript/test_integration.py: 2 warnings
+  /home/varun/argus/argus/evidence/model.py:37: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/evidence/test_evidence.py: 6 warnings
+tests/orchestration/test_orchestrator.py: 1 warning
+tests/plugins/graphql/test_discovery.py: 10 warnings
+tests/plugins/graphql/test_schema.py: 15 warnings
+tests/plugins/javascript/test_discovery.py: 8 warnings
+tests/plugins/javascript/test_integration.py: 2 warnings
+  /home/varun/argus/argus/evidence/model.py:38: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    updated_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/evidence/test_evidence.py::test_evidence_manager_save_and_retrieve
+tests/evidence/test_evidence.py::test_evidence_manager_supersede
+tests/evidence/test_evidence.py::test_evidence_manager_supersede
+tests/evidence/test_evidence.py::test_evidence_manager_supersede
+tests/evidence/test_evidence.py::test_get_by_investigation
+tests/evidence/test_evidence.py::test_get_by_investigation
+tests/evidence/test_evidence.py::test_get_by_investigation
+tests/orchestration/test_orchestrator.py::test_execute_tool_step_in_scope
+  /home/varun/argus/argus/evidence/manager.py:22: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    evidence.updated_at = datetime.datetime.utcnow().isoformat()
+
+tests/orchestration/test_orchestrator.py::test_execute_tool_step_in_scope
+  /home/varun/argus/argus/orchestration/orchestrator.py:77: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    step.tool_execution.started_at = datetime.utcnow().isoformat()
+
+tests/orchestration/test_orchestrator.py::test_execute_tool_step_in_scope
+  /home/varun/argus/argus/orchestration/orchestrator.py:86: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    step.tool_execution.completed_at = datetime.utcnow().isoformat()
+
+tests/orchestration/test_orchestrator.py::test_execute_tool_step_in_scope
+  /home/varun/argus/argus/orchestration/orchestrator.py:103: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    workflow.updated_at = datetime.utcnow().isoformat()
+
+tests/plugins/graphql/test_discovery.py: 8 warnings
+tests/plugins/graphql/test_schema.py: 9 warnings
+  /home/varun/argus/argus/plugins/graphql/models.py:23: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    first_seen: Optional[str] = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/plugins/graphql/test_discovery.py: 8 warnings
+tests/plugins/graphql/test_schema.py: 9 warnings
+  /home/varun/argus/argus/plugins/graphql/models.py:24: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    last_seen: Optional[str] = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/runtime/test_mission_runtime.py: 11 warnings
+  /home/varun/argus/argus/runtime/state_machine.py:72: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now = datetime.utcnow().isoformat()
+
+tests/test_agents.py::test_scheduler_execution
+tests/test_agents.py::test_scheduler_execution
+tests/test_agents.py::test_scheduler_execution
+  /home/varun/argus/argus/agents/results.py:25: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/test_execution.py::test_engine_successful_execution
+tests/test_execution.py::test_engine_failure_handling
+tests/test_execution.py::test_validator_blocked
+tests/test_execution.py::test_step_validator_missing_input
+  /home/varun/argus/argus/execution/results.py:22: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    start_time: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/test_execution.py::test_engine_successful_execution
+tests/test_execution.py::test_engine_failure_handling
+tests/test_execution.py::test_validator_blocked
+  /home/varun/argus/argus/execution/results.py:13: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/test_execution.py::test_engine_successful_execution
+tests/test_execution.py::test_engine_failure_handling
+tests/test_execution.py::test_validator_blocked
+tests/test_execution.py::test_step_validator_missing_input
+  /home/varun/argus/argus/execution/engine.py:66: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    result.end_time = datetime.utcnow().isoformat()
+
+tests/test_knowledge.py: 10 warnings
+  /home/varun/argus/argus/knowledge/models.py:32: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/test_knowledge.py: 10 warnings
+  /home/varun/argus/argus/knowledge/models.py:33: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    updated_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/test_provenance.py::test_provenance_trace_lineage
+tests/test_provenance.py::test_provenance_trace_lineage
+tests/test_provenance.py::test_provenance_trace_lineage
+tests/test_provenance.py::test_provenance_trace_lineage
+tests/test_provenance.py::test_provenance_trace_lineage
+tests/test_provenance.py::test_provenance_unsupported_node
+  /home/varun/argus/argus/provenance/models.py:11: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/test_research_cards.py::test_research_queue_sorting
+tests/test_research_cards.py::test_research_queue_sorting
+tests/test_research_cards.py::test_research_queue_sorting
+tests/test_research_cards.py::test_research_queue_filtering
+tests/test_research_cards.py::test_research_queue_filtering
+tests/test_research_cards.py::test_research_queue_status_management
+tests/test_research_cards.py::test_research_queue_status_management
+tests/test_research_cards.py::test_research_queue_status_management
+  /home/varun/argus/argus/ai/models.py:60: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/workspace/test_api.py: 1 warning
+tests/workspace/test_engine.py: 5 warnings
+tests/workspace/test_graph_retrieval.py: 1 warning
+tests/workspace/test_models.py: 1 warning
+tests/workspace/test_planner.py: 4 warnings
+tests/workspace/test_repository.py: 2 warnings
+  /home/varun/argus/argus/workspace/models.py:87: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/workspace/test_api.py: 1 warning
+tests/workspace/test_engine.py: 5 warnings
+tests/workspace/test_graph_retrieval.py: 1 warning
+tests/workspace/test_models.py: 1 warning
+tests/workspace/test_planner.py: 4 warnings
+tests/workspace/test_repository.py: 2 warnings
+  /home/varun/argus/argus/workspace/models.py:88: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    updated_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/workspace/test_api.py: 1 warning
+tests/workspace/test_engine.py: 5 warnings
+tests/workspace/test_graph_retrieval.py: 1 warning
+tests/workspace/test_models.py: 1 warning
+tests/workspace/test_planner.py: 4 warnings
+tests/workspace/test_repository.py: 2 warnings
+  /home/varun/argus/argus/workspace/models.py:89: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    last_message_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/workspace/test_api.py::test_api_conversations
+  /home/varun/argus/argus/workspace/api.py:64: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    conv.archived_at = datetime.datetime.utcnow().isoformat()
+
+tests/workspace/test_api.py::test_api_conversations
+  /home/varun/argus/argus/workspace/api.py:68: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    conv.updated_at = datetime.datetime.utcnow().isoformat()
+
+tests/workspace/test_engine.py: 9 warnings
+tests/workspace/test_graph_retrieval.py: 1 warning
+tests/workspace/test_models.py: 1 warning
+tests/workspace/test_planner.py: 4 warnings
+tests/workspace/test_repository.py: 1 warning
+  /home/varun/argus/argus/workspace/models.py:62: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/workspace/test_engine.py::test_add_user_message
+tests/workspace/test_engine.py::test_generate_response
+tests/workspace/test_engine.py::test_generate_multimodal_response
+tests/workspace/test_engine.py::test_evidence_citations_extracted
+tests/workspace/test_engine.py::test_mission_context_integration
+  /home/varun/argus/argus/workspace/engine.py:25: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    conversation.last_message_at = datetime.datetime.utcnow().isoformat()
+
+tests/workspace/test_engine.py::test_generate_response
+tests/workspace/test_engine.py::test_generate_multimodal_response
+tests/workspace/test_engine.py::test_evidence_citations_extracted
+tests/workspace/test_engine.py::test_mission_context_integration
+  /home/varun/argus/argus/workspace/engine.py:86: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    conversation.last_message_at = datetime.datetime.utcnow().isoformat()
+
+tests/workspace/test_engine.py::test_generate_multimodal_response
+tests/workspace/test_models.py::test_models_creation
+tests/workspace/test_vision.py::test_vision_pipeline
+  /home/varun/argus/argus/workspace/models.py:36: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED argus/agents/business_logic/tests/test_business_logic.py::test_workflow_discovery
+FAILED argus/agents/business_logic/tests/test_business_logic.py::test_business_rule_extraction
+FAILED argus/agents/business_logic/tests/test_business_logic.py::test_business_logic_specialist_run
+FAILED argus/plugins/api/tests/test_api_intelligence.py::test_relationship_inferencer
+FAILED argus/plugins/api/tests/test_api_intelligence.py::test_api_intelligence_plugin
+FAILED argus/plugins/file_upload/tests/test_file_upload.py::test_file_upload_intelligence_plugin
+FAILED argus/plugins/graphql/tests/test_graphql.py::test_graphql_specialist_discover
+FAILED tests/benchmark/test_framework.py::test_benchmark_runner_recall_logic
+FAILED tests/benchmark/test_framework.py::test_benchmark_run_mocked - Attribu...
+FAILED tests/plugins/graphql/test_discovery.py::test_mission_storage_and_observation
+FAILED tests/plugins/javascript/test_agent.py::test_javascript_specialist_generate_investigations
+FAILED tests/plugins/javascript/test_plugin.py::test_javascript_plugin_execute
+FAILED tests/runtime/test_runtime_orchestrator.py::TestOrchestratorIntegrations::test_scheduler_integration
+FAILED tests/runtime/test_scheduler.py::TestSchedulerDependencies::test_dependency_resolution_blocks_tasks
+FAILED tests/runtime/test_scheduler.py::TestSchedulerDependencies::test_completing_dependency_unblocks_task
+FAILED tests/runtime/test_scheduler.py::TestSchedulerConcurrency::test_parallel_scheduling_respects_max_workers
+FAILED tests/runtime/test_scheduler.py::TestRetryPolicy::test_task_retries_on_failure
+FAILED tests/runtime/test_scheduler.py::TestRetryPolicy::test_task_fails_terminally_after_max_retries
+FAILED tests/runtime/test_scheduler.py::TestEventEmission::test_events_emitted_on_lifecycle_changes
+FAILED tests/test_ai_research.py::test_context_builder - KeyError: 'Mission T...
+FAILED tests/test_ai_research.py::test_prompt_builder - IndexError: list inde...
+FAILED tests/test_ai_research.py::test_researcher_integration - IndexError: l...
+FAILED tests/test_authorization.py::test_ownership_chains - TypeError: Workfl...
+FAILED tests/test_authorization.py::test_authorization_boundaries - TypeError...
+FAILED tests/test_authz_specialist.py::test_role_analyzer - AssertionError: a...
+FAILED tests/test_authz_specialist.py::test_ownership_analyzer - TypeError: A...
+FAILED tests/test_execution.py::test_validator_blocked - AssertionError: asse...
+FAILED tests/test_graph_root.py::TestKnowledgeGraphBuilder::test_empty_mission
+FAILED tests/test_intelligence.py::test_intelligence_engine - AssertionError:...
+FAILED tests/test_runtime.py::test_mission_lifecycle_transitions - AttributeE...
+FAILED tests/test_runtime.py::test_mission_checkpointing - AttributeError: ty...
+FAILED tests/test_runtime.py::test_mission_scheduler_phases - AttributeError:...
+FAILED tests/test_workflows.py::test_authorization_attachment - assert 0 == 1
+FAILED tests/test_workflows.py::test_mission_integration - AttributeError: 'A...
+FAILED tests/workspace/test_context.py::test_research_context_engine - Assert...
+================= 35 failed, 394 passed, 683 warnings in 5.15s =================

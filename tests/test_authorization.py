@@ -41,13 +41,13 @@ def test_role_hierarchy_inference():
 
 def test_ownership_chains():
     mission = Mission(target="test")
-    wf1 = Workflow(name="Organization Management")
+    wf1 = Workflow(name="Organization Management", description="Manage organizations")
     wf1.steps.append(WorkflowStep(title="Create Org", endpoint="/orgs", http_method="POST", business_object="Organization"))
     
-    wf2 = Workflow(name="Project Creation")
+    wf2 = Workflow(name="Project Creation", description="Manage projects")
     wf2.steps.append(WorkflowStep(title="Create Project", endpoint="/projects", http_method="POST", business_object="Project"))
     
-    wf3 = Workflow(name="Repository Management")
+    wf3 = Workflow(name="Repository Management", description="Manage repositories")
     wf3.steps.append(WorkflowStep(title="Create Repo", endpoint="/repos", http_method="POST", business_object="Repository"))
     
     mission.workflows = [wf1, wf2, wf3]
@@ -78,7 +78,7 @@ def test_empty_mission():
 
 def test_authorization_boundaries():
     mission = Mission(target="test")
-    wf = Workflow(name="Settings")
+    wf = Workflow(name="Settings", description="Manage settings")
     wf.steps.append(WorkflowStep(title="Update Settings", endpoint="/settings", http_method="PUT", required_role="Admin", business_object="Settings"))
     mission.workflows = [wf]
     

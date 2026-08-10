@@ -13,7 +13,7 @@ class ExecutionValidator:
         # For simplicity in mock, just check if list is empty if they require something
         if plan.required_evidence and not mission_evidence and "mock" not in plan.title.lower():
             # Not strictly enforcing in dummy runs, but in reality we'd check keys
-            pass 
+            return False
         return True
 
     @staticmethod

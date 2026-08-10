@@ -19,6 +19,8 @@ class ProvenanceData:
     observation_id: str = ""
     original_ai_description: str = ""
     corrected_by_user: bool = False
+    workflow_id: str = ""
+    step_id: str = ""
     
 @dataclass(slots=True)
 class Evidence:

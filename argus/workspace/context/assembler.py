@@ -16,7 +16,12 @@ class ContextAssembler:
             parts.append("No relevant research evidence found for this query.")
             return "\n".join(parts)
             
-        parts.append(f"CONTEXT STATUS: {result.context_status}\n")
+        parts.append(f"CONTEXT STATUS: {result.context_status}")
+        if getattr(result, "user_permission_state", None):
+            parts.append(f"USER PERMISSION STATE: {result.user_permission_state}")
+        if getattr(result, "authorization_scope", None):
+            parts.append(f"AUTHORIZATION SCOPE: {result.authorization_scope}")
+        parts.append("")
         
         # Group sources
         observations = [s for s in result.sources if s.semantic_status == "OBSERVATION"]
@@ -24,6 +29,29 @@ class ContextAssembler:
         hypotheses = [s for s in result.sources if s.semantic_status == "HYPOTHESIS"]
         findings = [s for s in result.sources if s.semantic_status == "FINDING"]
         graph = [s for s in result.sources if s.semantic_status == "KNOWLEDGE_GRAPH"]
+        
+        # New semantic states
+        mission_states = [s for s in result.sources if s.semantic_status == "MISSION_STATE"]
+        scopes = [s for s in result.sources if s.semantic_status == "SCOPE"]
+        investigations = [s for s in result.sources if s.semantic_status == "INVESTIGATION_STATE"]
+        
+        if mission_states:
+            parts.append("### ACTIVE MISSION STATE")
+            for m in mission_states:
+                parts.append(m.content)
+            parts.append("\n")
+            
+        if scopes:
+            parts.append("### AUTHORIZED SCOPE")
+            for sc in scopes:
+                parts.append(sc.content)
+            parts.append("\n")
+            
+        if investigations:
+            parts.append("### ACTIVE INVESTIGATION")
+            for i in investigations:
+                parts.append(i.content)
+            parts.append("\n")
         
         if observations:
             parts.append("### RELEVANT OBSERVATIONS (Unconfirmed Facts)")

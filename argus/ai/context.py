@@ -38,7 +38,7 @@ class ContextBuilder:
                 "Technologies": getattr(mission, "technologies", []),
                 "Authentication": f"Auth Type: {mission.authentication.authentication_type}, Token Type: {mission.authentication.token_type}" if getattr(mission, "authentication", None) and mission.authentication.authentication_type else "None detected.",
             },
-            "Business Objects": [bo.name for bo in getattr(mission, "business_objects", [])] if hasattr(mission, 'business_objects') and hasattr(mission.business_objects[0], 'name') else getattr(mission, "business_objects", []),
+            "Business Objects": [bo.name for bo in getattr(mission, "business_objects", [])] if hasattr(mission, 'business_objects') and getattr(mission, 'business_objects', []) and hasattr(mission.business_objects[0], 'name') else getattr(mission, "business_objects", []),
             "Workflow Summary": workflow_summary,
             "Authorization Summary": auth_summary,
             "Evidence": len(getattr(mission, "evidence", [])),

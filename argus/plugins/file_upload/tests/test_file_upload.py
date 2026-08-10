@@ -9,7 +9,7 @@ def test_file_upload_intelligence_plugin():
         {"path": "/api/upload/avatar", "method": "POST"},
         {"path": "/api/import/csv", "method": "POST"},
         {"path": "/api/attachments/upload", "method": "POST"},
-        {"path": "/api/tmp/download", "method": "GET"}
+        {"path": "/api/tmp/upload", "method": "POST"}
     ]
     
     plugin = FileUploadPlugin()

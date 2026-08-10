@@ -291,7 +291,8 @@ class JavaScriptSpecialist:
             new_invs.append(inv)
 
         # Add all to mission investigations and priority queue
-        mission.investigations.extend(new_invs)
+        for inv in new_invs:
+            mission.investigations.add(inv)
         if hasattr(mission, "priority_queue"):
             mission.priority_queue.extend(new_invs)
         

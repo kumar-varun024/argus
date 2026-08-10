@@ -37,6 +37,7 @@
         .status-failed { color: #F44336; }
         .status-pending { color: #FFC107; }
     </style>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 </head>
 <body>
 
@@ -147,6 +148,17 @@
             </div>
         </div>
         
+        <!-- Graph Viewer Modal -->
+        <div id="graph-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1200; justify-content:center; align-items:center;">
+            <div style="background:#252526; width:90%; height:90%; border-radius:8px; display:flex; flex-direction:column;">
+                <div style="padding:20px; border-bottom:1px solid #3c3c3c; display:flex; justify-content:space-between; align-items:center;">
+                    <h3 style="margin:0; color:#007acc;">Knowledge Graph</h3>
+                    <span onclick="document.getElementById('graph-modal').style.display='none'" style="color:white; font-size:30px; cursor:pointer;">&times;</span>
+                </div>
+                <div id="graph-network" style="flex-grow:1; background:#1e1e1e;"></div>
+            </div>
+        </div>
+        
         <form class="chat-input" action="/chat" method="post" enctype="multipart/form-data">
             <input type="hidden" name="cid" value="{{ conversation.conversation_id }}">
             <input type="file" name="image" accept="image/*" title="Upload Evidence">
@@ -158,11 +170,40 @@
     <div class="context-panel">
         <div class="panel-section">
             <h3>Current Mission</h3>
-            <p style="font-size: 0.9em; color: #a0a0a0;">No active mission selected.</p>
+            <p style="font-size: 0.9em; color: #a0a0a0;">
+                {% if conversation.current_context.mission_name %}
+                    <strong>{{ conversation.current_context.mission_name }}</strong><br>
+                    Target: {{ conversation.current_context.mission_target }}
+                {% else %}
+                    No active mission selected.
+                {% endif %}
+            </p>
         </div>
         <div class="panel-section">
             <h3>Current Scope</h3>
-            <p style="font-size: 0.9em; color: #a0a0a0;">Unconstrained Research</p>
+            <p style="font-size: 0.9em; color: #a0a0a0;">
+                {% if conversation.current_context.mission_scope %}
+                    {{ conversation.current_context.mission_scope }}
+                {% else %}
+                    Unconstrained Research
+                {% endif %}
+            </p>
+        </div>
+        <div class="panel-section">
+            <h3>Active Investigation</h3>
+            <p style="font-size: 0.9em; color: #a0a0a0;">
+                {% if conversation.current_context.investigation_title %}
+                    {{ conversation.current_context.investigation_title }}
+                {% else %}
+                    None selected.
+                {% endif %}
+            </p>
+        </div>
+        <div class="panel-section">
+            <h3>Knowledge Graph</h3>
+            <button onclick="openGraphModal()" style="width:100%; padding:10px; background:#4CAF50; color:white; border:none; border-radius:4px; cursor:pointer;">
+                View Graph
+            </button>
         </div>
         <div class="panel-section">
             <h3>Relevant Evidence</h3>
@@ -279,6 +320,55 @@
         document.getElementById('search-box').addEventListener('input', (e) => {
             loadHistory(e.target.value);
         });
+
+        let network = null;
+        async function openGraphModal() {
+            const invId = "{{ conversation.investigation_id }}";
+            const missionId = "{{ conversation.mission_id }}";
+            if (!missionId) {
+                alert("No active mission to load graph.");
+                return;
+            }
+            
+            document.getElementById('graph-modal').style.display = 'flex';
+            
+            try {
+                const res = await fetch(`/api/investigations/${invId || 'default'}/graph?mission_id=${missionId}`);
+                if (!res.ok) {
+                    throw new Error("Failed to load graph data");
+                }
+                const data = await res.json();
+                
+                const container = document.getElementById('graph-network');
+                const graphData = {
+                    nodes: new vis.DataSet(data.nodes),
+                    edges: new vis.DataSet(data.edges)
+                };
+                const options = {
+                    nodes: {
+                        shape: 'dot',
+                        size: 16,
+                        font: { color: '#ffffff' }
+                    },
+                    edges: {
+                        color: { color: '#888888', highlight: '#007acc' },
+                        font: { color: '#a0a0a0', size: 12, align: 'top' },
+                        arrows: { to: { enabled: true, scaleFactor: 0.5 } }
+                    },
+                    physics: {
+                        barnesHut: { gravitationalConstant: -2000, centralGravity: 0.3, springLength: 95 }
+                    }
+                };
+                
+                if (network) {
+                    network.destroy();
+                }
+                network = new vis.Network(container, graphData, options);
+            } catch (err) {
+                console.error(err);
+                alert(err.message);
+            }
+        }
 
         loadHistory();
     </script>

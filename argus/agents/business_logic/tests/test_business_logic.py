@@ -11,8 +11,8 @@ from argus.intelligence.models import Investigation
 def test_workflow_discovery():
     builder = StateMachineBuilder()
     wf = Workflow(name="Order Lifecycle", description="")
-    wf.steps.append(WorkflowStep(title="Draft", endpoint="/order", expected_state="Draft"))
-    wf.steps.append(WorkflowStep(title="Submit", endpoint="/order", expected_state="Submitted"))
+    wf.steps.append(WorkflowStep(title="Draft", endpoint="/order", http_method="POST", expected_state="Draft"))
+    wf.steps.append(WorkflowStep(title="Submit", endpoint="/order", http_method="POST", expected_state="Submitted"))
     
     context = BusinessLogicContext(mission_id="1", target="test", workflows=[wf])
     machines = builder.extract(context)
@@ -24,7 +24,7 @@ def test_workflow_discovery():
 
 def test_business_rule_extraction():
     analyzer = WorkflowAnalyzer()
-    wf1 = Workflow(name="Refund")
+    wf1 = Workflow(name="Refund", description="Refund wf")
     wf1.dependencies = ["Payment"]
     
     context = BusinessLogicContext(mission_id="1", target="test", workflows=[wf1])
@@ -36,8 +36,8 @@ def test_business_rule_extraction():
 
 def test_business_logic_specialist_run():
     mission = Mission(target="test.local")
-    wf1 = Workflow(name="Checkout Workflow")
-    wf1.steps = [WorkflowStep(title="S1", endpoint="/1"), WorkflowStep(title="S2", endpoint="/2"), WorkflowStep(title="S3", endpoint="/3")]
+    wf1 = Workflow(name="Checkout Workflow", description="Checkout wf")
+    wf1.steps = [WorkflowStep(title="S1", endpoint="/1", http_method="GET"), WorkflowStep(title="S2", endpoint="/2", http_method="POST"), WorkflowStep(title="S3", endpoint="/3", http_method="POST")]
     wf1.dependencies = ["Login Workflow"]
     
     mission.workflows.append(wf1)

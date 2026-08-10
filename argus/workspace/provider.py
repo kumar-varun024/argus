@@ -41,6 +41,7 @@ class MockModelProvider(AIModelProvider):
         return len(text.split())
         
     def generate(self, messages: List[Message], system_prompt: str = "", **kwargs) -> str:
+        self.last_system_prompt = system_prompt
         base_resp = "This is a mocked response from the Argus MockModelProvider."
         if "CITATIONS" in system_prompt:
             base_resp += " Here is an evidence reference: [Evidence #test-id]"

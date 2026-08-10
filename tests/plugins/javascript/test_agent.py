@@ -31,9 +31,9 @@ def test_javascript_specialist_generate_investigations():
     
     # 7 investigations should have been generated
     assert len(mission.javascript.investigations) == 7
-    assert len(mission.investigations) == 7
+    assert len(mission.investigations.get_all()) == 7
     
-    titles = [i.title for i in mission.investigations]
+    titles = [i.title for i in mission.investigations.get_all()]
     assert "Hidden Admin Route Review" in titles
     assert "Hidden API Review" in titles
     assert "Feature Flag Review" in titles
@@ -43,7 +43,7 @@ def test_javascript_specialist_generate_investigations():
     assert "WebSocket Security Review" in titles
     
     # Ensure no vulnerabilities were explicitly claimed
-    for inv in mission.investigations:
+    for inv in mission.investigations.get_all():
         assert "vulnerabilit" not in inv.description.lower()
         assert "vulnerabilit" not in inv.reasoning.lower()
         

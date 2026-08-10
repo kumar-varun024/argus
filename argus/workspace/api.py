@@ -177,7 +177,16 @@ def create_evidence(req: EvidenceCreate):
         provenance=prov
     )
     
-    return evidence_manager.save(ev)
+    saved_ev = evidence_manager.save(ev)
+    
+    try:
+        conv = repository.get(req.conversation_id)
+        if conv:
+            _extract_and_ingest_graph(saved_ev, req, conv)
+    except Exception as e:
+        print(f"Graph ingestion failed: {e}")
+        
+    return saved_ev
 
 @router.get("/investigations/{investigation_id}/evidence")
 def get_investigation_evidence(investigation_id: str):
@@ -197,4 +206,218 @@ def review_evidence(evidence_id: str, new_description: str = Query(...)):
     ev.status = "USER_REVIEWED"
     
     return evidence_manager.save(ev)
+
+# --- MISSION / CONVERSATION INTEGRATION ---
+
+class InvestigationSwitchRequest(BaseModel):
+    investigation_id: str
+
+@router.get("/missions/{mission_id}/conversations")
+def get_mission_conversations(mission_id: str):
+    """List conversations belonging to a mission."""
+    all_convs = repository.search(user_id=None, include_archived=True)
+    return [c for c in all_convs if getattr(c, 'mission_id', '') == mission_id]
+
+@router.post("/missions/{mission_id}/conversations")
+def create_mission_conversation(mission_id: str, conv: Conversation):
+    """Create a new conversation for a mission."""
+    conv.mission_id = mission_id
+    repository.save(conv)
+    return conv
+
+@router.post("/conversations/{conversation_id}/switch-investigation")
+def switch_investigation(conversation_id: str, req: InvestigationSwitchRequest):
+    """Switches the active investigation for a conversation."""
+    conv = repository.get(conversation_id)
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    conv.investigation_id = req.investigation_id
+    conv.updated_at = datetime.datetime.utcnow().isoformat()
+    repository.save(conv)
+    return conv
+
+# --- GRAPH INTEGRATION ---
+
+import re
+from argus.graph.graph import KnowledgeGraph
+from argus.graph.node import Node
+from argus.runtime.manager import mission_manager
+from argus.graph.builder import KnowledgeGraphBuilder
+
+def _extract_and_ingest_graph(ev: Evidence, req: EvidenceCreate, conversation: Conversation):
+    if not conversation.mission_id:
+        return
+        
+    mission = mission_manager.get_mission(conversation.mission_id)
+    if not mission: return
+    
+    graph = getattr(mission, "graph", None)
+    if not graph:
+        KnowledgeGraphBuilder().build(mission)
+        graph = mission.graph
+        
+    status = "USER_CONFIRMED" if ev.created_by == "USER_PROVIDED" else "AI_INFERRED"
+    
+    text = f"{ev.title} {ev.description}"
+    
+    # 1. Endpoint extraction
+    endpoints = re.findall(r"(?:GET|POST|PUT|DELETE|PATCH)?\s*(/[a-zA-Z0-9_\-\./]+)", text)
+    # 2. URLs
+    urls = re.findall(r"https?://[a-zA-Z0-9_\-\.]+", text)
+    
+    ev_node_id = f"ev_{ev.id}"
+    ev_node = graph.get(ev_node_id)
+    if not ev_node:
+        ev_node = Node(id=ev_node_id, type="Evidence", value=ev.title, metadata={"evidence_id": ev.id})
+        graph.add(ev_node)
+        
+    for ep in set(endpoints):
+        ep = ep.strip()
+        if len(ep) < 2: continue
+        ep_id = f"ep_{ep}"
+        ep_node = graph.get(ep_id)
+        if not ep_node:
+            ep_node = Node(id=ep_id, type="Endpoint", value=ep)
+            graph.add(ep_node)
+            
+        graph.connect(ep_id, ev_node_id, "OBSERVED_IN", metadata={"status": status, "provenance": f"conv_{req.conversation_id}"})
+        
+    for url in set(urls):
+        url_id = f"url_{url}"
+        url_node = graph.get(url_id)
+        if not url_node:
+            url_node = Node(id=url_id, type="URL", value=url)
+            graph.add(url_node)
+            
+        graph.connect(url_id, ev_node_id, "OBSERVED_IN", metadata={"status": status, "provenance": f"conv_{req.conversation_id}"})
+
+@router.get("/investigations/{investigation_id}/graph")
+def get_investigation_graph(investigation_id: str, mission_id: str = Query(...)):
+    """Returns the graph nodes and edges for visualization."""
+    mission = mission_manager.get_mission(mission_id)
+    if not mission:
+        raise HTTPException(status_code=404, detail="Mission not found")
+        
+    graph = getattr(mission, "graph", None)
+    if not graph:
+        return {"nodes": [], "edges": []}
+        
+    nodes = [{"id": n.id, "label": n.value, "group": n.type} for n in graph.all()]
+    edges = [{"from": e.source, "to": e.target, "label": e.type, "title": e.metadata.get("status", "")} for e in graph.edges]
+    return {"nodes": nodes, "edges": edges}
+
+@router.post("/graph/entities/{edge_id}/review")
+def review_graph_relationship(edge_id: str, action: str = Query(...)): # action = accept/reject
+    # In a real app we'd identify the exact edge. 
+    # For now, this is a stub for the planner's capability.
+    return {"status": f"Edge {edge_id} {action}ed"}
+
+# --- AUTHORIZATION & SCOPE ---
+
+@router.get("/missions/{mission_id}/scope")
+def get_mission_scope(mission_id: str):
+    """Returns the active scope rules for a mission."""
+    mission = mission_manager.get_mission(mission_id)
+    if not mission:
+        raise HTTPException(status_code=404, detail="Mission not found")
+    return {"scope": mission.scope}
+
+@router.post("/missions/{mission_id}/scope/check")
+def check_mission_scope(mission_id: str, target: str = Query(...)):
+    """Checks if a target is authorized under the mission scope."""
+    from argus.authorization.scope import ScopeResolver
+    decision = ScopeResolver().check_scope(target, mission_id)
+    return {
+        "target": decision.target,
+        "decision": decision.decision.value,
+        "matched_rule": decision.matched_rule,
+        "explanation": ScopeResolver().explain_scope_decision(decision)
+    }
+
+@router.get("/missions/{mission_id}/permissions")
+def get_mission_permissions(mission_id: str, user_id: str = "system_user"):
+    """Returns permission state for the current user."""
+    from argus.authorization.gate import authorization_gate
+    perm = authorization_gate.can_access_mission(user_id, mission_id)
+    return {"allowed": perm.allowed, "reason": perm.reason}
+
+@router.post("/missions/{mission_id}/authorize-action")
+def authorize_mission_action(mission_id: str, action: str = Query(...), target: str = Query(...), user_id: str = "system_user"):
+    """Centralized authorization gate for taking actions on targets."""
+    from argus.authorization.gate import authorization_gate
+    auth = authorization_gate.can_execute_action(user_id, action, target, mission_id)
+    scope_data = None
+    if auth.scope_decision:
+        scope_data = {
+            "decision": auth.scope_decision.decision.value,
+            "matched_rule": auth.scope_decision.matched_rule
+        }
+    return {
+        "allowed": auth.allowed,
+        "reason": auth.reason,
+        "scope": scope_data
+    }
+
+# --- ORCHESTRATION WORKFLOW ---
+
+from argus.orchestration.orchestrator import ResearchWorkflowOrchestrator
+from argus.orchestration.models import ResearchStep
+from argus.orchestration.planner import WorkflowPlanner
+
+orchestrator = ResearchWorkflowOrchestrator()
+workflow_planner = WorkflowPlanner()
+
+@router.get("/investigations/{investigation_id}/workflow")
+def get_workflow(investigation_id: str, mission_id: str = Query(...)):
+    """Returns the active workflow for an investigation, or creates one if it doesn't exist."""
+    # Find existing workflow
+    for wf in orchestrator._workflows.values():
+        if wf.investigation_id == investigation_id:
+            return wf
+            
+    # Create new
+    return orchestrator.create_workflow(investigation_id, mission_id)
+
+@router.post("/investigations/{investigation_id}/workflow/plan")
+def plan_workflow_steps(investigation_id: str, mission_id: str = Query(...)):
+    """Plans the next logical steps for an investigation."""
+    wf = get_workflow(investigation_id, mission_id)
+    steps = workflow_planner.generate_candidate_steps(investigation_id)
+    ranked = workflow_planner.rank_candidate_steps(steps)
+    
+    # Just take top 1 for now
+    if ranked:
+        orchestrator.plan_next_step(wf.id, ranked[0])
+    
+    return wf
+
+@router.post("/workflow/steps/{step_id}/execute")
+def execute_workflow_step(step_id: str, workflow_id: str = Query(...), user_id: str = "system_user"):
+    return orchestrator.execute_step(workflow_id, step_id, user_id)
+
+@router.post("/workflow/steps/{step_id}/pause")
+def pause_workflow(step_id: str, workflow_id: str = Query(...)):
+    wf = orchestrator.get_workflow(workflow_id)
+    if not wf:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    wf.is_paused = True
+    orchestrator._record_event(wf, "WORKFLOW_PAUSED", f"Workflow paused at step {step_id}")
+    return wf
+
+@router.post("/workflow/steps/{step_id}/resume")
+def resume_workflow(step_id: str, workflow_id: str = Query(...)):
+    wf = orchestrator.get_workflow(workflow_id)
+    if not wf:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    wf.is_paused = False
+    orchestrator._record_event(wf, "WORKFLOW_RESUMED", f"Workflow resumed at step {step_id}")
+    return wf
+
+@router.get("/workflow/{workflow_id}/timeline")
+def get_workflow_timeline(workflow_id: str):
+    wf = orchestrator.get_workflow(workflow_id)
+    if not wf:
+        raise HTTPException(status_code=404, detail="Workflow not found")
+    return wf.events
 

@@ -7,5 +7,7 @@ def test_graphql_specialist_initialization():
 
 def test_graphql_specialist_discover():
     specialist = GraphQLSpecialist()
-    specialist.discover()
+    from argus.runtime.mission import Mission
+    mission = Mission(target="test")
+    specialist.discover(mission)
     assert True

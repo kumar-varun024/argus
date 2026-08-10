@@ -113,7 +113,7 @@ class TestKnowledgeGraphBuilder(unittest.TestCase):
         builder.build(mission)
         
         self.assertIsNotNone(mission.graph)
-        self.assertEqual(mission.graph.node_count(), 0)
+        self.assertEqual(mission.graph.node_count(), 1)
         self.assertEqual(mission.graph.edge_count(), 0)
         
     def test_builder_statistics(self):

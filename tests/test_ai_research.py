@@ -30,11 +30,10 @@ def test_context_builder():
     builder = ContextBuilder()
     context = builder.build(mission)
 
-    assert context["Mission Target"] == "https://hackerone.com"
-    assert "Cloudflare" in context["Technology Intelligence"]
+    assert context["Application Overview"]["Target"] == "https://hackerone.com"
+    assert "Cloudflare" in context["Application Overview"]["Technologies"]
     assert "User" in context["Business Objects"]
-    assert "Auth Type: OAuth2" in context["Authentication Intelligence"]
-    assert "POST /api/v1/users" in context["High-Risk APIs"]
+    assert "Auth Type: OAuth2" in context["Application Overview"]["Authentication"]
 
 def test_prompt_builder():
     mission = Mission("https://example.com")

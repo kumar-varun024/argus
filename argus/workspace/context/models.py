@@ -41,4 +41,6 @@ class ContextResult:
     sources: List[ContextSource] = field(default_factory=list)
     context_status: str = "OK"  # 'INSUFFICIENT_CONTEXT', 'CONTRADICTORY_EVIDENCE', 'OK'
     status_reason: str = ""
+    user_permission_state: str = ""
+    authorization_scope: str = ""
     metadata: Dict[str, Any] = field(default_factory=dict)

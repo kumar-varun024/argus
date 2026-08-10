@@ -46,3 +46,22 @@ def test_evidence_citations_extracted():
     assert len(resp.references) == 1
     assert resp.references[0].ref_id == "test-id"
     assert resp.references[0].ref_type == "evidence"
+
+def test_mission_context_integration():
+    from argus.runtime.manager import mission_manager
+    mission = mission_manager.create_mission("test_target.com")
+    mission.name = "Integration Test Mission"
+    mission.scope = ["test_target.com"]
+    
+    engine = ConversationEngine(provider=MockModelProvider())
+    conv = Conversation(mission_id=mission.id)
+    
+    # We want to intercept the context assembly or rely on the MockModelProvider
+    # MockModelProvider stores the last system prompt. We can check if "Integration Test Mission" is in it.
+    engine.add_user_message(conv, "what is the mission?")
+    engine.generate_response(conv)
+    
+    # Check that the provider received the mission name in the context
+    last_prompt = engine.provider.last_system_prompt
+    assert "Integration Test Mission" in last_prompt
+    assert "test_target.com" in last_prompt

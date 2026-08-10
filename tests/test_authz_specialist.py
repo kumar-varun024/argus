@@ -9,7 +9,7 @@ from argus.agents.authorization.ownership import OwnershipAnalyzer
 from argus.agents.authorization.heuristics import AUTHZ_HEURISTIC_REGISTRY, BaseAuthzHeuristic, AuthzHeuristicResult
 from argus.intelligence.models import Investigation
 from argus.authorization.graph import AuthorizationGraph
-from argus.authorization.models import AuthNodeType, AuthNode, AuthEdge
+from argus.authorization.models import AuthNodeType, AuthNode, AuthEdge, AuthEdgeType
 
 def test_authz_specialist_initialization():
     specialist = AuthorizationSpecialist()
@@ -52,8 +52,8 @@ def test_role_analyzer():
     
     # Hierarchy analysis
     overlaps = analyzer.get_overlapping_roles(context)
-    # Admin -> Admin_Support, Admin -> Admin_Billing, Admin -> Admin_L1, Admin_Support -> Admin_L1
-    assert len(overlaps) == 4
+    # Admin -> Admin_Support, Admin -> Admin_Billing, Admin_Support -> Admin_L1
+    assert len(overlaps) == 3
 
 def test_permission_analyzer():
     analyzer = PermissionAnalyzer()
@@ -74,11 +74,11 @@ def test_ownership_analyzer():
     
     # Mocking graph behavior for ownership analyzer
     graph = AuthorizationGraph()
-    n1 = AuthNode(name="User", node_type=AuthNodeType.IDENTITY)
-    n2 = AuthNode(name="Document", node_type=AuthNodeType.PROTECTED_RESOURCE)
+    n1 = AuthNode(id="User", name="User", node_type=AuthNodeType.IDENTITY)
+    n2 = AuthNode(id="Document", name="Document", node_type=AuthNodeType.PROTECTED_RESOURCE)
     graph.add_node(n1)
     graph.add_node(n2)
-    graph.add_edge(AuthEdge(source="User", target="Document", relation="owns"))
+    graph.add_edge(AuthEdge(source_id="User", target_id="Document", edge_type=AuthEdgeType.OWNS))
     
     context = AuthzContext(mission_id="t", target="t", graph=graph)
     cross_tenant = analyzer.get_cross_tenant_objects(context)

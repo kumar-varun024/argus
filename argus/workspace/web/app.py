@@ -25,6 +25,8 @@ repository = ConversationRepository()
 storage = AttachmentStorage()
 vision = VisionPipeline()
 
+from argus.runtime.manager import mission_manager
+
 @app.get("/", response_class=HTMLResponse)
 async def get_workspace(request: Request, cid: str = None):
     """Renders the main conversational workspace UI."""
@@ -36,6 +38,20 @@ async def get_workspace(request: Request, cid: str = None):
         # For simplicity, if no ID provided, just create a new one but don't save until message sent
         conversation = Conversation(title="New Conversation")
         
+    if conversation.mission_id:
+        try:
+            mission = mission_manager.get_mission(conversation.mission_id)
+            conversation.current_context['mission_name'] = mission.name
+            conversation.current_context['mission_target'] = mission.target
+            conversation.current_context['mission_scope'] = ", ".join(mission.scope) if mission.scope else "Unconstrained Research"
+            
+            if conversation.investigation_id:
+                inv = mission.investigations.get(conversation.investigation_id)
+                if inv:
+                    conversation.current_context['investigation_title'] = inv.title
+        except Exception as e:
+            pass
+            
     return templates.TemplateResponse("workspace.html", {
         "request": request, 
         "conversation": conversation

@@ -1,0 +1,199 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.14, pytest-9.0.3, pluggy-1.6.0
+rootdir: /home/varun/argus
+configfile: pyproject.toml
+plugins: anyio-4.12.1, typeguard-4.4.4
+collected 15 items
+
+tests/test_execution.py ..F.                                             [ 26%]
+tests/test_intelligence.py ...F                                          [ 53%]
+tests/test_runtime.py FFF.                                               [ 80%]
+tests/benchmark/test_framework.py .FF                                    [100%]
+
+=================================== FAILURES ===================================
+____________________________ test_validator_blocked ____________________________
+
+    def test_validator_blocked():
+        mission = Mission("test")
+        engine = ExecutionEngine(setup_registry())
+    
+        plan = ExecutionPlan(
+            title="Blocked Plan",
+            objective="Should be blocked by missing evidence.",
+            required_evidence=["MissingKey"] # This should block the plan based on the strict validator check, unless it's mock
+        )
+        plan.steps.append(ExecutionStep(order=1, agent="MockAgentPass", action="Test"))
+    
+        result = engine.execute_plan(plan, mission)
+    
+        # Because plan.title does not contain 'mock' in lower case, it will fail validator in our simplistic mock check
+>       assert result.status == ExecutionStatus.BLOCKED
+E       AssertionError: assert <ExecutionSta...: 'Completed'> == <ExecutionSta...ED: 'Blocked'>
+E         
+E         - Blocked
+E         + Completed
+
+tests/test_execution.py:85: AssertionError
+----------------------------- Captured stdout call -----------------------------
+
+[MockAgentPass] Thinking...
+[MockAgentPass] Executing...
+[MockAgentPass] Evaluating...
+[MockAgentPass] Finished.
+
+___________________________ test_intelligence_engine ___________________________
+
+    def test_intelligence_engine():
+        registry = HeuristicRegistry()
+        registry.register(MockHeuristic())
+    
+        engine = VulnerabilityIntelligenceEngine(registry)
+        mission = Mission("test.local")
+    
+        engine.run(mission)
+    
+        assert len(mission.investigations) == 1
+    
+        inv = mission.investigations[0]
+        assert inv.title == "Mock Auth Finding"
+>       assert inv.priority == "High" # 66 confidence in auth -> High
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'Low' == 'High'
+E         
+E         - High
+E         + Low
+
+tests/test_intelligence.py:91: AssertionError
+______________________ test_mission_lifecycle_transitions ______________________
+
+    def test_mission_lifecycle_transitions():
+        mission = MissionLifecycle.create("target.local")
+        assert mission.status == MissionState.CREATED
+    
+>       MissionLifecycle.start(mission)
+
+tests/test_runtime.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mission = Mission(target='target.local', id='493325cd-9f7a-4eaa-a260-5a02307d9985', name='', workspace='default', created_at='20...={}, agent_health={}, agent_metrics={}, execution_results={}, execution_metrics={}, reports=[], metrics={}, plugins=[])
+
+    @staticmethod
+    def start(mission: Mission):
+>       if mission.status not in (MissionState.CREATED, MissionState.READY):
+                                                        ^^^^^^^^^^^^^^^^^^
+E       AttributeError: type object 'MissionState' has no attribute 'READY'
+
+argus/runtime/lifecycle.py:13: AttributeError
+__________________________ test_mission_checkpointing __________________________
+
+    def test_mission_checkpointing():
+        test_dir = ".argus/test_checkpoints"
+        checkpointer = MissionCheckpointer(storage_dir=test_dir)
+    
+>       mission = Mission(target="example.com", status=MissionState.RUNNING, phase="recon")
+                                                       ^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: type object 'MissionState' has no attribute 'RUNNING'. Did you mean: 'PLANNING'?
+
+tests/test_runtime.py:38: AttributeError
+________________________ test_mission_scheduler_phases _________________________
+
+    def test_mission_scheduler_phases():
+        scheduler = MissionScheduler()
+>       mission = Mission(target="test.local", status=MissionState.RUNNING, phase="planning")
+                                                      ^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: type object 'MissionState' has no attribute 'RUNNING'. Did you mean: 'PLANNING'?
+
+tests/test_runtime.py:55: AttributeError
+______________________ test_benchmark_runner_recall_logic ______________________
+
+    def test_benchmark_runner_recall_logic():
+        framework = BenchmarkFramework()
+        runner = framework.runner
+    
+        expected = ["vuln-1", "vuln-2", "vuln-3"]
+        actual = ["vuln-1", "vuln-3", "vuln-4"]
+    
+>       recall = runner._calculate_recall(expected, actual)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'EvaluationRunner' object has no attribute '_calculate_recall'
+
+tests/benchmark/test_framework.py:34: AttributeError
+__________________________ test_benchmark_run_mocked ___________________________
+
+    def test_benchmark_run_mocked():
+        framework = BenchmarkFramework()
+    
+        benchmark = Benchmark(
+            id="test-bench-mock",
+            name="Mock Benchmark",
+            description="Testing the runner",
+            category="auth",
+            target="http://example.com",
+            ground_truth=BenchmarkGroundTruth(
+                expected_technologies=["React", "Node"]
+            )
+        )
+    
+        # We mock the controller start to immediately complete the mission
+>       original_start = framework.runner.controller.start
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'EvaluationRunner' object has no attribute 'controller'
+
+tests/benchmark/test_framework.py:55: AttributeError
+=============================== warnings summary ===============================
+argus/runtime/models.py:167
+  /home/varun/argus/argus/runtime/models.py:167: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class ToolExecutionContext(BaseModel):
+
+tests/test_execution.py::test_engine_successful_execution
+tests/test_execution.py::test_engine_failure_handling
+tests/test_execution.py::test_validator_blocked
+tests/test_execution.py::test_step_validator_missing_input
+tests/test_intelligence.py::test_confidence_scorer
+tests/test_intelligence.py::test_intelligence_engine
+tests/test_runtime.py::test_mission_lifecycle_transitions
+tests/test_runtime.py::test_mission_context
+  /home/varun/argus/argus/runtime/mission.py:80: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/test_execution.py::test_engine_successful_execution
+tests/test_execution.py::test_engine_failure_handling
+tests/test_execution.py::test_validator_blocked
+tests/test_execution.py::test_step_validator_missing_input
+tests/test_intelligence.py::test_confidence_scorer
+tests/test_intelligence.py::test_intelligence_engine
+tests/test_runtime.py::test_mission_lifecycle_transitions
+tests/test_runtime.py::test_mission_context
+  /home/varun/argus/argus/runtime/mission.py:81: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    updated_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/test_execution.py::test_engine_successful_execution
+tests/test_execution.py::test_engine_failure_handling
+tests/test_execution.py::test_validator_blocked
+tests/test_execution.py::test_step_validator_missing_input
+  /home/varun/argus/argus/execution/results.py:22: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    start_time: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/test_execution.py::test_engine_successful_execution
+tests/test_execution.py::test_engine_failure_handling
+tests/test_execution.py::test_validator_blocked
+  /home/varun/argus/argus/execution/results.py:13: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+
+tests/test_execution.py::test_engine_successful_execution
+tests/test_execution.py::test_engine_failure_handling
+tests/test_execution.py::test_validator_blocked
+tests/test_execution.py::test_step_validator_missing_input
+  /home/varun/argus/argus/execution/engine.py:66: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    result.end_time = datetime.utcnow().isoformat()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_execution.py::test_validator_blocked - AssertionError: asse...
+FAILED tests/test_intelligence.py::test_intelligence_engine - AssertionError:...
+FAILED tests/test_runtime.py::test_mission_lifecycle_transitions - AttributeE...
+FAILED tests/test_runtime.py::test_mission_checkpointing - AttributeError: ty...
+FAILED tests/test_runtime.py::test_mission_scheduler_phases - AttributeError:...
+FAILED tests/benchmark/test_framework.py::test_benchmark_runner_recall_logic
+FAILED tests/benchmark/test_framework.py::test_benchmark_run_mocked - Attribu...
+=================== 7 failed, 8 passed, 28 warnings in 0.61s ===================
