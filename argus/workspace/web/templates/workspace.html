@@ -94,6 +94,18 @@
                         {% endfor %}
                     {% endif %}
                     <div style="white-space: pre-wrap;">{{ msg.text }}</div>
+                    {% if msg.references %}
+                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
+                            <div style="font-size: 0.8em; color: #a0a0a0; margin-bottom: 5px;">Sources:</div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                {% for ref in msg.references %}
+                                    <button class="attachment-badge" style="border: 1px solid #007acc; cursor: pointer; color: #007acc; background: rgba(0,122,204,0.1);" onclick="alert('Open Evidence: {{ ref.ref_id }}')">
+                                        {{ ref.title }}
+                                    </button>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
             {% endfor %}
             {% if not conversation.messages %}

@@ -16,17 +16,17 @@ class AIModelProvider(ABC):
         pass
         
     @abstractmethod
-    def generate(self, messages: List[Message], **kwargs) -> str:
+    def generate(self, messages: List[Message], system_prompt: str = "", **kwargs) -> str:
         """Generates a text response synchronously."""
         pass
         
     @abstractmethod
-    async def stream(self, messages: List[Message], **kwargs) -> AsyncGenerator[str, None]:
+    async def stream(self, messages: List[Message], system_prompt: str = "", **kwargs) -> AsyncGenerator[str, None]:
         """Generates a text response asynchronously, yielding tokens."""
         pass
         
     @abstractmethod
-    def multimodal_generate(self, messages: List[Message], images: List[ImageAttachment], **kwargs) -> str:
+    def multimodal_generate(self, messages: List[Message], images: List[ImageAttachment], system_prompt: str = "", **kwargs) -> str:
         """Generates a response considering both text messages and images."""
         pass
 
@@ -40,13 +40,19 @@ class MockModelProvider(AIModelProvider):
     def count_tokens(self, text: str) -> int:
         return len(text.split())
         
-    def generate(self, messages: List[Message], **kwargs) -> str:
-        return "This is a mocked response from the Argus MockModelProvider."
+    def generate(self, messages: List[Message], system_prompt: str = "", **kwargs) -> str:
+        base_resp = "This is a mocked response from the Argus MockModelProvider."
+        if "CITATIONS" in system_prompt:
+            base_resp += " Here is an evidence reference: [Evidence #test-id]"
+        return base_resp
         
-    async def stream(self, messages: List[Message], **kwargs) -> AsyncGenerator[str, None]:
+    async def stream(self, messages: List[Message], system_prompt: str = "", **kwargs) -> AsyncGenerator[str, None]:
         words = ["This", " is", " a", " mocked", " streamed", " response."]
         for w in words:
             yield w
             
-    def multimodal_generate(self, messages: List[Message], images: List[ImageAttachment], **kwargs) -> str:
-        return f"I have analyzed {len(images)} images and conclude that there might be something interesting. (Mocked)"
+    def multimodal_generate(self, messages: List[Message], images: List[ImageAttachment], system_prompt: str = "", **kwargs) -> str:
+        base_resp = f"I have analyzed {len(images)} images and conclude that there might be something interesting. (Mocked)"
+        if "CITATIONS" in system_prompt:
+            base_resp += " [Screenshot Test]"
+        return base_resp

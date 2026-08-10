@@ -28,25 +28,29 @@ class ContextAssembler:
         if observations:
             parts.append("### RELEVANT OBSERVATIONS (Unconfirmed Facts)")
             for o in observations:
-                parts.append(f"- [{o.source_id}] {o.title}: {o.content}")
+                parts.append(f"- [Evidence #{o.source_id}] {o.title}: {o.content}")
             parts.append("\n")
             
         if evidence:
             parts.append("### RELEVANT EVIDENCE (Collected Facts)")
             for e in evidence:
-                parts.append(f"- [{e.source_id}] {e.title}: {e.content}")
+                qual = e.metadata.get("strength", "UNKNOWN")
+                prov = e.metadata.get("provenance", "UNKNOWN")
+                rel = e.metadata.get("relationship", "NONE")
+                parts.append(f"- [Evidence #{e.source_id}] {e.title}: {e.content}")
+                parts.append(f"  - Quality: {qual} | Provenance: {prov} | Relationship: {rel}")
             parts.append("\n")
             
         if hypotheses:
             parts.append("### ACTIVE HYPOTHESES (Unproven Theories)")
             for h in hypotheses:
-                parts.append(f"- [{h.source_id}] {h.title}: {h.content}")
+                parts.append(f"- [Hypothesis #{h.source_id}] {h.title}: {h.content}")
             parts.append("\n")
             
         if findings:
             parts.append("### CONFIRMED FINDINGS")
             for f in findings:
-                parts.append(f"- [{f.source_id}] {f.title}: {f.content}")
+                parts.append(f"- [Finding #{f.source_id}] {f.title}: {f.content}")
             parts.append("\n")
             
         if graph:
@@ -56,9 +60,5 @@ class ContextAssembler:
             parts.append("\n")
             
         parts.append("=========================================================")
-        parts.append("IMPORTANT POLICY:")
-        parts.append("1. Do not invent evidence.")
-        parts.append("2. Distinguish clearly between facts (Evidence) and guesses (Hypothesis).")
-        parts.append("3. If context is contradictory, explicitly tell the user.")
         
         return "\n".join(parts)
