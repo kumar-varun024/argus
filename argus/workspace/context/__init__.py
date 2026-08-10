@@ -1,0 +1,3 @@
+"""
+Research Context Engine package.
+"""
