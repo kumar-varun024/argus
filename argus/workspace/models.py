@@ -74,6 +74,35 @@ class Message:
     reasoning_chain: List[str] = field(default_factory=list)
 
 @dataclass
+class Project:
+    """Represents a security engagement or research workspace."""
+    project_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    name: str = "New Project"
+    description: str = ""
+    
+    user_id: str = "local_user"
+    
+    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    updated_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    
+    status: str = "active"
+
+@dataclass
+class WorkspaceTask:
+    """Represents a focused piece of work inside a Project."""
+    task_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    project_id: str = ""
+    name: str = "New Task"
+    description: str = ""
+    
+    user_id: str = "local_user"
+    
+    created_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    updated_at: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    
+    status: str = "active"
+
+@dataclass
 class Conversation:
     """Represents a full conversation session in the workspace."""
     conversation_id: str = field(default_factory=lambda: str(uuid.uuid4()))
@@ -81,6 +110,7 @@ class Conversation:
     
     user_id: str = "local_user"
     project_id: str = ""
+    task_id: str = ""
     mission_id: str = ""
     investigation_id: str = ""
     

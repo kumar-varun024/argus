@@ -8,10 +8,7 @@ import uvicorn
 
 from argus.workspace.models import Conversation, ImageAttachment
 from argus.workspace.engine import ConversationEngine
-from argus.workspace.api import router as api_router
-from argus.workspace.repository import ConversationRepository
-from argus.workspace.storage import AttachmentStorage
-from argus.workspace.vision import VisionPipeline
+from argus.workspace.api import router as api_router, repository, storage, vision
 
 app = FastAPI(title="Argus Multimodal Workspace")
 app.include_router(api_router)
@@ -20,24 +17,32 @@ app.include_router(api_router)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
-engine = ConversationEngine()
-repository = ConversationRepository()
-storage = AttachmentStorage()
-vision = VisionPipeline()
+engine = ConversationEngine(repository=repository)
 
 from argus.runtime.manager import mission_manager
 
 @app.get("/", response_class=HTMLResponse)
 async def get_workspace(request: Request, cid: str = None):
     """Renders the main conversational workspace UI."""
+    current_user = "local_user"
     if cid:
         conversation = repository.get(cid)
-        if not conversation:
+        if not conversation or conversation.user_id != current_user:
             return RedirectResponse(url="/")
     else:
-        # For simplicity, if no ID provided, just create a new one but don't save until message sent
-        conversation = Conversation(title="New Conversation")
+        # Empty state dummy object to satisfy Jinja template without persisting
+        conversation = Conversation(conversation_id="", title="New Conversation", user_id=current_user)
         
+    if conversation.project_id:
+        from argus.workspace.api import project_repo, task_repo
+        p = project_repo.get(conversation.project_id)
+        if p:
+            conversation.current_context['project_name'] = p.name
+        if conversation.task_id:
+            t = task_repo.get(conversation.task_id)
+            if t:
+                conversation.current_context['task_name'] = t.name
+                
     if conversation.mission_id:
         try:
             mission = mission_manager.get_mission(conversation.mission_id)
@@ -45,33 +50,72 @@ async def get_workspace(request: Request, cid: str = None):
             conversation.current_context['mission_target'] = mission.target
             conversation.current_context['mission_scope'] = ", ".join(mission.scope) if mission.scope else "Unconstrained Research"
             
+            graph = getattr(mission, "graph", None)
+            conversation.current_context['graph_available'] = True if graph and len(graph.all()) > 0 else False
+            
             if conversation.investigation_id:
                 inv = mission.investigations.get(conversation.investigation_id)
                 if inv:
                     conversation.current_context['investigation_title'] = inv.title
+                    
+                # Fetch evidence and findings
+                from argus.workspace.api import evidence_manager
+                evidence_list = evidence_manager.get_by_investigation(conversation.investigation_id)
+                conversation.current_context['evidence_count'] = len(evidence_list)
+                
+                # Assume status "USER_REVIEWED" or "CONFIRMED" is finding-worthy, or category = Finding
+                # For now, let's just count all that are confirmed or user reviewed.
+                findings_count = sum(1 for e in evidence_list if e.status in ["USER_REVIEWED", "CONFIRMED", "CORROBORATED"])
+                conversation.current_context['findings_count'] = findings_count
         except Exception as e:
             pass
             
-    return templates.TemplateResponse("workspace.html", {
-        "request": request, 
-        "conversation": conversation
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="workspace.html", 
+        context={
+            "request": request, 
+            "conversation": conversation
+        }
+    )
 
 @app.post("/chat", response_class=HTMLResponse)
 async def post_chat(
     request: Request, 
     cid: str = Form(""),
+    project_id: str = Form(""),
+    task_id: str = Form(""),
     message: str = Form(...),
     image: UploadFile = File(None)
 ):
     """Handles sending a message and optional image attachment."""
+    current_user = "local_user"
     if cid:
         conversation = repository.get(cid)
-        if not conversation:
-            conversation = Conversation(conversation_id=cid, title="New Conversation")
+        if not conversation or conversation.user_id != current_user:
+            return RedirectResponse(url="/")
     else:
-        conversation = Conversation(title="New Conversation")
+        conversation = Conversation(
+            title="New Conversation", 
+            user_id=current_user,
+            project_id=project_id,
+            task_id=task_id
+        )
+        repository.save(conversation)
         
+    # Deduplicate: if the exact same message was just sent by the same user, ignore it.
+    if conversation.messages:
+        last_msg = conversation.messages[-1]
+        # Check the last user message or the last AI message (if it's a double post, the last user message might be [-2])
+        recent_user_msgs = [m for m in conversation.messages[-3:] if m.role == "user"]
+        if recent_user_msgs and recent_user_msgs[-1].text == message and not image:
+            import datetime
+            last_time = datetime.datetime.fromisoformat(recent_user_msgs[-1].timestamp.replace("Z", ""))
+            # If last_time is aware, strip tzinfo or use aware for both
+            last_time = last_time.replace(tzinfo=None)
+            if (datetime.datetime.utcnow() - last_time).total_seconds() < 5:
+                return RedirectResponse(url=f"/?cid={conversation.conversation_id}", status_code=303)
+                
     attachments = []
     
     if image and image.filename:
@@ -97,6 +141,11 @@ async def post_chat(
     
     # Process AI response
     engine.generate_response(conversation)
+    
+    # PERSISTENCE: Actually save the conversation!
+    import datetime
+    conversation.last_message_at = datetime.datetime.utcnow().isoformat()
+    repository.save(conversation)
     
     # Redirect to the persistent URL
     return RedirectResponse(url=f"/?cid={conversation.conversation_id}", status_code=303)

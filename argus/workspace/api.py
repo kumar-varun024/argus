@@ -1,63 +1,188 @@
 import datetime
-from fastapi import APIRouter, HTTPException, Query, Path
+from fastapi import APIRouter, HTTPException, Query, Path, Header, Depends
 from fastapi.responses import FileResponse
 from typing import List, Optional
 from pydantic import BaseModel
 
-from argus.workspace.models import Conversation
-from argus.workspace.repository import ConversationRepository
+def get_current_user(x_user_id: str = Header("local_user")) -> str:
+    return x_user_id
+
+from argus.workspace.models import Conversation, Project, WorkspaceTask
+from argus.workspace.repository import ConversationRepository, ProjectRepository, WorkspaceTaskRepository
 from argus.workspace.storage import AttachmentStorage
 from argus.workspace.vision import VisionPipeline
 
 router = APIRouter(prefix="/api", tags=["workspace"])
 repository = ConversationRepository()
+project_repo = ProjectRepository()
+task_repo = WorkspaceTaskRepository()
 storage = AttachmentStorage()
 vision = VisionPipeline()
+
+class ProjectUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
+
+class TaskUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[str] = None
 
 class ConversationUpdate(BaseModel):
     title: Optional[str] = None
     status: Optional[str] = None # e.g., 'archived'
+    project_id: Optional[str] = None
+    task_id: Optional[str] = None
+
+# --- PROJECTS ---
+
+@router.get("/projects/")
+def list_projects(user_id: str = Depends(get_current_user)):
+    return project_repo.search(user_id=user_id)
+
+@router.post("/projects/")
+def create_project(project: Project, user_id: str = Depends(get_current_user)):
+    project.user_id = user_id
+    project_repo.save(project)
+    return project
+
+@router.get("/projects/{project_id}")
+def get_project(project_id: str, user_id: str = Depends(get_current_user)):
+    p = project_repo.get(project_id)
+    if not p or p.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return p
+
+@router.patch("/projects/{project_id}")
+def update_project(project_id: str, update: ProjectUpdate, user_id: str = Depends(get_current_user)):
+    p = project_repo.get(project_id)
+    if not p or p.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if update.name is not None:
+        p.name = update.name
+    if update.description is not None:
+        p.description = update.description
+    if update.status is not None:
+        p.status = update.status
+    p.updated_at = datetime.datetime.utcnow().isoformat()
+    project_repo.save(p)
+    return p
+
+@router.delete("/projects/{project_id}")
+def delete_project(project_id: str, user_id: str = Depends(get_current_user)):
+    p = project_repo.get(project_id)
+    if not p or p.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Project not found")
+    # Soft delete / archive to avoid cascade issues unless explicitly implemented
+    p.status = "archived"
+    project_repo.save(p)
+    return {"status": "archived"}
+
+# --- TASKS ---
+
+@router.get("/projects/{project_id}/tasks")
+def list_tasks_for_project(project_id: str, user_id: str = Depends(get_current_user)):
+    # Verify project auth
+    p = project_repo.get(project_id)
+    if not p or p.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return task_repo.search(project_id=project_id, user_id=user_id)
+
+@router.post("/projects/{project_id}/tasks")
+def create_task(project_id: str, task: WorkspaceTask, user_id: str = Depends(get_current_user)):
+    p = project_repo.get(project_id)
+    if not p or p.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Project not found")
+    task.project_id = project_id
+    task.user_id = user_id
+    task_repo.save(task)
+    return task
+
+@router.get("/tasks/{task_id}")
+def get_task(task_id: str, user_id: str = Depends(get_current_user)):
+    t = task_repo.get(task_id)
+    if not t or t.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return t
+
+@router.patch("/tasks/{task_id}")
+def update_task(task_id: str, update: TaskUpdate, user_id: str = Depends(get_current_user)):
+    t = task_repo.get(task_id)
+    if not t or t.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Task not found")
+    if update.name is not None:
+        t.name = update.name
+    if update.description is not None:
+        t.description = update.description
+    if update.status is not None:
+        t.status = update.status
+    t.updated_at = datetime.datetime.utcnow().isoformat()
+    task_repo.save(t)
+    return t
+
+@router.delete("/tasks/{task_id}")
+def delete_task(task_id: str, user_id: str = Depends(get_current_user)):
+    t = task_repo.get(task_id)
+    if not t or t.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Task not found")
+    t.status = "archived"
+    task_repo.save(t)
+    return {"status": "archived"}
 
 @router.get("/conversations/")
 def list_conversations(
-    user_id: str = None,
+    user_id: str = Depends(get_current_user),
     include_archived: bool = False
 ):
     """List all conversations, optionally filtered by user."""
     return repository.search(user_id=user_id, include_archived=include_archived)
 
 @router.post("/conversations/")
-def create_conversation(conv: Conversation):
+def create_conversation(conv: Optional[Conversation] = None, user_id: str = Depends(get_current_user)):
     """Create a new persistent conversation."""
+    if not conv:
+        conv = Conversation(title="New Conversation")
+    conv.user_id = user_id
     repository.save(conv)
     return conv
 
 @router.get("/conversations/search")
 def search_conversations(
-    q: str = Query(...),
-    user_id: str = None,
+    q: str = Query(None),
+    project_id: str = Query(None),
+    task_id: str = Query(None),
+    user_id: str = Depends(get_current_user),
     include_archived: bool = False
 ):
     """Search conversations by title or message content."""
-    return repository.search(query=q, user_id=user_id, include_archived=include_archived)
+    return repository.search(query=q, user_id=user_id, project_id=project_id, task_id=task_id, include_archived=include_archived)
 
 @router.get("/conversations/{conversation_id}")
-def get_conversation(conversation_id: str = Path(...)):
+def get_conversation(conversation_id: str = Path(...), user_id: str = Depends(get_current_user)):
     """Retrieve a specific conversation."""
     conv = repository.get(conversation_id)
     if not conv:
         raise HTTPException(status_code=404, detail="Conversation not found")
+    if conv.user_id != user_id:
+        raise HTTPException(status_code=403, detail="Unauthorized access to conversation")
     return conv
 
 @router.patch("/conversations/{conversation_id}")
-def update_conversation(conversation_id: str, update: ConversationUpdate):
+def update_conversation(conversation_id: str, update: ConversationUpdate, user_id: str = Depends(get_current_user)):
     """Update conversation metadata (rename, archive)."""
     conv = repository.get(conversation_id)
     if not conv:
         raise HTTPException(status_code=404, detail="Conversation not found")
+    if conv.user_id != user_id:
+        raise HTTPException(status_code=403, detail="Unauthorized access to conversation")
         
     if update.title is not None:
         conv.title = update.title
+    if update.project_id is not None:
+        conv.project_id = update.project_id
+    if update.task_id is not None:
+        conv.task_id = update.task_id
     if update.status is not None:
         conv.status = update.status
         if update.status == "archived":
@@ -70,10 +195,13 @@ def update_conversation(conversation_id: str, update: ConversationUpdate):
     return conv
 
 @router.delete("/conversations/{conversation_id}")
-def delete_conversation(conversation_id: str):
+def delete_conversation(conversation_id: str, user_id: str = Depends(get_current_user)):
     """Permanently delete a conversation."""
-    if not repository.get(conversation_id):
+    conv = repository.get(conversation_id)
+    if not conv:
         raise HTTPException(status_code=404, detail="Conversation not found")
+    if conv.user_id != user_id:
+        raise HTTPException(status_code=403, detail="Unauthorized access to conversation")
     repository.delete(conversation_id)
     return {"status": "deleted"}
 
@@ -100,6 +228,9 @@ def get_attachment(attachment_id: str, cid: str = Query(None)):
         
     if not target_att:
         raise HTTPException(status_code=404, detail="Attachment not found in conversation")
+        
+    if not target_att.storage_reference:
+        raise HTTPException(status_code=404, detail="Attachment has no storage reference")
         
     try:
         path = storage.get_path(target_att.storage_reference)

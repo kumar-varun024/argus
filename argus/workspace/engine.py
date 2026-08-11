@@ -37,8 +37,10 @@ class ConversationEngine:
         query = ContextQuery(
             conversation_id=conversation.conversation_id,
             query=query_text,
+            user_id=conversation.user_id,
             mission_id=conversation.mission_id,
-            project_id=conversation.project_id
+            project_id=conversation.project_id,
+            investigation_id=conversation.investigation_id
         )
         
         # 1. Retrieve raw sources via context engine

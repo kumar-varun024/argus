@@ -1109,5 +1109,71 @@
     "completed_at": "2026-08-10T18:47:32.601025+00:00",
     "execution_time_ms": 4.085930995643139,
     "error": null
+  },
+  {
+    "run_id": "cca44255-5ad0-44ba-9d9a-452d68427ee6",
+    "mission_id": "602d6434-25b1-4314-92f3-d3e460e0853d",
+    "task_id": "0718789a-8a27-4596-b7b4-76f562a74337",
+    "tool_id": "tool_b",
+    "status": "Succeeded",
+    "started_at": "2026-08-11T07:47:43.673282+00:00",
+    "completed_at": "2026-08-11T07:47:43.675586+00:00",
+    "execution_time_ms": 2.2820199956186116,
+    "error": null
+  },
+  {
+    "run_id": "86a0aab7-aae3-4c2c-b986-67f756fbbd28",
+    "mission_id": "9ad46a21-3a67-4f45-a342-207af06d3fa0",
+    "task_id": "261a350e-3523-4434-8485-5a8eec777bc0",
+    "tool_id": "tool_b",
+    "status": "Succeeded",
+    "started_at": "2026-08-11T07:47:43.678904+00:00",
+    "completed_at": "2026-08-11T07:47:43.680522+00:00",
+    "execution_time_ms": 1.603421027539298,
+    "error": null
+  },
+  {
+    "run_id": "3ea29559-027e-4646-ad5e-9cd02ef6c22a",
+    "mission_id": "729b220b-34e6-48b6-a1c7-de9ffc96993b",
+    "task_id": "0444b92e-285d-4cb3-a7a0-8dd734731c50",
+    "tool_id": "tool_b",
+    "status": "Timed Out",
+    "started_at": "2026-08-11T07:47:43.683939+00:00",
+    "completed_at": "2026-08-11T07:47:43.735707+00:00",
+    "execution_time_ms": 51.70435400214046,
+    "error": "Command execution timed out after 0.05 seconds"
+  },
+  {
+    "run_id": "d33a1c60-9baa-4513-8a34-414ae435871d",
+    "mission_id": "282451a9-ff2c-4147-b4e4-511ef9877670",
+    "task_id": "scheduler-task-1",
+    "tool_id": "tool_b",
+    "status": "Succeeded",
+    "started_at": "2026-08-11T07:47:43.739508+00:00",
+    "completed_at": "2026-08-11T07:47:43.741150+00:00",
+    "execution_time_ms": 1.6274570079986006,
+    "error": null
+  },
+  {
+    "run_id": "ac7d6c7e-e0db-4495-bb5a-a31e1d8f19da",
+    "mission_id": "6ce65220-b676-476a-afbc-8ddcf160525d",
+    "task_id": "418d0379-4117-45eb-8cb0-475064b98a13",
+    "tool_id": "graphql_specialist",
+    "status": "Succeeded",
+    "started_at": "2026-08-11T07:47:43.743702+00:00",
+    "completed_at": "2026-08-11T07:47:43.744305+00:00",
+    "execution_time_ms": 0.5956859968136996,
+    "error": null
+  },
+  {
+    "run_id": "48645c46-a356-4cf8-a13f-97052deab26c",
+    "mission_id": "cb6604c2-9cef-4ed7-aa08-47791a8c6325",
+    "task_id": "1471b290-b75a-4447-9ab8-834387899400",
+    "tool_id": "tool_b",
+    "status": "Succeeded",
+    "started_at": "2026-08-11T07:47:43.746284+00:00",
+    "completed_at": "2026-08-11T07:47:43.747243+00:00",
+    "execution_time_ms": 0.9459569992031902,
+    "error": null
   }
 ]
