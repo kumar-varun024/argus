@@ -544,15 +544,22 @@ html_content = """<!DOCTYPE html>
         // Load History
         async function createNewConversation(projectId = "", taskId = "") {
             try {
-                // Post to chat API using Form Data to mimic standard behavior
-                const formData = new FormData();
-                formData.append("cid", "");
-                formData.append("message", "Initiating new conversation...");
-                if (projectId) formData.append("project_id", projectId);
-                if (taskId) formData.append("task_id", taskId);
+                // Post to API to create an empty conversation
+                const payload = {};
+                if (projectId) payload.project_id = projectId;
+                if (taskId) payload.task_id = taskId;
                 
-                const res = await fetch('/chat', { method: 'POST', body: formData, redirect: 'follow' });
-                window.location.href = res.url;
+                const res = await fetch('/api/conversations/', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    window.location.href = `/?cid=${data.conversation_id}`;
+                } else {
+                    alert("Failed to create conversation");
+                }
             } catch (err) {
                 alert("Failed to create conversation");
             }

@@ -8,7 +8,10 @@ from argus.workspace.models import Conversation, Project, WorkspaceTask
 class ProjectRepository:
     """Handles JSON-based persistence of workspace projects."""
     
-    def __init__(self, data_dir: str = "~/.argus/workspace/projects"):
+    def __init__(self, data_dir: str = None):
+        if not data_dir:
+            base = os.environ.get("ARGUS_WORKSPACE_DIR", "~/.argus/workspace")
+            data_dir = os.path.join(base, "projects")
         self.data_dir = Path(os.path.expanduser(data_dir))
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self._cache: Dict[str, Project] = {}
@@ -54,7 +57,10 @@ class ProjectRepository:
 class WorkspaceTaskRepository:
     """Handles JSON-based persistence of workspace tasks."""
     
-    def __init__(self, data_dir: str = "~/.argus/workspace/tasks"):
+    def __init__(self, data_dir: str = None):
+        if not data_dir:
+            base = os.environ.get("ARGUS_WORKSPACE_DIR", "~/.argus/workspace")
+            data_dir = os.path.join(base, "tasks")
         self.data_dir = Path(os.path.expanduser(data_dir))
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self._cache: Dict[str, WorkspaceTask] = {}
@@ -101,7 +107,10 @@ class WorkspaceTaskRepository:
 class ConversationRepository:
     """Handles JSON-based persistence of workspace conversations with fast in-memory indexing."""
     
-    def __init__(self, data_dir: str = "~/.argus/workspace/conversations"):
+    def __init__(self, data_dir: str = None):
+        if not data_dir:
+            base = os.environ.get("ARGUS_WORKSPACE_DIR", "~/.argus/workspace")
+            data_dir = os.path.join(base, "conversations")
         self.data_dir = Path(os.path.expanduser(data_dir))
         self.data_dir.mkdir(parents=True, exist_ok=True)
         

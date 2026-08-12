@@ -87,6 +87,17 @@ class ConversationEngine:
         
         conversation.last_message_at = datetime.datetime.utcnow().isoformat()
         conversation.updated_at = conversation.last_message_at
+        
+        if conversation.title == "New Conversation" and len(conversation.messages) >= 2:
+            try:
+                title_prompt = "You are a title generator. Generate a concise 3-5 word title for this conversation based on the user's message. Output ONLY the title, with no quotes or preamble."
+                # We pass only the first user message
+                new_title = self.provider.generate([conversation.messages[0]], system_prompt=title_prompt)
+                if new_title:
+                    conversation.title = new_title.strip(' "\'')
+            except Exception:
+                pass
+                
         self.repository.save(conversation)
         
         return assistant_msg
@@ -145,4 +156,14 @@ class ConversationEngine:
         
         conversation.last_message_at = datetime.datetime.utcnow().isoformat()
         conversation.updated_at = conversation.last_message_at
+        
+        if conversation.title == "New Conversation" and len(conversation.messages) >= 2:
+            try:
+                title_prompt = "You are a title generator. Generate a concise 3-5 word title for this conversation based on the user's message. Output ONLY the title, with no quotes or preamble."
+                new_title = self.provider.generate([conversation.messages[0]], system_prompt=title_prompt)
+                if new_title:
+                    conversation.title = new_title.strip(' "\'')
+            except Exception:
+                pass
+                
         self.repository.save(conversation)

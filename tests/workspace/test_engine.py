@@ -54,7 +54,7 @@ def test_mission_context_integration():
     mission.scope = ["test_target.com"]
     
     engine = ConversationEngine(provider=MockModelProvider())
-    conv = Conversation(mission_id=mission.id)
+    conv = Conversation(mission_id=mission.id, title="Integration Test")
     
     # We want to intercept the context assembly or rely on the MockModelProvider
     # MockModelProvider stores the last system prompt. We can check if "Integration Test Mission" is in it.
