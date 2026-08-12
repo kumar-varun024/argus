@@ -11,6 +11,9 @@ from argus.workspace.models import Conversation, Project, WorkspaceTask
 from argus.workspace.repository import ConversationRepository, ProjectRepository, WorkspaceTaskRepository
 from argus.workspace.storage import AttachmentStorage
 from argus.workspace.vision import VisionPipeline
+from argus.workspace.context.engine import ResearchContextEngine
+from argus.workspace.context.models import ContextQuery, ContextResult
+from argus.workspace.copilot import ResearchCopilot
 
 router = APIRouter(prefix="/api", tags=["workspace"])
 repository = ConversationRepository()
@@ -205,18 +208,91 @@ def delete_conversation(conversation_id: str, user_id: str = Depends(get_current
     repository.delete(conversation_id)
     return {"status": "deleted"}
 
+@router.get("/conversations/{conversation_id}/context")
+def get_conversation_context(conversation_id: str, user_id: str = Depends(get_current_user)):
+    conv = repository.get(conversation_id)
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    if conv.user_id != user_id:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+        
+    context_data = {}
+    
+    if conv.project_id:
+        p = project_repo.get(conv.project_id)
+        if p: context_data['project_name'] = p.name
+        if conv.task_id:
+            t = task_repo.get(conv.task_id)
+            if t: context_data['task_name'] = t.name
+            
+    if conv.mission_id:
+        from argus.runtime.manager import mission_manager
+        try:
+            mission = mission_manager.get_mission(conv.mission_id)
+            context_data['mission_name'] = mission.name
+            context_data['mission_target'] = mission.target
+            context_data['mission_scope'] = ", ".join(mission.scope) if mission.scope else "Unconstrained Research"
+            
+            graph = getattr(mission, "graph", None)
+            context_data['graph_available'] = True if graph and len(graph.all()) > 0 else False
+            
+            if conv.investigation_id:
+                inv = mission.investigations.get(conv.investigation_id)
+                if inv:
+                    context_data['investigation_title'] = inv.title
+                    
+                evidence_list = evidence_manager.get_by_investigation(conv.investigation_id)
+                context_data['evidence_count'] = len(evidence_list)
+                
+                findings_count = sum(1 for e in evidence_list if e.status in ["USER_REVIEWED", "CONFIRMED", "CORROBORATED"])
+                context_data['findings_count'] = findings_count
+                
+                # Fetch Research Opportunities using Copilot
+                ctx_engine = ResearchContextEngine()
+                query = ContextQuery(
+                    conversation_id=conv.conversation_id,
+                    query="What should I test next?",
+                    user_id=user_id,
+                    mission_id=conv.mission_id,
+                    project_id=conv.project_id,
+                    investigation_id=conv.investigation_id
+                )
+                raw_sources = ctx_engine._retrieve_sources(query)
+                allowed_sources = ctx_engine.policy.apply(query, raw_sources)
+                ranked_sources = ctx_engine.ranker.rank(query, allowed_sources)
+                
+                result = ContextResult(sources=ranked_sources, context_status="OK" if ranked_sources else "INSUFFICIENT_CONTEXT")
+                opportunities = ResearchCopilot().evaluate(result)
+                context_data['opportunities'] = [
+                    {
+                        "title": o.title,
+                        "explanation": o.explanation,
+                        "reason": o.reason,
+                        "missing_evidence": o.missing_evidence,
+                        "suggested_verification": o.suggested_verification,
+                        "status": o.status,
+                        "priority": o.priority
+                    } for o in opportunities
+                ]
+        except Exception as e:
+            pass
+            
+    return context_data
+
 # --- ATTACHMENTS ---
 
 @router.get("/attachments/{attachment_id}")
-def get_attachment(attachment_id: str, cid: str = Query(None)):
-    """Serves the binary image file. In a real app, this verifies `cid` auth."""
-    # Find the attachment in the repo to get the storage_reference
+def get_attachment(attachment_id: str, cid: str = Query(None), x_user_id: Optional[str] = Header(None)):
+    """Serves the binary image file."""
     if not cid:
         raise HTTPException(status_code=400, detail="Missing conversation ID for auth")
     
     conv = repository.get(cid)
     if not conv:
         raise HTTPException(status_code=404, detail="Conversation not found")
+        
+    if x_user_id and conv.user_id != x_user_id:
+        raise HTTPException(status_code=403, detail="Unauthorized to access this conversation's attachments")
         
     target_att = None
     for msg in conv.messages:
@@ -239,11 +315,14 @@ def get_attachment(attachment_id: str, cid: str = Query(None)):
         raise HTTPException(status_code=404, detail="File on disk not found")
 
 @router.post("/attachments/{attachment_id}/analyze")
-def analyze_attachment(attachment_id: str, cid: str = Query(...)):
+def analyze_attachment(attachment_id: str, cid: str = Query(...), x_user_id: Optional[str] = Header(None)):
     """Triggers or retries the vision analysis pipeline for an attachment."""
     conv = repository.get(cid)
     if not conv:
         raise HTTPException(status_code=404, detail="Conversation not found")
+        
+    if x_user_id and conv.user_id != x_user_id:
+        raise HTTPException(status_code=403, detail="Unauthorized to access this conversation")
         
     target_att = None
     for msg in conv.messages:
@@ -262,6 +341,53 @@ def analyze_attachment(attachment_id: str, cid: str = Query(...)):
     # Save conversation state
     repository.save(conv)
     return target_att
+
+@router.post("/attachments/{attachment_id}/evidence")
+def convert_to_evidence(attachment_id: str, cid: str = Query(...), x_user_id: Optional[str] = Header(None)):
+    """Converts a specific attachment into an Evidence object in the active investigation."""
+    conv = repository.get(cid)
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+        
+    if x_user_id and conv.user_id != x_user_id:
+        raise HTTPException(status_code=403, detail="Unauthorized to access this conversation")
+        
+    if not conv.investigation_id:
+        raise HTTPException(status_code=400, detail="Cannot save as evidence: no active investigation in this conversation")
+        
+    target_att = None
+    target_msg_id = None
+    for msg in conv.messages:
+        for att in msg.attachments:
+            if att.image_id == attachment_id:
+                target_att = att
+                target_msg_id = msg.message_id
+                break
+        if target_att: break
+        
+    if not target_att:
+        raise HTTPException(status_code=404, detail="Attachment not found")
+        
+    from argus.evidence.model import Evidence, ProvenanceData
+    
+    cat = "Client-side"
+    ev = Evidence(
+        title=f"Screenshot Observation: {target_att.filename}",
+        description=target_att.analysis_result if target_att.analysis_result else "User uploaded screenshot.",
+        category=cat,
+        source_type="SCREENSHOT",
+        source_id=target_att.image_id,
+        investigation_id=conv.investigation_id,
+        created_by="user-uploaded screenshot",
+        status="OBSERVATION",
+        provenance=ProvenanceData(
+            conversation_id=conv.conversation_id,
+            message_id=target_msg_id,
+            image_id=target_att.image_id
+        )
+    )
+    evidence_manager.save(ev)
+    return {"status": "success", "evidence_id": ev.evidence_id}
 
 # --- EVIDENCE ---
 

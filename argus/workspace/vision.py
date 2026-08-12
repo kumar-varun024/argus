@@ -1,55 +1,83 @@
 import time
-from typing import List
-from argus.workspace.models import ImageAttachment, VisualObservation
+from typing import List, Optional
+from argus.workspace.models import ImageAttachment, VisualObservation, Message
+from argus.workspace.provider import MockModelProvider
+
+VISION_SYSTEM_PROMPT = """You are a highly capable AI security researcher acting as the vision component of Argus.
+You have been provided with one or more screenshots from a user's security research session.
+Your task is to analyze these images and explain what you see in clear, simple language.
+
+You must structure your response EXACTLY as follows:
+
+WHAT I SEE
+[Explain what is visibly present in the screenshot. E.g., UI elements, HTTP requests, responses, status codes, URLs, parameters, headers, error messages, tokens.]
+
+WHAT IT COULD MEAN
+[Explain the potential security significance or vulnerability type (e.g. IDOR, BOLA, XSS) implied by the observation.]
+
+WHY IT MATTERS
+[Explain the impact of this potential issue in simple, beginner-friendly terms.]
+
+WHAT IS NOT PROVEN YET
+[Clearly identify what evidence is missing. Be explicit about what you can only infer versus what is actually proven by the screenshot.]
+
+WHAT TO CHECK NEXT
+[Suggest safe, authorized follow-up verification steps.]
+
+CRITICAL RULES:
+- Distinguish clearly between OBSERVED facts and INFERRED meaning.
+- Do NOT fabricate exploitability, CVSS, backend behavior, or claim a vulnerability is proven if it isn't.
+- Do NOT fake visual analysis. If you cannot see the image, say so.
+"""
 
 class VisionPipeline:
     """Orchestrates image analysis and visual observation extraction."""
     
+    def __init__(self, provider=None):
+        # Defaulting to MockModelProvider for tests; in production this would be injected
+        self.provider = provider or MockModelProvider()
+        
     def analyze(self, attachment: ImageAttachment) -> ImageAttachment:
         """
-        Simulates extracting technical observations from the image.
-        In production, this would send the image binary to GPT-4V or Claude Sonnet,
-        asking for a JSON output of visual facts.
+        Extracts technical observations from the image using the configured AI provider.
         """
         attachment.analysis_status = "PROCESSING"
         
-        # Simulate API latency
-        # time.sleep(0.5) 
-        
-        # We are using a mock implementation per the approved implementation plan.
-        
-        # Example: Mocking OCR & Technical interpretation of a "screenshot"
-        obs1 = VisualObservation(
-            image_id=attachment.image_id,
-            description="The screenshot shows an HTTP GET request to /api/v1/users/789.",
-            category="HTTP request",
-            confidence="CONFIRMED",
-            semantic_status="OBSERVATION",
-            technical_significance="Targeting a specific user resource ID."
-        )
-        
-        obs2 = VisualObservation(
-            image_id=attachment.image_id,
-            description="The response returns a 200 OK with a JSON body containing user PII, despite the Authorization header lacking admin scopes.",
-            category="HTTP response",
-            confidence="LIKELY",
-            semantic_status="OBSERVATION",
-            technical_significance="Potential BOLA (Broken Object Level Authorization)."
-        )
-        
-        attachment.visual_observations = [obs1, obs2]
-        
-        # Build a textual summary for the LLM context and UI
-        summary = (
-            "Visual Analysis Output:\n"
-            f"- {obs1.description} (Category: {obs1.category})\n"
-            f"- {obs2.description} (Category: {obs2.category})\n"
-            "This suggests a potential authorization flaw, but requires further verification."
-        )
-        
-        attachment.analysis_result = summary
-        attachment.model = "mock-vision-v1"
-        attachment.model_provider = "local"
-        attachment.analysis_status = "COMPLETED"
-        
+        # 1. Capability check
+        capabilities = self.provider.capabilities()
+        if not capabilities.get("vision", False):
+            attachment.analysis_result = "The currently configured model does not support image analysis. Please configure a vision-capable model."
+            attachment.analysis_status = "UNSUPPORTED"
+            attachment.model = "unknown"
+            return attachment
+            
+        # 2. Call provider
+        try:
+            # We treat the single image as a multimodal generate call.
+            # Real provider would extract base64 or pass file paths.
+            result = self.provider.multimodal_generate(
+                messages=[],
+                images=[attachment],
+                system_prompt=VISION_SYSTEM_PROMPT
+            )
+            
+            attachment.analysis_result = result
+            attachment.analysis_status = "COMPLETED"
+            attachment.model = "vision-capable-model"
+            
+            # Create a base observation that Engine can pick up to create Evidence
+            obs = VisualObservation(
+                image_id=attachment.image_id,
+                description="Visual analysis completed. See analysis result for details.",
+                category="Image Analysis",
+                confidence="UNKNOWN",
+                semantic_status="OBSERVATION",
+                technical_significance="To be determined by context"
+            )
+            attachment.visual_observations = [obs]
+            
+        except Exception as e:
+            attachment.analysis_result = f"Analysis failed: {str(e)}"
+            attachment.analysis_status = "FAILED"
+            
         return attachment

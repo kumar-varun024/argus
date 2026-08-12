@@ -1,9 +1,10 @@
 import os
 import uuid
+from typing import List
 from fastapi import FastAPI, Request, Form, UploadFile, File, Query, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 import uvicorn
 
 from argus.workspace.models import Conversation, ImageAttachment
@@ -86,9 +87,9 @@ async def post_chat(
     project_id: str = Form(""),
     task_id: str = Form(""),
     message: str = Form(...),
-    image: UploadFile = File(None)
+    images: List[UploadFile] = File(None)
 ):
-    """Handles sending a message and optional image attachment."""
+    """Handles sending a message and optional image attachments."""
     current_user = "local_user"
     if cid:
         conversation = repository.get(cid)
@@ -108,7 +109,9 @@ async def post_chat(
         last_msg = conversation.messages[-1]
         # Check the last user message or the last AI message (if it's a double post, the last user message might be [-2])
         recent_user_msgs = [m for m in conversation.messages[-3:] if m.role == "user"]
-        if recent_user_msgs and recent_user_msgs[-1].text == message and not image:
+        # Only deduplicate if there are no images
+        has_images = images and any(img.filename for img in images)
+        if recent_user_msgs and recent_user_msgs[-1].text == message and not has_images:
             import datetime
             last_time = datetime.datetime.fromisoformat(recent_user_msgs[-1].timestamp.replace("Z", ""))
             # If last_time is aware, strip tzinfo or use aware for both
@@ -118,23 +121,25 @@ async def post_chat(
                 
     attachments = []
     
-    if image and image.filename:
-        # Save securely
-        image_id = str(uuid.uuid4())
-        meta = storage.save_upload(image, image_id)
-        
-        attachment = ImageAttachment(
-            image_id=image_id,
-            filename=meta["filename"],
-            mime_type=meta["mime_type"],
-            size=meta["size"],
-            storage_reference=meta["storage_reference"]
-        )
-        
-        # Analyze via Vision Pipeline
-        attachment = vision.analyze(attachment)
-        
-        attachments.append(attachment)
+    if images:
+        for img in images:
+            if img and img.filename:
+                # Save securely
+                image_id = str(uuid.uuid4())
+                meta = storage.save_upload(img, image_id)
+                
+                attachment = ImageAttachment(
+                    image_id=image_id,
+                    filename=meta["filename"],
+                    mime_type=meta["mime_type"],
+                    size=meta["size"],
+                    storage_reference=meta["storage_reference"]
+                )
+                
+                # Analyze via Vision Pipeline
+                attachment = vision.analyze(attachment)
+                
+                attachments.append(attachment)
         
     # Process user message
     engine.add_user_message(conversation, message, attachments)
@@ -149,6 +154,59 @@ async def post_chat(
     
     # Redirect to the persistent URL
     return RedirectResponse(url=f"/?cid={conversation.conversation_id}", status_code=303)
+
+@app.post("/chat/stream")
+async def post_chat_stream(
+    request: Request,
+    cid: str = Form(""),
+    project_id: str = Form(""),
+    task_id: str = Form(""),
+    message: str = Form(...),
+    images: List[UploadFile] = File(None)
+):
+    """Handles sending a message and streaming the AI response."""
+    current_user = "local_user"
+    if cid:
+        from argus.workspace.api import repository
+        conversation = repository.get(cid)
+        if not conversation or conversation.user_id != current_user:
+            raise HTTPException(status_code=403, detail="Unauthorized")
+    else:
+        from argus.workspace.api import repository
+        conversation = Conversation(
+            title="New Conversation", 
+            user_id=current_user,
+            project_id=project_id,
+            task_id=task_id
+        )
+        repository.save(conversation)
+        
+    attachments = []
+    
+    if images:
+        for img in images:
+            if img and img.filename:
+                # Save securely
+                image_id = str(uuid.uuid4())
+                meta = storage.save_upload(img, image_id)
+                
+                attachment = ImageAttachment(
+                    image_id=image_id,
+                    filename=meta["filename"],
+                    mime_type=meta["mime_type"],
+                    size=meta["size"],
+                    storage_reference=meta["storage_reference"]
+                )
+                
+                # Analyze via Vision Pipeline
+                attachment = vision.analyze(attachment)
+                
+                attachments.append(attachment)
+                
+    # Process user message
+    engine.add_user_message(conversation, message, attachments)
+    
+    return StreamingResponse(engine.generate_response_stream(conversation), media_type="text/event-stream")
 
 def start_server(host: str = "127.0.0.1", port: int = 8000):
     """Starts the Uvicorn web server for the workspace."""

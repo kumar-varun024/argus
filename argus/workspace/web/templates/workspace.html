@@ -164,6 +164,13 @@ html_content = """<!DOCTYPE html>
                                     <div style="font-size:0.85em; color:var(--text-muted); margin-top:4px;">
                                         Analysis: {{ att.analysis_status }}
                                     </div>
+                                    {% if conversation.investigation_id %}
+                                    <div style="margin-top: 8px;">
+                                        <button class="new-btn" style="padding: 4px 8px; font-size: 0.8em; margin: 0; background: var(--surface-light); border: 1px solid var(--border-color); color: var(--text-muted);" onclick="saveAsEvidence('{{ att.image_id }}', '{{ conversation.conversation_id }}', this)">
+                                            Save as Evidence
+                                        </button>
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         {% endfor %}
@@ -179,7 +186,7 @@ html_content = """<!DOCTYPE html>
                                     <div style="font-size: 0.75em; color: var(--text-muted); margin-bottom: 10px; text-transform:uppercase; letter-spacing:0.05em; font-weight:600;">Sources</div>
                                     <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                                         {% for ref in msg.references %}
-                                            <button style="border: 1px solid #333; border-radius: 4px; padding: 4px 8px; cursor: pointer; color: #a0a0a0; background: #1a1a1a; font-size: 0.85em; transition: all 0.2s;">
+                                            <button style="border: 1px solid var(--accent); border-radius: 4px; padding: 4px 8px; cursor: pointer; color: var(--accent); background: rgba(0, 153, 255, 0.1); font-size: 0.85em; transition: all 0.2s;" onclick="alert('Viewing Evidence Details:\n\nReference ID: {{ ref.ref_id }}\nTitle: {{ ref.title }}')">
                                                 {{ ref.title }}
                                             </button>
                                         {% endfor %}
@@ -205,11 +212,11 @@ html_content = """<!DOCTYPE html>
                 
                 <label class="icon-btn" style="margin-bottom: 2px;" title="Attach File">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-                    <input type="file" id="file-input" name="image" accept="image/*" style="display: none;" onchange="updateFileBadge()">
+                    <input type="file" id="file-input" name="images" accept="image/*" multiple style="display: none;" onchange="updateFileBadge()">
                 </label>
                 
                 <div style="flex-grow: 1; display: flex; flex-direction: column;">
-                    <div id="file-badge" style="display:none; font-size: 0.8em; color: var(--accent); margin-bottom: 5px; font-weight: 500;"></div>
+                    <div id="file-previews" style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:5px;"></div>
                     <textarea name="message" id="message-input" placeholder="Ask, learn, brainstorm..." required></textarea>
                 </div>
                 
@@ -295,13 +302,20 @@ html_content = """<!DOCTYPE html>
         </div>
         <div class="panel-section">
             <h3>Knowledge Graph</h3>
-            <div class="panel-value">
+            <div class="panel-value" id="panel-graph">
                 {% if conversation.current_context.graph_available %}
                     <span style="color: #4caf50;">Available</span>
                     <button class="panel-btn" style="margin-top: 10px;" onclick="openGraphModal()">View Graph</button>
                 {% else %}
                     <span style="color:var(--text-muted);">Unavailable</span>
                 {% endif %}
+            </div>
+        </div>
+        
+        <div class="panel-section" id="panel-opportunities-section" style="display: none;">
+            <h3>Research Opportunities</h3>
+            <div id="panel-opportunities">
+                <!-- Dynamically populated via JS -->
             </div>
         </div>
 
@@ -373,20 +387,157 @@ html_content = """<!DOCTYPE html>
             submitForm();
         });
         
-        function submitForm() {
+        async function submitForm() {
             submitBtn.disabled = true;
-            loadingOverlay.style.display = 'flex';
-            form.submit();
+            
+            const msgInput = document.getElementById('message-input');
+            const message = msgInput.value.trim();
+            const cid = document.querySelector('input[name="cid"]').value;
+            
+            // Immediately render user message
+            const messagesContainer = document.getElementById('chat-messages');
+            
+            // Remove empty state if present
+            if(messagesContainer.querySelector('h2')) {
+                messagesContainer.innerHTML = '';
+            }
+            
+            // 1. Create user message bubble
+            const userMsgHtml = `
+                <div class="message-container user-message-container">
+                    <div class="message user-message">
+                        <div style="white-space: pre-wrap;">${message}</div>
+                    </div>
+                </div>
+            `;
+            messagesContainer.insertAdjacentHTML('beforeend', userMsgHtml);
+            
+            // 2. Clear input
+            msgInput.value = '';
+            msgInput.style.height = 'auto';
+            document.getElementById('file-previews').innerHTML = '';
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // 3. Create Assistant Placeholder Bubble
+            const assistantBubbleId = 'msg-' + Date.now();
+            const assistantMsgHtml = `
+                <div class="message-container assistant-message-container">
+                    <div class="message assistant-message">
+                        <div id="${assistantBubbleId}" class="rendered-markdown"><i>Thinking...</i></div>
+                        <div class="raw-markdown" style="display:none;" id="raw-${assistantBubbleId}"></div>
+                    </div>
+                </div>
+            `;
+            messagesContainer.insertAdjacentHTML('beforeend', assistantMsgHtml);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            const formData = new FormData(form);
+            
+            try {
+                // Post to streaming endpoint
+                const response = await fetch('/chat/stream', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    // It might have redirected (new conversation) or failed
+                    if (response.redirected) {
+                        window.location.href = response.url;
+                        return;
+                    }
+                    throw new Error("HTTP " + response.status);
+                }
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                let fullText = "";
+                const bubble = document.getElementById(assistantBubbleId);
+                const rawBubble = document.getElementById(`raw-${assistantBubbleId}`);
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    const chunk = decoder.decode(value, { stream: true });
+                    fullText += chunk;
+                    
+                    // Progressive rendering
+                    rawBubble.textContent = fullText;
+                    bubble.innerHTML = marked.parse(fullText);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+                
+                // Done streaming. Refresh Context!
+                // If it was a new conversation, we don't have the cid yet unless we parse it.
+                // Let's just reload if cid is empty.
+                if (!cid) {
+                    window.location.reload();
+                } else {
+                    refreshContextPanel(cid);
+                }
+                
+            } catch (err) {
+                console.error(err);
+                const bubble = document.getElementById(assistantBubbleId);
+                bubble.innerHTML = `<span style="color:#f44336;">Error: Could not retrieve response. ${err.message}</span>`;
+            }
+            
+            submitBtn.disabled = false;
         }
         
         function updateFileBadge() {
             const input = document.getElementById('file-input');
-            const badge = document.getElementById('file-badge');
+            const previewContainer = document.getElementById('file-previews');
+            previewContainer.innerHTML = '';
+            
             if(input.files && input.files.length > 0) {
-                badge.textContent = `📎 Attached: ${input.files[0].name}`;
-                badge.style.display = 'block';
-            } else {
-                badge.style.display = 'none';
+                Array.from(input.files).forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const previewWrapper = document.createElement('div');
+                        previewWrapper.style.position = 'relative';
+                        previewWrapper.style.display = 'inline-block';
+                        
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.style.maxWidth = '80px';
+                        img.style.maxHeight = '60px';
+                        img.style.borderRadius = '4px';
+                        img.style.border = '1px solid var(--border-color)';
+                        img.title = `${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+                        
+                        const removeBtn = document.createElement('div');
+                        removeBtn.innerHTML = '&times;';
+                        removeBtn.style.position = 'absolute';
+                        removeBtn.style.top = '-5px';
+                        removeBtn.style.right = '-5px';
+                        removeBtn.style.background = '#f44336';
+                        removeBtn.style.color = 'white';
+                        removeBtn.style.borderRadius = '50%';
+                        removeBtn.style.width = '16px';
+                        removeBtn.style.height = '16px';
+                        removeBtn.style.fontSize = '12px';
+                        removeBtn.style.lineHeight = '16px';
+                        removeBtn.style.textAlign = 'center';
+                        removeBtn.style.cursor = 'pointer';
+                        
+                        // We cannot easily remove single files from a FileList in standard HTML input, 
+                        // so we'll just clear the whole input if they click remove for now, or use DataTransfer.
+                        removeBtn.onclick = function() {
+                            const dt = new DataTransfer();
+                            Array.from(input.files).forEach((f, i) => {
+                                if(i !== index) dt.items.add(f);
+                            });
+                            input.files = dt.files;
+                            updateFileBadge();
+                        };
+                        
+                        previewWrapper.appendChild(img);
+                        previewWrapper.appendChild(removeBtn);
+                        previewContainer.appendChild(previewWrapper);
+                    }
+                    reader.readAsDataURL(file);
+                });
             }
         }
 
@@ -549,6 +700,105 @@ html_content = """<!DOCTYPE html>
                 }
             } catch (err) {
                 console.error("Failed to load history", err);
+            }
+        }
+        
+        async function deleteCurrent() {
+            if(!currentCid) return;
+            if(!confirm("Delete this conversation?")) return;
+            await fetch(`/api/conversations/${currentCid}`, { method: 'DELETE' });
+            window.location.href = "/";
+        }
+        
+        async function refreshContextPanel(cid) {
+            if (!cid) return;
+            try {
+                const response = await fetch(`/api/conversations/${cid}/context`);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // We can dynamically update the DOM or just reload for now
+                    // Let's dynamically update a few critical things
+                    if(data.evidence_count !== undefined) {
+                        const panels = document.querySelectorAll('.panel-section h3');
+                        panels.forEach(h3 => {
+                            if(h3.innerText === "Relevant Evidence") {
+                                h3.nextElementSibling.innerText = `${data.evidence_count} items`;
+                            }
+                            if(h3.innerText === "Findings") {
+                                h3.nextElementSibling.innerText = `${data.findings_count} confirmed`;
+                            }
+                        });
+                    }
+                    
+                    // Render Research Opportunities
+                    const oppSection = document.getElementById('panel-opportunities-section');
+                    const oppContainer = document.getElementById('panel-opportunities');
+                    
+                    if (data.opportunities && data.opportunities.length > 0) {
+                        oppSection.style.display = 'block';
+                        oppContainer.innerHTML = '';
+                        
+                        data.opportunities.forEach((opp, i) => {
+                            const oppEl = document.createElement('div');
+                            oppEl.className = 'panel-value';
+                            oppEl.style.marginBottom = '10px';
+                            oppEl.innerHTML = `
+                                <div style="font-weight: 600; margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="color: #fff;">${i+1}. ${opp.title}</span>
+                                    ${opp.priority === 'HIGH' ? '<span style="color: #f44336; font-size: 0.8em; border: 1px solid #f44336; padding: 2px 4px; border-radius: 4px;">High</span>' : ''}
+                                </div>
+                                <div style="font-size: 0.9em; margin-bottom: 8px;">
+                                    <strong>Why:</strong> ${opp.reason}
+                                </div>
+                                <div style="font-size: 0.85em; color: var(--text-muted); margin-bottom: 8px;">
+                                    <strong>Missing:</strong> ${opp.missing_evidence}
+                                </div>
+                                <button class="panel-btn" style="padding: 6px; font-size: 0.85em; background: #2a2a2a;" onclick="testOpportunity('${opp.title.replace(/'/g, "\\'")}')">Test this</button>
+                            `;
+                            oppContainer.appendChild(oppEl);
+                        });
+                    } else {
+                        oppSection.style.display = 'none';
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to refresh context", err);
+            }
+        }
+        
+        function testOpportunity(title) {
+            const msgInput = document.getElementById('message-input');
+            msgInput.value = `I want to test: ${title}. How should I proceed?`;
+            submitForm();
+        }
+
+        async function saveAsEvidence(attachmentId, cid, btnElement) {
+            btnElement.disabled = true;
+            btnElement.innerText = "Saving...";
+            
+            try {
+                const response = await fetch(`/api/attachments/${attachmentId}/evidence?cid=${cid}`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    btnElement.innerText = "Saved as Evidence";
+                    btnElement.style.color = "var(--success)";
+                    btnElement.style.borderColor = "var(--success)";
+                    
+                    // Dynamically refresh context panel
+                    refreshContextPanel(cid);
+                } else {
+                    const data = await response.json();
+                    btnElement.innerText = "Failed";
+                    btnElement.disabled = false;
+                    alert("Error: " + (data.detail || "Could not save evidence"));
+                }
+            } catch (e) {
+                console.error(e);
+                btnElement.innerText = "Failed";
+                btnElement.disabled = false;
             }
         }
         

@@ -2,6 +2,7 @@ from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
 from argus.workspace.models import Conversation, Message
 from argus.workspace.context.models import ContextResult, ContextSource
+from argus.workspace.copilot import ResearchCopilot, ResearchOpportunity
 
 @dataclass
 class AnswerPlan:
@@ -12,12 +13,16 @@ class AnswerPlan:
     requires_confirmation: bool = False
     missing_evidence: List[str] = field(default_factory=list)
     contradictions: List[str] = field(default_factory=list)
+    opportunities: List[ResearchOpportunity] = field(default_factory=list)
     system_instructions: str = ""
 
 class EvidenceAwareAnswerPlanner:
+    def __init__(self):
+        self.copilot = ResearchCopilot()
+
     def plan_answer(self, conversation: Conversation, current_msg: Message, context_result: ContextResult) -> AnswerPlan:
         # 1. Identify question type & explanation level
-        text = current_msg.text.lower()
+        text = current_msg.text.lower() if current_msg and current_msg.text else ""
         q_type = "GENERAL"
         action_intent = "READ"
         requires_confirmation = False
@@ -66,6 +71,10 @@ class EvidenceAwareAnswerPlanner:
             plan.missing_evidence.append("No relevant evidence found for this context.")
         elif plan.contradictions:
             plan.evidence_status = "CONTRADICTORY"
+            
+        # Evaluate Copilot Opportunities if recommendation or missing evidence is requested
+        if plan.question_type in ["RECOMMENDATION", "MISSING_EVIDENCE"]:
+            plan.opportunities = self.copilot.evaluate(context_result)
         
         # 3. Build instructions
         plan.system_instructions = self._build_instructions(plan)
@@ -110,7 +119,23 @@ class EvidenceAwareAnswerPlanner:
             instructions.append("9. CURRENT STATUS: CONTRADICTORY EVIDENCE. You must acknowledge this conflict in the evidence. Explain the contradiction instead of hiding it.")
             
         if plan.question_type == "RECOMMENDATION":
-            instructions.append("10. RECOMMENDATION REQUESTED. Provide evidence-driven, minimal, targeted recommendations for next research steps. Clearly label them as recommendations.")
+            instructions.append("10. RECOMMENDATION REQUESTED. Provide evidence-driven, minimal, targeted recommendations for next research steps.")
+            instructions.append("    - Use the structured Research Opportunities provided below.")
+            instructions.append("    - Use the framework: OBSERVATION -> HYPOTHESIS -> VERIFICATION -> CONCLUSION.")
+            instructions.append("    - Prevent duplicate work. If an opportunity states it is DEPRIORITIZED due to duplicate tests, state that explicitly.")
+            instructions.append("    - Do not fabricate severity. Do not recommend testing out-of-scope targets.")
+            instructions.append("    - Respond naturally like an experienced bug-bounty researcher. Do not output raw JSON or command-line formats.")
+            
+            if plan.opportunities:
+                instructions.append("\nAVAILABLE RESEARCH OPPORTUNITIES:")
+                for i, opp in enumerate(plan.opportunities, 1):
+                    instructions.append(f"Opportunity {i}: {opp.title} ({opp.status})")
+                    instructions.append(f"  Explanation: {opp.explanation}")
+                    instructions.append(f"  Why: {opp.reason}")
+                    instructions.append(f"  Missing Evidence: {', '.join(opp.missing_evidence)}")
+                    instructions.append(f"  Suggested Verification: {opp.suggested_verification}")
+            else:
+                instructions.append("\nNo structured research opportunities generated. Please rely on general heuristic reasoning.")
             
         instructions.append("11. CITATIONS: Use internal evidence references like [Evidence #<id>] or [Screenshot <title>] when referring to evidence.")
         

@@ -11,6 +11,6 @@ def test_vision_pipeline():
     res = pipeline.analyze(att)
     
     assert res.analysis_status == "COMPLETED"
-    assert len(res.visual_observations) == 2
+    assert len(res.visual_observations) == 1
     assert res.visual_observations[0].semantic_status == "OBSERVATION"
-    assert "HTTP GET" in res.analysis_result
+    assert "Mocked" in res.analysis_result

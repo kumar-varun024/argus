@@ -47,4 +47,6 @@ class ContextRanker:
         
         filtered = [s for s in sources if priority.get(s.relevance_score, 0) > 1]
         filtered.sort(key=lambda s: priority.get(s.relevance_score, 0), reverse=True)
-        return filtered
+        
+        # Enforce maximum context size to prevent prompt overflow
+        return filtered[:15]

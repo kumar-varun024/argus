@@ -90,3 +90,59 @@ class ConversationEngine:
         self.repository.save(conversation)
         
         return assistant_msg
+
+    async def generate_response_stream(self, conversation: Conversation) -> AsyncGenerator[str, None]:
+        """Generates an asynchronous streaming response using evidence-aware context."""
+        
+        latest_msg = conversation.messages[-1] if conversation.messages else None
+        query_text = latest_msg.text if latest_msg else ""
+        
+        query = ContextQuery(
+            conversation_id=conversation.conversation_id,
+            query=query_text,
+            user_id=conversation.user_id,
+            mission_id=conversation.mission_id,
+            project_id=conversation.project_id,
+            investigation_id=conversation.investigation_id
+        )
+        
+        context_str = self.context_engine.resolve_context(query)
+        raw_sources = self.context_engine._retrieve_sources(query)
+        allowed_sources = self.context_engine.policy.apply(query, raw_sources)
+        ranked_sources = self.context_engine.ranker.rank(query, allowed_sources)
+        
+        from argus.workspace.context.models import ContextResult
+        status = "OK" if ranked_sources else "INSUFFICIENT_CONTEXT"
+        result = ContextResult(sources=ranked_sources, context_status=status)
+        
+        if latest_msg:
+            answer_plan = self.planner.plan_answer(conversation, latest_msg, result)
+        else:
+            answer_plan = self.planner.plan_answer(conversation, Message(), result)
+            
+        full_system_prompt = answer_plan.system_instructions + "\n\n" + context_str
+        
+        assistant_msg = Message(role="assistant", text="")
+        assistant_msg.sequence_number = len(conversation.messages)
+        conversation.messages.append(assistant_msg)
+        
+        full_response = ""
+        try:
+            async for chunk in self.provider.stream(conversation.messages[:-1], system_prompt=full_system_prompt):
+                full_response += chunk
+                yield chunk
+        except Exception as e:
+            full_response += f"\n\n[Error generating response: {str(e)}]"
+            yield f"\n\n[Error generating response: {str(e)}]"
+            
+        references = []
+        evidence_matches = re.findall(r"\[Evidence #([^\]]+)\]", full_response)
+        for ev_id in evidence_matches:
+            references.append(ContextReference(ref_id=ev_id, ref_type="evidence", title=f"Evidence #{ev_id}"))
+            
+        assistant_msg.text = full_response
+        assistant_msg.references = references
+        
+        conversation.last_message_at = datetime.datetime.utcnow().isoformat()
+        conversation.updated_at = conversation.last_message_at
+        self.repository.save(conversation)
