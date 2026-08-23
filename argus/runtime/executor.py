@@ -205,11 +205,13 @@ class ExternalToolExecutor(ToolExecutor):
             # Pass subdomains if already discovered, otherwise target
             subdomains = getattr(context.mission, "subdomains", [])
             if subdomains:
-                args = ["-l", ",".join(subdomains)]
+                args = ["-l", ",".join(subdomains), "-json"]
             else:
-                args = ["-u", target]
+                args = ["-u", target, "-json"]
         elif "katana" in tool.id:
             args = ["-u", target]
+        elif tool.id == "nuclei":
+            args = ["-u", target, "-json-export", "-"]
         else:
             args = [target]
 
@@ -245,7 +247,66 @@ class ExternalToolExecutor(ToolExecutor):
                         description=f"Discovered subdomain {sub} for target {target}"
                     )
                     # Add to mission evidence store
-                    if hasattr(context.mission, "evidence") and context.mission.evidence:
+                    if hasattr(context.mission, "evidence") and context.mission.evidence is not None:
+                        context.mission.evidence.add(ev)
+                    collector.add_evidence(ev)
+
+            elif tool.id == "httpx":
+                from argus.runtime.parser import ReconParser
+                hosts = ReconParser.parse_httpx(stdout)
+                
+                context.mission.live_hosts = [h["url"] for h in hosts]
+                collector.add_metric("live_hosts_discovered", len(hosts))
+                
+                for h in hosts:
+                    ev = Evidence(
+                        category="live_host",
+                        value=h["url"],
+                        source="httpx",
+                        description=f"Discovered live host {h['url']}"
+                    )
+                    if hasattr(context.mission, "evidence") and context.mission.evidence is not None:
+                        context.mission.evidence.add(ev)
+                    collector.add_evidence(ev)
+
+            elif tool.id == "katana_crawler":
+                from argus.runtime.parser import ReconParser
+                endpoints = ReconParser.parse_katana(stdout)
+                
+                if not hasattr(context.mission, "endpoints"):
+                    context.mission.endpoints = []
+                context.mission.endpoints.extend(endpoints)
+                collector.add_metric("endpoints_discovered", len(endpoints))
+                
+                for ep in endpoints:
+                    ev = Evidence(
+                        category="endpoint",
+                        value=ep,
+                        source="katana",
+                        description=f"Discovered endpoint {ep}"
+                    )
+                    if hasattr(context.mission, "evidence") and context.mission.evidence is not None:
+                        context.mission.evidence.add(ev)
+                    collector.add_evidence(ev)
+                    
+            elif tool.id == "nuclei":
+                from argus.runtime.parser import ReconParser
+                vulnerabilities = ReconParser.parse_nuclei(stdout)
+                
+                if not hasattr(context.mission, "vulnerabilities"):
+                    context.mission.vulnerabilities = []
+                context.mission.vulnerabilities.extend(vulnerabilities)
+                collector.add_metric("vulnerabilities_discovered", len(vulnerabilities))
+                
+                for vuln in vulnerabilities:
+                    ev = Evidence(
+                        category="vulnerability",
+                        value=vuln["name"],
+                        source="nuclei",
+                        description=vuln.get("description", ""),
+                        metadata={"severity": vuln.get("severity"), "host": vuln.get("host")}
+                    )
+                    if hasattr(context.mission, "evidence") and context.mission.evidence is not None:
                         context.mission.evidence.add(ev)
                     collector.add_evidence(ev)
 

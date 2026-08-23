@@ -20,6 +20,10 @@ class MissionManager:
         mission = MissionLifecycle.create(target)
         self._active_missions[mission.id] = mission
         self.checkpointer.checkpoint(mission)
+        
+        from argus.runtime.events import EventBus, RuntimeEventType
+        EventBus().publish(RuntimeEventType.MISSION_CREATED, mission.id, details={"target": target})
+        
         return mission
 
     def get_mission(self, mission_id: str) -> Mission:
@@ -27,9 +31,12 @@ class MissionManager:
             return self._active_missions[mission_id]
         
         # Try to recover
-        mission = self.checkpointer.recover(mission_id)
-        self._active_missions[mission.id] = mission
-        return mission
+        try:
+            mission = self.checkpointer.recover(mission_id)
+            self._active_missions[mission.id] = mission
+            return mission
+        except FileNotFoundError:
+            return None
 
     def start_mission(self, mission_id: str):
         mission = self.get_mission(mission_id)

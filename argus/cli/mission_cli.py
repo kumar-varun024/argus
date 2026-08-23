@@ -14,13 +14,31 @@ checkpointer = MissionCheckpointer()
 controller = MissionController(checkpointer)
 
 @app.command()
-def create(target: str, start: bool = False):
+def create(target: str = typer.Option(..., "--target", help="Target URL or domain"), start: bool = False):
     """Creates a new mission."""
     mission = mission_manager.create_mission(target)
     console.print(f"[green]Created Mission:[/green] {mission.id} for target [bold]{mission.target}[/bold]")
     if start:
         controller.start(mission)
         console.print(f"[green]Mission {mission.id} started.[/green]")
+
+@app.command()
+def run(target: str = typer.Option(..., "--target", help="Target URL or domain")):
+    """Creates and runs a mission synchronously to completion."""
+    import time
+    from argus.runtime.mission import MissionState
+    mission = mission_manager.create_mission(target)
+    console.print(f"[green]Created Mission:[/green] {mission.id} for target [bold]{mission.target}[/bold]")
+    controller.start(mission)
+    console.print(f"[green]Mission {mission.id} started.[/green]")
+    
+    with console.status(f"[bold green]Running mission {mission.id}...") as status:
+        while True:
+            m = mission_manager.get_mission(mission.id)
+            if m.status in [MissionState.COMPLETED, MissionState.FAILED, MissionState.CANCELLED]:
+                console.print(f"\n[bold]Mission Finished with status:[/bold] {m.status.value}")
+                break
+            time.sleep(1)
 
 @app.command()
 def list():

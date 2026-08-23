@@ -31,9 +31,16 @@ class RuntimeEventType(str, Enum):
     TASK_CANCELLED = "TaskCancelled"
     OBSERVATION_ADDED = "ObservationAdded"
     CORRELATION_CREATED = "CorrelationCreated"
+    EVIDENCE_CREATED = "EvidenceCreated"
     EVIDENCE_BUNDLE_CREATED = "EvidenceBundleCreated"
     INVESTIGATION_CREATED = "InvestigationCreated"
+    INVESTIGATION_STARTED = "InvestigationStarted"
     HYPOTHESIS_UPDATED = "HypothesisUpdated"
+    KNOWLEDGE_RETRIEVED = "KnowledgeRetrieved"
+    TOOL_STARTED = "ToolStarted"
+    TOOL_COMPLETED = "ToolCompleted"
+    PLAN_CREATED = "PlanCreated"
+    MISSION_CREATED = "MissionCreated"
 
 class RuntimeEvent(BaseModel):
     """An event emitted across the Argus platform."""
@@ -49,6 +56,26 @@ class EventBus:
     def __init__(self):
         self.subscribers: List[Callable[[RuntimeEvent], None]] = []
         self.history: List[RuntimeEvent] = []
+        
+        # Register the observability logger by default
+        self.subscribe(self._observability_logger)
+
+    def _observability_logger(self, event: Any):
+        try:
+            from argus.runtime.observability import log_lifecycle
+            event_name = event.event_type.name if hasattr(event.event_type, "name") else str(event.event_type)
+            mission_id = getattr(event, "mission_id", "unknown")
+            task_id = getattr(event, "task_id", None)
+            tool_id = getattr(event, "tool_id", None)
+            log_lifecycle(
+                event=event_name,
+                mission_id=mission_id,
+                task_id=task_id,
+                tool_id=tool_id,
+                **getattr(event, "details", {})
+            )
+        except Exception:
+            pass
 
     def subscribe(self, callback: Callable[[RuntimeEvent], None]):
         """Register a callback for all events."""

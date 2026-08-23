@@ -12,8 +12,95 @@ from argus.plugins.graphql.models import (
 from argus.evidence.model import Evidence
 from argus.graph.node import Node
 from argus.graph.edge import Edge
+from argus.http.client import AuthorizedHttpClient
 
 logger = logging.getLogger(__name__)
+
+INTROSPECTION_QUERY = """
+query IntrospectionQuery {
+  __schema {
+    queryType { name }
+    mutationType { name }
+    subscriptionType { name }
+    types {
+      kind
+      name
+      description
+      fields(includeDeprecated: true) {
+        name
+        description
+        args {
+          name
+          description
+          type {
+            ...TypeRef
+          }
+          defaultValue
+        }
+        type {
+          ...TypeRef
+        }
+        isDeprecated
+        deprecationReason
+      }
+      inputFields {
+        name
+        description
+        type {
+          ...TypeRef
+        }
+        defaultValue
+      }
+      interfaces {
+        ...TypeRef
+      }
+      enumValues(includeDeprecated: true) {
+        name
+        description
+        isDeprecated
+        deprecationReason
+      }
+      possibleTypes {
+        ...TypeRef
+      }
+    }
+  }
+}
+
+fragment TypeRef on __Type {
+  kind
+  name
+  ofType {
+    kind
+    name
+    ofType {
+      kind
+      name
+      ofType {
+        kind
+        name
+        ofType {
+          kind
+          name
+          ofType {
+            kind
+            name
+            ofType {
+              kind
+              name
+              ofType {
+                kind
+                name
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+"""
+
 
 class GraphQLSchemaAnalyzer:
     def __init__(self, cache_dir: str = ".argus/cache/graphql"):
@@ -41,7 +128,7 @@ class GraphQLSchemaAnalyzer:
                 logger.info(f"GraphQLSchemaAnalyzer: Cache miss for {ep.url}")
             
             # Simulate Introspection
-            schema = self.acquire_schema(ep.url)
+            schema = self.acquire_schema(ep.url, mission)
             if schema:
                 logger.info(f"GraphQLSchemaAnalyzer: Schema downloaded via introspection for {ep.url}")
                 self._save_to_cache(schema, cache_path)
@@ -58,12 +145,215 @@ class GraphQLSchemaAnalyzer:
             
         return schema
         
-    def acquire_schema(self, url: str) -> Optional[GraphQLSchema]:
-        if "introspection-enabled" in url:
-            schema = GraphQLSchema(source="Introspection", evidence=[])
-            schema.types["User"] = GraphQLType(name="User", kind="OBJECT")
+    def acquire_schema(self, url: str, mission) -> Optional[GraphQLSchema]:
+        client = AuthorizedHttpClient()
+        logger.info("GraphQLSchemaAnalyzer: Attempting introspection POST request using AuthorizedHttpClient...")
+        
+        try:
+            response = client.post(
+                mission=mission,
+                url=url,
+                json={"query": INTROSPECTION_QUERY},
+                action="graphql_introspection"
+            )
+            
+            if not response.success:
+                logger.warning("GraphQLSchemaAnalyzer: Introspection request was blocked or failed. Error: %s", response.error)
+                return None
+                
+            if response.status_code != 200:
+                logger.warning("GraphQLSchemaAnalyzer: Introspection request returned HTTP status %s", response.status_code)
+                return None
+                
+            if not response.body:
+                logger.warning("GraphQLSchemaAnalyzer: Introspection response body was empty")
+                return None
+                
+            try:
+                res_data = json.loads(response.body)
+            except json.JSONDecodeError as e:
+                logger.warning("GraphQLSchemaAnalyzer: Introspection response was malformed JSON: %s", str(e))
+                return None
+                
+            if "errors" in res_data:
+                logger.warning("GraphQLSchemaAnalyzer: Introspection response returned GraphQL errors: %s", res_data["errors"])
+                return None
+                
+            data = res_data.get("data")
+            if not data or not data.get("__schema"):
+                logger.warning("GraphQLSchemaAnalyzer: Introspection response is missing '__schema' in 'data'")
+                return None
+                
+            # Retrieve the evidence that was just stored by the HTTP client
+            last_evidence = None
+            if hasattr(mission, "evidence"):
+                all_ev = []
+                if hasattr(mission.evidence, "all"):
+                    all_ev = mission.evidence.all()
+                elif isinstance(mission.evidence, list):
+                    all_ev = mission.evidence
+                if all_ev:
+                    for ev in reversed(all_ev):
+                        if ev.source == url:
+                            last_evidence = ev
+                            break
+                            
+            schema = self._parse_introspection_response(data["__schema"], last_evidence)
             return schema
-        return None
+            
+        except Exception as e:
+            logger.exception("GraphQLSchemaAnalyzer: Unexpected error acquiring schema: %s", str(e))
+            return None
+
+    def _parse_introspection_response(self, schema_data: dict, evidence: Optional[Evidence]) -> GraphQLSchema:
+        schema = GraphQLSchema(source="Introspection", evidence=[evidence] if evidence else [])
+        
+        query_type_name = schema_data.get("queryType", {}).get("name") if schema_data.get("queryType") else None
+        mutation_type_name = schema_data.get("mutationType", {}).get("name") if schema_data.get("mutationType") else None
+        subscription_type_name = schema_data.get("subscriptionType", {}).get("name") if schema_data.get("subscriptionType") else None
+        
+        types = schema_data.get("types", [])
+        for t in types:
+            kind = t.get("kind")
+            name = t.get("name")
+            if not name or name.startswith("__"):
+                continue
+                
+            if name == query_type_name:
+                self._parse_operations(t.get("fields") or [], "Query", schema, evidence)
+            elif name == mutation_type_name:
+                self._parse_operations(t.get("fields") or [], "Mutation", schema, evidence)
+            elif name == subscription_type_name:
+                self._parse_operations(t.get("fields") or [], "Subscription", schema, evidence)
+                
+            if kind == "ENUM":
+                enum_values = [ev.get("name") for ev in t.get("enumValues", []) if ev.get("name")]
+                schema.enums[name] = GraphQLEnum(
+                    name=name,
+                    values=enum_values,
+                    source="Introspection",
+                    evidence=[evidence] if evidence else []
+                )
+            elif kind == "UNION":
+                possible_types = []
+                for pt in t.get("possibleTypes", []):
+                    pt_name = self._parse_type_ref(pt)
+                    if pt_name:
+                        possible_types.append(pt_name)
+                schema.unions[name] = GraphQLUnion(
+                    name=name,
+                    possible_types=possible_types,
+                    source="Introspection",
+                    evidence=[evidence] if evidence else []
+                )
+            elif kind == "INTERFACE":
+                fields_dict = self._parse_fields(t.get("fields") or [], evidence)
+                schema.interfaces[name] = GraphQLInterface(
+                    name=name,
+                    fields=fields_dict,
+                    source="Introspection",
+                    evidence=[evidence] if evidence else []
+                )
+            elif kind in ("OBJECT", "INPUT_OBJECT", "SCALAR"):
+                fields_dict = self._parse_fields(t.get("fields") or t.get("inputFields") or [], evidence)
+                schema.types[name] = GraphQLType(
+                    name=name,
+                    kind=kind,
+                    description=t.get("description"),
+                    fields=fields_dict,
+                    source="Introspection",
+                    evidence=[evidence] if evidence else []
+                )
+        return schema
+        
+    def _parse_operations(self, fields: list, op_type: str, schema: GraphQLSchema, evidence: Optional[Evidence]):
+        for f in fields:
+            name = f.get("name")
+            if not name:
+                continue
+            ret_type = self._parse_type_ref(f.get("type"))
+            arguments = self._parse_arguments(f.get("args") or [])
+            op = GraphQLOperation(
+                name=name,
+                operation_type=op_type,
+                return_type=ret_type,
+                arguments=arguments,
+                input_types=[arg.type for arg in arguments],
+                source="Introspection",
+                evidence=[evidence] if evidence else []
+            )
+            if op_type == "Query":
+                schema.queries[name] = op
+            elif op_type == "Mutation":
+                schema.mutations[name] = op
+            elif op_type == "Subscription":
+                schema.subscriptions[name] = op
+
+    def _parse_fields(self, fields: list, evidence: Optional[Evidence]) -> Dict[str, GraphQLField]:
+        fields_dict = {}
+        for f in fields:
+            name = f.get("name")
+            if not name:
+                continue
+            f_type_str = self._parse_type_ref(f.get("type"))
+            is_req, is_lst = self._check_type_properties(f.get("type"))
+            arguments = self._parse_arguments(f.get("args") or [])
+            fields_dict[name] = GraphQLField(
+                name=name,
+                type=f_type_str,
+                description=f.get("description"),
+                arguments=arguments,
+                is_list=is_lst,
+                is_required=is_req
+            )
+        return fields_dict
+
+    def _parse_arguments(self, args: list) -> List[GraphQLArgument]:
+        arguments = []
+        for arg in args:
+            name = arg.get("name")
+            if not name:
+                continue
+            arg_type_str = self._parse_type_ref(arg.get("type"))
+            arg_is_req, _ = self._check_type_properties(arg.get("type"))
+            arguments.append(GraphQLArgument(
+                name=name,
+                type=arg_type_str,
+                default_value=arg.get("defaultValue"),
+                is_required=arg_is_req
+            ))
+        return arguments
+
+    def _parse_type_ref(self, type_ref: Optional[dict]) -> str:
+        if not type_ref:
+            return "Unknown"
+        kind = type_ref.get("kind")
+        name = type_ref.get("name")
+        if name:
+            return name
+        ofType = type_ref.get("ofType")
+        if ofType:
+            inner = self._parse_type_ref(ofType)
+            if kind == "NON_NULL":
+                return f"{inner}!"
+            elif kind == "LIST":
+                return f"[{inner}]"
+            return inner
+        return "Unknown"
+
+    def _check_type_properties(self, type_ref: Optional[dict]):
+        is_req = False
+        is_lst = False
+        curr = type_ref
+        while curr:
+            kind = curr.get("kind")
+            if kind == "NON_NULL":
+                is_req = True
+            elif kind == "LIST":
+                is_lst = True
+            curr = curr.get("ofType")
+        return is_req, is_lst
+
         
     def infer_schema(self, mission) -> GraphQLSchema:
         schema = GraphQLSchema(source="Inference", evidence=[])

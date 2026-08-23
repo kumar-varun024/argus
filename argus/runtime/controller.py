@@ -10,7 +10,7 @@ from argus.runtime.recovery import RecoveryManager
 # Core Engines
 from argus.planning.planner import MissionPlanner
 from argus.planning.research_planner import ResearchPlanner
-from argus.runtime.scheduler import MissionScheduler
+from argus.runtime.executor import TaskScheduler
 from argus.runtime.orchestrator import ToolOrchestrator
 from argus.correlation.engine import CorrelationEngine
 from argus.correlation.fusion import EvidenceFusionEngine
@@ -36,15 +36,15 @@ class MissionController:
             mission=mission,
             state_machine=state_machine,
             checkpointer=self.checkpointer,
-            mission_planner=MissionPlanner(),
-            research_planner=ResearchPlanner(),
-            task_scheduler=MissionScheduler(),
+            mission_planner=MissionPlanner(mission),
+            research_planner=ResearchPlanner(mission),
+            task_scheduler=TaskScheduler(mission),
             tool_orchestrator=ToolOrchestrator(),
-            correlation_engine=CorrelationEngine(),
-            fusion_engine=EvidenceFusionEngine(),
-            investigation_builder=InvestigationBuilder(),
+            correlation_engine=CorrelationEngine(mission.observations, mission.correlations, mission.correlation_graph),
+            fusion_engine=EvidenceFusionEngine(mission.observations, mission.correlations, mission.evidence_bundles),
+            investigation_builder=InvestigationBuilder(mission.investigations, mission.evidence_bundles, mission.correlations, mission.observations),
             priority_engine=PriorityEngine(),
-            hypothesis_engine=HypothesisEngine(),
+            hypothesis_engine=HypothesisEngine(getattr(mission, 'hypotheses', None)),
             learning_engine=LearningEngine()
         )
 

@@ -31,6 +31,12 @@ class ResultCollector:
     def add_evidence(self, ev: Any):
         """Add evidence discovered."""
         self.evidence.append(ev)
+        
+        try:
+            from argus.runtime.events import EventBus, RuntimeEventType
+            EventBus().publish(RuntimeEventType.EVIDENCE_CREATED, "unknown", details={"category": getattr(ev, "category", "unknown"), "source": getattr(ev, "source", "unknown")})
+        except Exception:
+            pass
 
     def add_knowledge_graph_update(self, update: Any):
         """Add a Knowledge Graph update instruction/object."""

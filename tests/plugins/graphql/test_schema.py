@@ -9,6 +9,54 @@ from argus.graph.graph import KnowledgeGraph
 from argus.plugins.graphql.agent import GraphQLSpecialist
 from argus.plugins.graphql.models import GraphQLEndpoint
 
+from unittest.mock import patch
+
+@pytest.fixture(autouse=True)
+def mock_http_client():
+    from argus.http.client import HttpResponse
+    from argus.authorization.scope import ScopeDecision, ScopeState
+    from argus.authorization.gate import AuthDecision
+    
+    def side_effect(mission, url, *args, **kwargs):
+        if "introspection-enabled" in url:
+            mock_resp_body = json.dumps({
+                "data": {
+                    "__schema": {
+                        "queryType": {"name": "Query"},
+                        "types": [
+                            {
+                                "kind": "OBJECT",
+                                "name": "User"
+                            }
+                        ]
+                    }
+                }
+            })
+            return HttpResponse(
+                success=True,
+                status_code=200,
+                headers={"content-type": "application/json"},
+                body=mock_resp_body,
+                url=url,
+                method="POST",
+                scope_decision=ScopeDecision("example.com", ScopeState.IN_SCOPE),
+                authorization_decision=AuthDecision(True, "Allowed")
+            )
+        else:
+            return HttpResponse(
+                success=False,
+                status_code=400,
+                error="Introspection disabled",
+                url=url,
+                method="POST",
+                scope_decision=ScopeDecision("example.com", ScopeState.IN_SCOPE),
+                authorization_decision=AuthDecision(True, "Allowed")
+            )
+            
+    with patch("argus.plugins.graphql.schema.AuthorizedHttpClient.post", side_effect=side_effect) as p:
+        yield p
+
+
 @pytest.fixture
 def clean_cache():
     cache_dir = ".argus/cache/graphql"

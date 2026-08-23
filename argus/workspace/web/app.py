@@ -206,7 +206,21 @@ async def post_chat_stream(
     # Process user message
     engine.add_user_message(conversation, message, attachments)
     
-    return StreamingResponse(engine.generate_response_stream(conversation), media_type="text/event-stream")
+    return StreamingResponse(
+        engine.generate_response_stream(conversation), 
+        media_type="text/event-stream",
+        headers={"X-Conversation-Id": conversation.conversation_id}
+    )
+
+@app.get("/api/provider/status")
+def get_provider_status():
+    """Returns the safe status of the configured AI provider."""
+    provider = engine.provider
+    return {
+        "provider": provider.__class__.__name__.replace("Provider", "").replace("Model", "").replace("Compatible", "").lower(),
+        "model": provider.model_name(),
+        "configured": True
+    }
 
 def start_server(host: str = "127.0.0.1", port: int = 8000):
     """Starts the Uvicorn web server for the workspace."""

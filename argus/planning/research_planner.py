@@ -58,6 +58,58 @@ class ResearchPlanner:
         tasks = self.task_generator.from_gaps(gaps)
         logger.info("Tasks generated: %d", len(tasks))
 
+        try:
+            from argus.knowledge.manager import KnowledgeManager
+            km = KnowledgeManager()
+            
+            # Extract knowledge properties from Evidence
+            discovered_techs = set(getattr(self.mission, 'technologies', []))
+            vulns = []
+            
+            if hasattr(self.mission, 'evidence') and self.mission.evidence:
+                for ev in self.mission.evidence.all():
+                    if ev.category == "technology":
+                        discovered_techs.add(str(ev.value).lower())
+                    elif ev.category == "vulnerability":
+                        vulns.append(str(ev.value))
+
+            knowledge_context = set()
+            
+            # Query by discovered technologies
+            for tech in discovered_techs:
+                for k in km.search(technology=tech):
+                    knowledge_context.add(f"{k.title}: {k.description}")
+            
+            # Query by vulnerabilities (could map to CWE/OWASP/CAPEC if entries match)
+            for vuln in vulns:
+                for k in km.search(keyword=vuln):
+                    knowledge_context.add(f"{k.title}: {k.description}")
+                    
+                # Also try matching CWE/OWASP if explicitly known
+                if "cwe" in vuln.lower():
+                    # simplistic extraction just to demonstrate capability if finding contains CWE-XXX
+                    import re
+                    match = re.search(r'CWE-\d+', vuln, re.IGNORECASE)
+                    if match:
+                        for k in km.search(cwe=match.group(0)):
+                            knowledge_context.add(f"{k.title}: {k.description}")
+
+            for task in tasks:
+                # search for knowledge related specifically to the task
+                related = km.search(keyword=task.title)
+                hints = set(knowledge_context)
+                for k in related[:3]:
+                    hints.add(f"{k.title}: {k.description}")
+                
+                if hints:
+                    task.context["knowledge_base_hints"] = list(hints)[:5] # limit to top 5
+                    
+            from argus.runtime.events import EventBus, RuntimeEventType
+            EventBus().publish(RuntimeEventType.KNOWLEDGE_RETRIEVED, str(self.mission.id), details={"knowledge_count": len(knowledge_context)})
+                    
+        except Exception as e:
+            logger.warning(f"Failed to query KnowledgeManager: {e}")
+
         # 4. Filter by scope/policy, then prioritize
         tasks = self.decision_engine.filter_by_scope(tasks)
         tasks = self.decision_engine.prioritize(tasks, coverage)

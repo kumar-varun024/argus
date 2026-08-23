@@ -7,8 +7,12 @@ from argus.runtime.mission_runtime import AutonomousMissionRuntime
 # Mocking all the engines
 class MockEngine:
     def __getattr__(self, name):
+        if name in ("queue_manager",):
+            return MockEngine()
         def _mock(*args, **kwargs):
-            pass
+            if name == "is_complete":
+                return True
+            return None
         return _mock
 
 def test_state_machine_valid_transitions():

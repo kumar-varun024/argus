@@ -3,6 +3,7 @@ import re
 from typing import List, AsyncGenerator
 from argus.workspace.models import Conversation, Message, ImageAttachment, ContextReference
 from argus.workspace.provider import AIModelProvider, MockModelProvider
+from argus.workspace.provider_router import get_default_provider
 from argus.workspace.repository import ConversationRepository
 from argus.workspace.context.engine import ResearchContextEngine
 from argus.workspace.context.models import ContextQuery
@@ -12,7 +13,7 @@ class ConversationEngine:
     """The central engine orchestrating conversational interactions."""
     
     def __init__(self, provider: AIModelProvider = None, repository: ConversationRepository = None):
-        self.provider = provider or MockModelProvider()
+        self.provider = provider or get_default_provider()
         self.repository = repository or ConversationRepository()
         self.context_engine = ResearchContextEngine()
         self.planner = EvidenceAwareAnswerPlanner()

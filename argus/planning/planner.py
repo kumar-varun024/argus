@@ -56,4 +56,7 @@ class MissionPlanner:
         if hasattr(self.mission, 'plan_dependencies'):
             self.mission.plan_dependencies = dependencies
             
+        from argus.runtime.events import EventBus, RuntimeEventType
+        EventBus().publish(RuntimeEventType.PLAN_CREATED, str(self.mission.id), details={"steps_count": len(scheduled_steps)})
+            
         return plan

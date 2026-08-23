@@ -1,4 +1,4 @@
-html_content = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -115,13 +115,16 @@ html_content = """<!DOCTYPE html>
 
     <!-- LEFT SIDEBAR -->
     <div class="sidebar">
-        <div class="logo">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-            ARGUS
+        <div class="sidebar-logo">
+            <a href="/" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 10px;" title="New Conversation">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                ARGUS
+            </a>
         </div>
         <div style="display:flex; justify-content:space-between; margin-bottom: 20px;">
+            <button class="new-btn" onclick="window.location.href='/'" style="margin-bottom:0;" title="Start a New Conversation">+ Chat</button>
             <button class="new-btn" onclick="createNewProject()" style="margin-bottom:0;">+ Project</button>
-            <button class="new-btn" onclick="createNewConversation()" style="margin-bottom:0;">+ Task / Conv</button>
+            <button class="new-btn" onclick="createNewConversation()" style="margin-bottom:0;">+ Task</button>
         </div>
         
         <input type="text" id="search-box" placeholder="Search projects/tasks...">
@@ -384,6 +387,7 @@ html_content = """<!DOCTYPE html>
         });
         
         form.addEventListener('submit', function(e) {
+            e.preventDefault();
             submitForm();
         });
         
@@ -394,6 +398,19 @@ html_content = """<!DOCTYPE html>
             const message = msgInput.value.trim();
             const cid = document.querySelector('input[name="cid"]').value;
             
+            if (message === '') {
+                submitBtn.disabled = false;
+                return;
+            }
+            
+            // 1. Create FormData BEFORE clearing the input
+            const formData = new FormData(form);
+            formData.set('message', message); // Ensure trimmed message is used
+            const fileInput = document.getElementById('file-input');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                formData.delete('images');
+            }
+            
             // Immediately render user message
             const messagesContainer = document.getElementById('chat-messages');
             
@@ -402,7 +419,7 @@ html_content = """<!DOCTYPE html>
                 messagesContainer.innerHTML = '';
             }
             
-            // 1. Create user message bubble
+            // 2. Create user message bubble
             const userMsgHtml = `
                 <div class="message-container user-message-container">
                     <div class="message user-message">
@@ -412,13 +429,13 @@ html_content = """<!DOCTYPE html>
             `;
             messagesContainer.insertAdjacentHTML('beforeend', userMsgHtml);
             
-            // 2. Clear input
+            // 3. Clear input
             msgInput.value = '';
             msgInput.style.height = 'auto';
             document.getElementById('file-previews').innerHTML = '';
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
             
-            // 3. Create Assistant Placeholder Bubble
+            // 4. Create Assistant Placeholder Bubble
             const assistantBubbleId = 'msg-' + Date.now();
             const assistantMsgHtml = `
                 <div class="message-container assistant-message-container">
@@ -430,8 +447,6 @@ html_content = """<!DOCTYPE html>
             `;
             messagesContainer.insertAdjacentHTML('beforeend', assistantMsgHtml);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
-            
-            const formData = new FormData(form);
             
             try {
                 // Post to streaming endpoint
@@ -447,6 +462,11 @@ html_content = """<!DOCTYPE html>
                         return;
                     }
                     throw new Error("HTTP " + response.status);
+                }
+                
+                let responseCid = cid;
+                if (!cid && response.headers.has('X-Conversation-Id')) {
+                    responseCid = response.headers.get('X-Conversation-Id');
                 }
                 
                 const reader = response.body.getReader();
@@ -468,10 +488,12 @@ html_content = """<!DOCTYPE html>
                 }
                 
                 // Done streaming. Refresh Context!
-                // If it was a new conversation, we don't have the cid yet unless we parse it.
-                // Let's just reload if cid is empty.
                 if (!cid) {
-                    window.location.reload();
+                    if (responseCid) {
+                        window.location.href = '/?cid=' + responseCid;
+                    } else {
+                        window.location.reload();
+                    }
                 } else {
                     refreshContextPanel(cid);
                 }

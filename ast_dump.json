@@ -1,0 +1,4625 @@
+{
+  "/home/varun/argus/argus/config.py": [
+    {
+      "name": "Config",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/models.py": [
+    {
+      "name": "BenchmarkGroundTruth",
+      "methods": [],
+      "doc": "Defines the expected outcomes for a benchmark mission."
+    },
+    {
+      "name": "Benchmark",
+      "methods": [],
+      "doc": "Definition of a benchmark test."
+    },
+    {
+      "name": "BenchmarkMetrics",
+      "methods": [],
+      "doc": "Quantitative metrics describing benchmark performance."
+    },
+    {
+      "name": "BenchmarkResult",
+      "methods": [],
+      "doc": "The result of executing a benchmark mission."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/registry.py": [
+    {
+      "name": "BenchmarkRegistry",
+      "methods": [
+        "__init__",
+        "register",
+        "get",
+        "list_all",
+        "list_by_category"
+      ],
+      "doc": "Registry of all available benchmarks."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/mission_loader.py": [
+    {
+      "name": "MissionLoader",
+      "methods": [
+        "load_mission"
+      ],
+      "doc": "Constructs a Mission object for a Benchmark."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/dataset_loader.py": [
+    {
+      "name": "DatasetLoader",
+      "methods": [
+        "load_dataset"
+      ],
+      "doc": "Loads benchmark datasets (observations, mock files, responses) into the mission."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/framework.py": [
+    {
+      "name": "BenchmarkFramework",
+      "methods": [
+        "__init__",
+        "register_benchmark",
+        "register_dataset_as_benchmark",
+        "load_datasets",
+        "list_benchmarks",
+        "run_benchmark"
+      ],
+      "doc": "Facade for the Argus Benchmark subsystem."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/leaderboard/ci.py": [
+    {
+      "name": "CIIntegration",
+      "methods": [
+        "get_commit_sha",
+        "handle_regression_exit"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/leaderboard/models.py": [
+    {
+      "name": "Classification",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "LeaderboardEntry",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "MetricComparison",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "RegressionReport",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/leaderboard/history.py": [
+    {
+      "name": "HistoryTracker",
+      "methods": [
+        "__init__",
+        "get_trend"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/leaderboard/comparison.py": [
+    {
+      "name": "MetricComparator",
+      "methods": [
+        "compare_metric",
+        "check_compatibility"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/leaderboard/leaderboard.py": [
+    {
+      "name": "Leaderboard",
+      "methods": [
+        "__init__",
+        "_load",
+        "_save",
+        "register",
+        "get_entries",
+        "get_by_id"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/leaderboard/regression.py": [
+    {
+      "name": "RegressionDetector",
+      "methods": [
+        "detect"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/leaderboard/thresholds.py": [
+    {
+      "name": "RegressionThresholds",
+      "methods": [
+        "get_threshold"
+      ],
+      "doc": "Configurable thresholds for detecting regressions."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/leaderboard/baseline.py": [
+    {
+      "name": "BaselineResolver",
+      "methods": [
+        "__init__",
+        "resolve"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/runner/models.py": [
+    {
+      "name": "BenchmarkArtifacts",
+      "methods": [],
+      "doc": "Structured storage for artifacts collected during a benchmark mission."
+    },
+    {
+      "name": "EvaluationResult",
+      "methods": [],
+      "doc": "The final structured evaluation result produced by the Evaluation Runner."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/runner/history.py": [
+    {
+      "name": "HistoryManager",
+      "methods": [
+        "__init__",
+        "append",
+        "get_history",
+        "get_trend"
+      ],
+      "doc": "Manages evaluation history and provides trend analysis."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/runner/registry.py": [
+    {
+      "name": "EvaluationRegistry",
+      "methods": [
+        "__init__",
+        "register",
+        "get",
+        "get_by_benchmark",
+        "list_all"
+      ],
+      "doc": "Registry to store and retrieve active and completed evaluations."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/runner/comparison.py": [
+    {
+      "name": "ComparisonRunner",
+      "methods": [
+        "compare"
+      ],
+      "doc": "Wraps the GroundTruthEngine for the Evaluation Pipeline."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/runner/executor.py": [
+    {
+      "name": "BenchmarkExecutor",
+      "methods": [
+        "__init__",
+        "run_single",
+        "run_multiple",
+        "run_category",
+        "run_suite"
+      ],
+      "doc": "Executes benchmarks in various modes (Single, Multiple, Suite, Parallel)."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/runner/runner.py": [
+    {
+      "name": "EvaluationRunner",
+      "methods": [
+        "__init__",
+        "run",
+        "run_suite",
+        "_store_result",
+        "get_status",
+        "get_history",
+        "get_trend"
+      ],
+      "doc": "Facade for the Evaluation Runner subsystem."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/runner/pipeline.py": [
+    {
+      "name": "EvaluationPipeline",
+      "methods": [
+        "__init__",
+        "run"
+      ],
+      "doc": "End-to-end evaluation pipeline for a benchmark."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/runner/artifacts.py": [
+    {
+      "name": "ArtifactCollector",
+      "methods": [
+        "collect"
+      ],
+      "doc": "Collects artifacts safely from a completed Mission object."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/metrics/quality.py": [
+    {
+      "name": "QualityCalculator",
+      "methods": [
+        "_calculate_quality",
+        "calculate"
+      ],
+      "doc": "Calculates quality scores from ground truth comparisons."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/metrics/weights.py": [
+    {
+      "name": "ScoringWeights",
+      "methods": [],
+      "doc": "Configurable weights for the scoring engine."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/metrics/models.py": [
+    {
+      "name": "Metric",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "CoverageReport",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "QualityReport",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "PerformanceReport",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "BenchmarkScore",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/metrics/registry.py": [
+    {
+      "name": "MetricsRegistry",
+      "methods": [
+        "__init__",
+        "register_score",
+        "get_score",
+        "register_coverage",
+        "get_coverage",
+        "register_quality",
+        "get_quality",
+        "register_performance",
+        "get_performance"
+      ],
+      "doc": "Stores generated metrics, reports, and scores."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/metrics/coverage.py": [
+    {
+      "name": "CoverageCalculator",
+      "methods": [
+        "_calculate_ratio",
+        "_count_matches_by_category",
+        "_count_expected_by_category",
+        "calculate"
+      ],
+      "doc": "Calculates coverage scores from ground truth comparisons."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/metrics/performance.py": [
+    {
+      "name": "PerformanceCalculator",
+      "methods": [
+        "calculate"
+      ],
+      "doc": "Extracts and calculates performance metrics from the mission object."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/metrics/engine.py": [
+    {
+      "name": "MetricsEngine",
+      "methods": [
+        "__init__",
+        "evaluate"
+      ],
+      "doc": "Facade for the Metrics and Scoring subsystem."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/metrics/scoring.py": [
+    {
+      "name": "ScoringEngine",
+      "methods": [
+        "_calculate_weighted_average",
+        "calculate"
+      ],
+      "doc": "Computes the final deterministic benchmark scorecard."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/reports/html.py": [
+    {
+      "name": "HTMLRenderer",
+      "methods": [
+        "render"
+      ],
+      "doc": "Renders the report as a standalone HTML dashboard."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/reports/generator.py": [
+    {
+      "name": "ReportGenerator",
+      "methods": [
+        "generate",
+        "_generate_summary",
+        "_compare_historical",
+        "_generate_recommendations"
+      ],
+      "doc": "Converts EvaluationResults into BenchmarkReports."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/reports/models.py": [
+    {
+      "name": "ExecutiveSummary",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "BenchmarkReport",
+      "methods": [],
+      "doc": "The full report generated from an EvaluationResult."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/reports/json.py": [
+    {
+      "name": "JSONRenderer",
+      "methods": [
+        "render"
+      ],
+      "doc": "Renders the report as a JSON string."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/reports/charts.py": [
+    {
+      "name": "ChartGenerator",
+      "methods": [
+        "generate_ascii_bar",
+        "generate_html_bar"
+      ],
+      "doc": "Utility to generate text-based or HTML-based charts for reports."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/reports/renderers.py": [
+    {
+      "name": "BaseRenderer",
+      "methods": [
+        "render"
+      ],
+      "doc": "Base class for all report renderers."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/reports/pdf.py": [
+    {
+      "name": "PDFRenderer",
+      "methods": [
+        "render"
+      ],
+      "doc": "Renders the report as a PDF document using WeasyPrint (via HTML)."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/reports/markdown.py": [
+    {
+      "name": "MarkdownRenderer",
+      "methods": [
+        "render"
+      ],
+      "doc": "Renders the report as Markdown suitable for GitHub/GitLab."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/ground_truth/validator.py": [
+    {
+      "name": "GroundTruthSchema",
+      "methods": [],
+      "doc": "Pydantic schema for validating ground truth definitions."
+    },
+    {
+      "name": "GroundTruthValidator",
+      "methods": [
+        "validate"
+      ],
+      "doc": "Validates ground truth definitions against the schema."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/ground_truth/models.py": [
+    {
+      "name": "MatchStatus",
+      "methods": [],
+      "doc": "The classification of an expected finding against actual output."
+    },
+    {
+      "name": "GroundTruth",
+      "methods": [],
+      "doc": "Comprehensive definition of expected analysis outcomes for a benchmark."
+    },
+    {
+      "name": "MatchResult",
+      "methods": [],
+      "doc": "The result of comparing a single expectation against actual output."
+    },
+    {
+      "name": "ComparisonResult",
+      "methods": [],
+      "doc": "The aggregated result of all ground truth comparisons for a mission."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/ground_truth/registry.py": [
+    {
+      "name": "GroundTruthRegistry",
+      "methods": [
+        "__init__",
+        "register",
+        "get",
+        "get_by_dataset",
+        "list_all"
+      ],
+      "doc": "In-memory storage for loaded Ground Truth definitions."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/ground_truth/comparison.py": [
+    {
+      "name": "GroundTruthComparer",
+      "methods": [
+        "compare"
+      ],
+      "doc": "Orchestrates matching across all domains between Ground Truth and Mission output."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/ground_truth/loader.py": [
+    {
+      "name": "GroundTruthLoader",
+      "methods": [
+        "load_from_dict",
+        "load_from_file"
+      ],
+      "doc": "Loads and instantiates Ground Truth definitions."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/ground_truth/matcher.py": [
+    {
+      "name": "GroundTruthMatcher",
+      "methods": [
+        "match_item",
+        "identify_unexpected"
+      ],
+      "doc": "Core logic for matching expected strings/objects against actual outputs."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/ground_truth/engine.py": [
+    {
+      "name": "GroundTruthEngine",
+      "methods": [
+        "__init__",
+        "evaluate"
+      ],
+      "doc": "Facade for the Ground Truth evaluation subsystem."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/datasets/manager.py": [
+    {
+      "name": "DatasetManager",
+      "methods": [
+        "__init__",
+        "import_dataset",
+        "load_all_from_directory",
+        "get_dataset",
+        "list_datasets"
+      ],
+      "doc": "Facade for managing benchmark datasets."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/datasets/validator.py": [
+    {
+      "name": "DatasetValidator",
+      "methods": [
+        "validate_directory",
+        "validate_manifest",
+        "validate_mission_config",
+        "validate_ground_truth"
+      ],
+      "doc": "Validates the structure and content of a benchmark dataset directory."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/datasets/models.py": [
+    {
+      "name": "BenchmarkDataset",
+      "methods": [],
+      "doc": "Represents a loaded benchmark dataset with all its configurations."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/datasets/registry.py": [
+    {
+      "name": "DatasetRegistry",
+      "methods": [
+        "__init__",
+        "register",
+        "remove",
+        "find",
+        "search",
+        "list",
+        "filter"
+      ],
+      "doc": "In-memory registry of loaded datasets."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/datasets/loader.py": [
+    {
+      "name": "DatasetLoader",
+      "methods": [
+        "load",
+        "_read_yaml"
+      ],
+      "doc": "Parses a dataset directory and builds a BenchmarkDataset object."
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/datasets/schema.py": [
+    {
+      "name": "DatasetManifestSchema",
+      "methods": [],
+      "doc": "Schema for validating dataset.yaml"
+    },
+    {
+      "name": "MissionConfigSchema",
+      "methods": [],
+      "doc": "Schema for validating mission.yaml"
+    },
+    {
+      "name": "GroundTruthSchema",
+      "methods": [],
+      "doc": "Schema for validating ground_truth.yaml"
+    }
+  ],
+  "/home/varun/argus/argus/benchmark/datasets/versioning.py": [
+    {
+      "name": "VersioningManager",
+      "methods": [
+        "is_compatible"
+      ],
+      "doc": "Handles semantic versioning and compatibility checks for datasets."
+    }
+  ],
+  "/home/varun/argus/argus/learning/models.py": [
+    {
+      "name": "FeedbackTag",
+      "methods": [],
+      "doc": "Structured researcher feedback categories."
+    },
+    {
+      "name": "FeedbackTargetType",
+      "methods": [],
+      "doc": "Type of the artifact the feedback is attached to."
+    },
+    {
+      "name": "FeedbackEntry",
+      "methods": [],
+      "doc": "A single piece of structured researcher feedback."
+    },
+    {
+      "name": "PluginUsageStat",
+      "methods": [
+        "value_rate"
+      ],
+      "doc": "Performance statistics for a single plugin across a mission."
+    },
+    {
+      "name": "HeuristicUsageStat",
+      "methods": [
+        "noise_rate"
+      ],
+      "doc": "Performance statistics for a heuristic rule."
+    },
+    {
+      "name": "MissionMetricsRecord",
+      "methods": [],
+      "doc": "Complete performance snapshot of a mission."
+    },
+    {
+      "name": "LearningRecord",
+      "methods": [],
+      "doc": "Per-mission learning snapshot captured after mission completion."
+    },
+    {
+      "name": "DiscoveredPattern",
+      "methods": [],
+      "doc": "A reusable research pattern identified from historical mission data."
+    },
+    {
+      "name": "RecommendationPriority",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "Recommendation",
+      "methods": [],
+      "doc": "An advisory recommendation for the Mission Planner.\n\nALWAYS requires planner approval before any action is taken.\nThe Learning Engine NEVER auto-modifies execution plans or mission policy."
+    }
+  ],
+  "/home/varun/argus/argus/learning/recommendations.py": [
+    {
+      "name": "RecommendationEngine",
+      "methods": [
+        "generate"
+      ],
+      "doc": "Converts DiscoveredPattern objects into advisory Recommendation items.\n\nQuality gate: every recommendation must contain a non-empty ``rationale``.\nRecommendations that fail this check are logged and discarded."
+    }
+  ],
+  "/home/varun/argus/argus/learning/history.py": [
+    {
+      "name": "MissionHistoryStore",
+      "methods": [
+        "__init__",
+        "record_mission",
+        "get_record",
+        "get_all_records",
+        "_extract_hypothesis_ids",
+        "_extract_task_ids",
+        "_extract_plugin_usage",
+        "_investigation_quality"
+      ],
+      "doc": "Creates, persists, and retrieves LearningRecord snapshots for missions.\n\nUsage\n-----\nAfter a mission completes::\n\n    store = MissionHistoryStore(registry)\n    record = store.record_mission(mission)  # extract + persist"
+    }
+  ],
+  "/home/varun/argus/argus/learning/registry.py": [
+    {
+      "name": "LearningRegistry",
+      "methods": [
+        "__init__",
+        "add_record",
+        "get_record",
+        "get_all_records",
+        "add_feedback",
+        "get_feedback",
+        "get_all_feedback",
+        "clear",
+        "_save",
+        "_load"
+      ],
+      "doc": "Centralized store for LearningRecord snapshots and FeedbackEntry objects.\n\nRecords are keyed by mission_id.\nFeedback is keyed by target_id (investigation / hypothesis / task UUID)."
+    }
+  ],
+  "/home/varun/argus/argus/learning/metrics.py": [
+    {
+      "name": "MissionMetricsCalculator",
+      "methods": [
+        "calculate",
+        "_coverage",
+        "_execution_time",
+        "_investigation_count",
+        "_hypothesis_count",
+        "_hypothesis_outcomes",
+        "_evidence_quality",
+        "_graph_completeness",
+        "_plugin_usage",
+        "_task_stats"
+      ],
+      "doc": "Computes a MissionMetricsRecord from a Mission object.\n\nDesigned to be tolerant of missing or partial mission state \u2014 all\nattribute accesses use safe getattr / hasattr guards so the calculator\nworks regardless of which engines have been initialised."
+    }
+  ],
+  "/home/varun/argus/argus/learning/feedback.py": [
+    {
+      "name": "FeedbackCollector",
+      "methods": [
+        "__init__",
+        "submit",
+        "_validate_target"
+      ],
+      "doc": "Receives researcher feedback and persists it to the LearningRegistry.\n\nValidates that the target_id exists in the appropriate mission registry\nbefore storing.  Validation is best-effort \u2014 if the registry is\nunavailable the feedback is still recorded to avoid data loss."
+    },
+    {
+      "name": "FeedbackSummarizer",
+      "methods": [
+        "summarize",
+        "useful_rate",
+        "false_positive_rate"
+      ],
+      "doc": "Aggregates and summarises feedback for a collection of FeedbackEntry objects."
+    }
+  ],
+  "/home/varun/argus/argus/learning/engine.py": [
+    {
+      "name": "LearningEngine",
+      "methods": [
+        "__init__",
+        "process_mission",
+        "discover_patterns",
+        "generate_recommendations",
+        "feedback",
+        "_write_metrics_to_mission"
+      ],
+      "doc": "Orchestrates feedback collection, metrics computation, pattern discovery,\nand recommendation generation for the Argus Learning & Feedback Engine."
+    },
+    {
+      "name": "_Holder",
+      "methods": [
+        "__init__"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/learning/patterns.py": [
+    {
+      "name": "PatternDiscovery",
+      "methods": [
+        "discover",
+        "_rule_high_authorization_validation",
+        "_rule_low_confidence_heuristic",
+        "_rule_valuable_plugin",
+        "_rule_coverage_bottleneck",
+        "_rule_workflow_discovery_leader"
+      ],
+      "doc": "Identifies reusable patterns from a collection of LearningRecord objects.\n\nRules are evaluated deterministically \u2014 given the same records they always\nproduce the same patterns.  Patterns are advisory only; they do not trigger\nany automatic changes."
+    }
+  ],
+  "/home/varun/argus/argus/workspace/context.py": [
+    {
+      "name": "ResearchContextBuilder",
+      "methods": [
+        "build_system_prompt",
+        "extract_references"
+      ],
+      "doc": "Builds a concise context for the AI model from the current research state."
+    }
+  ],
+  "/home/varun/argus/argus/workspace/copilot.py": [
+    {
+      "name": "ResearchOpportunity",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "ResearchCopilot",
+      "methods": [
+        "evaluate"
+      ],
+      "doc": "The reasoning layer that identifies gaps and suggests prioritized research opportunities."
+    }
+  ],
+  "/home/varun/argus/argus/workspace/planner.py": [
+    {
+      "name": "AnswerPlan",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "EvidenceAwareAnswerPlanner",
+      "methods": [
+        "__init__",
+        "plan_answer",
+        "_build_instructions"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/workspace/models.py": [
+    {
+      "name": "ContextReference",
+      "methods": [],
+      "doc": "Represents a reference to research context (observation, evidence, workflow, etc.)"
+    },
+    {
+      "name": "VisualObservation",
+      "methods": [],
+      "doc": "Represents a structured technical fact extracted from an image."
+    },
+    {
+      "name": "ImageAttachment",
+      "methods": [],
+      "doc": "Represents an uploaded screenshot/image evidence."
+    },
+    {
+      "name": "Message",
+      "methods": [],
+      "doc": "Represents a single chat interaction."
+    },
+    {
+      "name": "Project",
+      "methods": [],
+      "doc": "Represents a security engagement or research workspace."
+    },
+    {
+      "name": "WorkspaceTask",
+      "methods": [],
+      "doc": "Represents a focused piece of work inside a Project."
+    },
+    {
+      "name": "Conversation",
+      "methods": [],
+      "doc": "Represents a full conversation session in the workspace."
+    }
+  ],
+  "/home/varun/argus/argus/workspace/provider_router.py": [
+    {
+      "name": "ProviderRoute",
+      "methods": [
+        "is_healthy"
+      ],
+      "doc": null
+    },
+    {
+      "name": "ProviderRouter",
+      "methods": [
+        "__init__",
+        "_get_healthy_routes",
+        "model_name",
+        "capabilities",
+        "count_tokens",
+        "_log_success",
+        "_log_failover",
+        "generate",
+        "multimodal_generate"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/workspace/repository.py": [
+    {
+      "name": "ProjectRepository",
+      "methods": [
+        "__init__",
+        "_load_all",
+        "save",
+        "get",
+        "delete",
+        "search"
+      ],
+      "doc": "Handles JSON-based persistence of workspace projects."
+    },
+    {
+      "name": "WorkspaceTaskRepository",
+      "methods": [
+        "__init__",
+        "_load_all",
+        "save",
+        "get",
+        "delete",
+        "search"
+      ],
+      "doc": "Handles JSON-based persistence of workspace tasks."
+    },
+    {
+      "name": "ConversationRepository",
+      "methods": [
+        "__init__",
+        "_load_all",
+        "_add_to_index",
+        "_remove_from_index",
+        "save",
+        "get",
+        "delete",
+        "search"
+      ],
+      "doc": "Handles JSON-based persistence of workspace conversations with fast in-memory indexing."
+    }
+  ],
+  "/home/varun/argus/argus/workspace/provider.py": [
+    {
+      "name": "ProviderError",
+      "methods": [
+        "__init__"
+      ],
+      "doc": "Exception raised for provider-specific failures."
+    },
+    {
+      "name": "AIModelProvider",
+      "methods": [
+        "model_name",
+        "capabilities",
+        "count_tokens",
+        "generate",
+        "multimodal_generate"
+      ],
+      "doc": "Abstract base class for all AI models (OpenAI, Anthropic, Local)."
+    },
+    {
+      "name": "MockModelProvider",
+      "methods": [
+        "model_name",
+        "capabilities",
+        "count_tokens",
+        "generate",
+        "multimodal_generate"
+      ],
+      "doc": "A mock provider used for the foundation PR and testing."
+    },
+    {
+      "name": "OpenAICompatibleProvider",
+      "methods": [
+        "__init__",
+        "model_name",
+        "capabilities",
+        "count_tokens",
+        "_format_messages",
+        "generate",
+        "multimodal_generate"
+      ],
+      "doc": null
+    },
+    {
+      "name": "GeminiProvider",
+      "methods": [
+        "__init__",
+        "model_name",
+        "capabilities",
+        "count_tokens",
+        "_format_messages",
+        "generate",
+        "multimodal_generate"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/workspace/api.py": [
+    {
+      "name": "ProjectUpdate",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "TaskUpdate",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "ConversationUpdate",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "EvidenceCreate",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "InvestigationSwitchRequest",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/workspace/vision.py": [
+    {
+      "name": "VisionPipeline",
+      "methods": [
+        "__init__",
+        "analyze"
+      ],
+      "doc": "Orchestrates image analysis and visual observation extraction."
+    }
+  ],
+  "/home/varun/argus/argus/workspace/engine.py": [
+    {
+      "name": "ConversationEngine",
+      "methods": [
+        "__init__",
+        "add_user_message",
+        "generate_response"
+      ],
+      "doc": "The central engine orchestrating conversational interactions."
+    }
+  ],
+  "/home/varun/argus/argus/workspace/storage.py": [
+    {
+      "name": "AttachmentStorage",
+      "methods": [
+        "__init__",
+        "save_upload",
+        "get_path"
+      ],
+      "doc": "Manages secure local storage for uploaded attachments and images."
+    }
+  ],
+  "/home/varun/argus/argus/workspace/context/assembler.py": [
+    {
+      "name": "ContextAssembler",
+      "methods": [
+        "assemble"
+      ],
+      "doc": "Formats a structured ContextResult into a Markdown string for the LLM prompt."
+    }
+  ],
+  "/home/varun/argus/argus/workspace/context/mission.py": [
+    {
+      "name": "MissionContextResolver",
+      "methods": [
+        "resolve"
+      ],
+      "doc": "Resolves and formats the active mission context for the AI."
+    }
+  ],
+  "/home/varun/argus/argus/workspace/context/models.py": [
+    {
+      "name": "ContextQuery",
+      "methods": [],
+      "doc": "Represents a request for research context."
+    },
+    {
+      "name": "ContextSource",
+      "methods": [],
+      "doc": "Represents a single retrieved item of research context."
+    },
+    {
+      "name": "ContextResult",
+      "methods": [],
+      "doc": "The final structured context returned by the engine."
+    }
+  ],
+  "/home/varun/argus/argus/workspace/context/policy.py": [
+    {
+      "name": "ContextPolicy",
+      "methods": [
+        "apply"
+      ],
+      "doc": "Enforces authorization, scope isolation, and privacy policies on context."
+    }
+  ],
+  "/home/varun/argus/argus/workspace/context/ranker.py": [
+    {
+      "name": "ContextRanker",
+      "methods": [
+        "rank"
+      ],
+      "doc": "Ranks retrieved research context based on relevance to the query."
+    }
+  ],
+  "/home/varun/argus/argus/workspace/context/graph.py": [
+    {
+      "name": "KnowledgeGraphRetriever",
+      "methods": [
+        "__init__",
+        "resolve",
+        "_identify_target_entities",
+        "_extract_recent_entities"
+      ],
+      "doc": "Retrieves relevant entities and relationships from the Knowledge Graph."
+    }
+  ],
+  "/home/varun/argus/argus/workspace/context/engine.py": [
+    {
+      "name": "ResearchContextEngine",
+      "methods": [
+        "__init__",
+        "_retrieve_sources",
+        "resolve_context"
+      ],
+      "doc": "The central orchestrator for gathering research context."
+    }
+  ],
+  "/home/varun/argus/argus/workflows/models.py": [
+    {
+      "name": "WorkflowStep",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "Workflow",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/workflows/builder.py": [
+    {
+      "name": "WorkflowBuilder",
+      "methods": [
+        "__init__",
+        "_get_endpoints",
+        "build"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/workflows/detector.py": [
+    {
+      "name": "WorkflowDetector",
+      "methods": [
+        "__init__",
+        "detect_workflows",
+        "_create_workflow",
+        "_detect_authentication",
+        "_detect_organization",
+        "_detect_billing",
+        "_detect_api_keys",
+        "_detect_general_crud"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/ai/context.py": [
+    {
+      "name": "ContextBuilder",
+      "methods": [
+        "build"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/ai/models.py": [
+    {
+      "name": "ResearchCardCategory",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "ResearchCardPriority",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "ResearchCardStatus",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "ResearchCard",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "AIResponse",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/ai/researcher.py": [
+    {
+      "name": "Researcher",
+      "methods": [
+        "__init__",
+        "analyze"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/ai/client.py": [
+    {
+      "name": "AIClient",
+      "methods": [
+        "research"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/ai/github_client.py": [
+    {
+      "name": "GitHubClient",
+      "methods": [
+        "__init__",
+        "research"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/explain/models.py": [
+    {
+      "name": "ReasoningStep",
+      "methods": [],
+      "doc": "A deterministic step in the reasoning chain."
+    },
+    {
+      "name": "TimelineEvent",
+      "methods": [],
+      "doc": "A chronological event related to the investigation."
+    },
+    {
+      "name": "GraphNode",
+      "methods": [],
+      "doc": "A node in the explanation graph."
+    },
+    {
+      "name": "GraphEdge",
+      "methods": [],
+      "doc": "An edge in the explanation graph."
+    },
+    {
+      "name": "ExplanationGraph",
+      "methods": [],
+      "doc": "The full graph structure explaining the investigation's provenance."
+    },
+    {
+      "name": "Explanation",
+      "methods": [],
+      "doc": "A comprehensive explanation object detailing why an investigation exists\nand how its attributes (priority, confidence) were determined."
+    }
+  ],
+  "/home/varun/argus/argus/explain/renderer.py": [
+    {
+      "name": "ExplanationRenderer",
+      "methods": [
+        "render_summary"
+      ],
+      "doc": "Renders Explanation objects into human-readable text."
+    }
+  ],
+  "/home/varun/argus/argus/explain/graph.py": [
+    {
+      "name": "ExplanationGraphBuilder",
+      "methods": [
+        "__init__",
+        "build_graph"
+      ],
+      "doc": "Builds a graph representing the provenance of an investigation."
+    }
+  ],
+  "/home/varun/argus/argus/explain/engine.py": [
+    {
+      "name": "ExplainabilityEngine",
+      "methods": [
+        "__init__",
+        "generate_explanation"
+      ],
+      "doc": "Orchestrates generation of Explanations for Investigations."
+    }
+  ],
+  "/home/varun/argus/argus/explain/timeline.py": [
+    {
+      "name": "TimelineBuilder",
+      "methods": [
+        "__init__",
+        "build_timeline"
+      ],
+      "doc": "Builds a chronological timeline of events leading up to an investigation."
+    }
+  ],
+  "/home/varun/argus/argus/explain/export.py": [
+    {
+      "name": "ExplanationExporter",
+      "methods": [
+        "__init__",
+        "to_json",
+        "to_markdown",
+        "to_html",
+        "to_graph_json"
+      ],
+      "doc": "Exports Explanation objects into various formats."
+    }
+  ],
+  "/home/varun/argus/argus/explain/reasoning.py": [
+    {
+      "name": "ReasoningChainBuilder",
+      "methods": [
+        "__init__",
+        "build_chain"
+      ],
+      "doc": "Builds deterministic reasoning chains tracing an investigation back to observations."
+    }
+  ],
+  "/home/varun/argus/argus/authorization/gate.py": [
+    {
+      "name": "AuthDecision",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "AuthorizationGate",
+      "methods": [
+        "__init__",
+        "can_view",
+        "can_edit",
+        "can_access_project",
+        "can_access_mission",
+        "can_access_investigation",
+        "can_access_evidence",
+        "can_execute_action"
+      ],
+      "doc": "Centralized authorization gate for Argus tools and actions."
+    }
+  ],
+  "/home/varun/argus/argus/authorization/models.py": [
+    {
+      "name": "AuthNodeType",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "AuthEdgeType",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "AuthNode",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "AuthEdge",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/authorization/builder.py": [
+    {
+      "name": "AuthorizationGraphBuilder",
+      "methods": [
+        "__init__",
+        "build",
+        "_build_role_hierarchy",
+        "_build_from_workflows",
+        "_infer_ownership",
+        "_get_or_create_node",
+        "_add_edge"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/authorization/analyzer.py": [
+    {
+      "name": "AuthorizationAnalyzer",
+      "methods": [
+        "__init__",
+        "get_role_hierarchy",
+        "get_ownership_chains",
+        "get_authorization_boundaries"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/authorization/graph.py": [
+    {
+      "name": "AuthorizationGraph",
+      "methods": [
+        "__init__",
+        "add_node",
+        "get_node",
+        "get_node_by_name_and_type",
+        "add_edge",
+        "get_outgoing_edges",
+        "get_incoming_edges",
+        "get_nodes_by_type"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/authorization/scope.py": [
+    {
+      "name": "ScopeState",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "ScopeDecision",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "ScopeResolver",
+      "methods": [
+        "check_scope",
+        "_match_rule",
+        "_is_url",
+        "resolve_target",
+        "resolve_domain",
+        "resolve_url",
+        "resolve_ip",
+        "resolve_subdomain",
+        "resolve_resource",
+        "explain_scope_decision"
+      ],
+      "doc": "Resolves and enforces authorized mission scope boundaries."
+    }
+  ],
+  "/home/varun/argus/argus/models/attack_surface.py": [
+    {
+      "name": "AttackSurface",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/models/authentication.py": [
+    {
+      "name": "AuthenticationModel",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/orchestration/planner.py": [
+    {
+      "name": "WorkflowPlanner",
+      "methods": [
+        "__init__",
+        "identify_current_state",
+        "identify_open_questions",
+        "generate_candidate_steps",
+        "rank_candidate_steps"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/orchestration/models.py": [
+    {
+      "name": "ResearchStepState",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "ResearchStepType",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "ToolExecution",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "WorkflowEvent",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "ResearchStep",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "ResearchWorkflow",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/orchestration/orchestrator.py": [
+    {
+      "name": "ResearchWorkflowOrchestrator",
+      "methods": [
+        "__init__",
+        "create_workflow",
+        "get_workflow",
+        "plan_next_step",
+        "execute_step",
+        "create_evidence",
+        "_record_event"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/hypothesis/generator.py": [
+    {
+      "name": "HypothesisGenerator",
+      "methods": [
+        "__init__",
+        "process_investigation",
+        "_find_overlapping",
+        "_refine"
+      ],
+      "doc": "Generates Hypotheses from Investigations based on evidence thresholds."
+    }
+  ],
+  "/home/varun/argus/argus/hypothesis/models.py": [
+    {
+      "name": "HypothesisCategory",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "HypothesisStatus",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "HypothesisPriority",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "HypothesisHistoryEntry",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "Hypothesis",
+      "methods": [],
+      "doc": "Represents an evidence-backed research question.\nA hypothesis is NOT a vulnerability.\nIt proposes structured areas that should be investigated further based on evidence."
+    }
+  ],
+  "/home/varun/argus/argus/hypothesis/confidence.py": [
+    {
+      "name": "HypothesisConfidenceScorer",
+      "methods": [
+        "calculate_confidence",
+        "_calculate_from_mission"
+      ],
+      "doc": "Calculates a confidence score for a hypothesis based on its supporting evidence."
+    }
+  ],
+  "/home/varun/argus/argus/hypothesis/registry.py": [
+    {
+      "name": "HypothesisRegistry",
+      "methods": [
+        "__init__",
+        "add",
+        "remove",
+        "find",
+        "search",
+        "filter_by_category",
+        "filter_by_status",
+        "get_all",
+        "clear"
+      ],
+      "doc": "Centralized store for Hypothesis objects."
+    }
+  ],
+  "/home/varun/argus/argus/hypothesis/templates.py": [
+    {
+      "name": "HypothesisTemplateBuilder",
+      "methods": [
+        "generate_reasoning",
+        "generate_manual_validation"
+      ],
+      "doc": "Generates structured reasoning and validation guidance for Hypotheses."
+    }
+  ],
+  "/home/varun/argus/argus/hypothesis/engine.py": [
+    {
+      "name": "HypothesisEngine",
+      "methods": [
+        "__init__",
+        "process_investigation",
+        "evaluate_all",
+        "get_ranked_hypotheses"
+      ],
+      "doc": "Facade for the Hypothesis Engine, orchestrating hypothesis generation and lifecycle."
+    }
+  ],
+  "/home/varun/argus/argus/hypothesis/lifecycle.py": [
+    {
+      "name": "HypothesisLifecycleManager",
+      "methods": [
+        "transition",
+        "propose",
+        "review",
+        "validate",
+        "reject",
+        "archive"
+      ],
+      "doc": "Manages the state transitions of Hypotheses and records history."
+    }
+  ],
+  "/home/varun/argus/argus/hypothesis/ranking.py": [
+    {
+      "name": "HypothesisRanker",
+      "methods": [
+        "rank",
+        "evaluate_priority"
+      ],
+      "doc": "Evaluates and ranks hypotheses based on evidence, impact, and confidence."
+    }
+  ],
+  "/home/varun/argus/argus/facts/store.py": [
+    {
+      "name": "FactStore",
+      "methods": [
+        "__init__",
+        "add",
+        "has",
+        "all",
+        "__len__",
+        "__iter__"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/facts/facts.py": [
+    {
+      "name": "Fact",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/reporting/queue.py": [
+    {
+      "name": "ResearchQueue",
+      "methods": [
+        "__init__",
+        "add",
+        "get",
+        "_calculate_score",
+        "sort_by_priority",
+        "filter",
+        "pending",
+        "completed",
+        "dismissed",
+        "__iter__",
+        "__len__"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/evidence/manager.py": [
+    {
+      "name": "EvidenceManager",
+      "methods": [
+        "__init__",
+        "_get_path",
+        "save",
+        "get",
+        "get_by_investigation",
+        "supersede"
+      ],
+      "doc": "Manages the persistence and retrieval of research evidence."
+    }
+  ],
+  "/home/varun/argus/argus/evidence/model.py": [
+    {
+      "name": "EvidenceRelationship",
+      "methods": [],
+      "doc": "Represents a relationship between evidence and other entities."
+    },
+    {
+      "name": "ProvenanceData",
+      "methods": [],
+      "doc": "Tracks the origin of an evidence item."
+    },
+    {
+      "name": "Evidence",
+      "methods": [],
+      "doc": "Represents confirmed or reviewed research evidence."
+    }
+  ],
+  "/home/varun/argus/argus/evidence/store.py": [
+    {
+      "name": "EvidenceStore",
+      "methods": [
+        "__init__",
+        "add",
+        "all",
+        "filter",
+        "count",
+        "clear",
+        "__iter__",
+        "__len__"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/methodology/context.py": [
+    {
+      "name": "MethodologyContext",
+      "methods": [
+        "__init__",
+        "get_scoped_evidence",
+        "get_relevant_workflows"
+      ],
+      "doc": "Wraps the Mission to provide a filtered, scope-aware context \nspecifically tailored for evaluating and executing a PlaybookStep."
+    }
+  ],
+  "/home/varun/argus/argus/methodology/models.py": [
+    {
+      "name": "PlaybookStep",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "Playbook",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "PlaybookResult",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/methodology/step.py": [
+    {
+      "name": "StepEvaluator",
+      "methods": [
+        "evaluate_prerequisites"
+      ],
+      "doc": "Evaluates if a PlaybookStep's prerequisites are met within the Mission context."
+    }
+  ],
+  "/home/varun/argus/argus/methodology/registry.py": [
+    {
+      "name": "PlaybookRegistry",
+      "methods": [
+        "__init__",
+        "load_defaults",
+        "register",
+        "unregister",
+        "get_all",
+        "get"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/methodology/executor.py": [
+    {
+      "name": "PlaybookExecutor",
+      "methods": [
+        "__init__",
+        "execute"
+      ],
+      "doc": "Executes a Playbook step-by-step against a Mission."
+    }
+  ],
+  "/home/varun/argus/argus/methodology/engine.py": [
+    {
+      "name": "MethodologyEngine",
+      "methods": [
+        "__init__",
+        "run"
+      ],
+      "doc": "Orchestrates the selection and execution of Methodology Playbooks."
+    }
+  ],
+  "/home/varun/argus/argus/performance/profiling.py": [
+    {
+      "name": "Profiler",
+      "methods": [
+        "__init__",
+        "__enter__",
+        "__exit__"
+      ],
+      "doc": "Context manager for profiling code blocks."
+    }
+  ],
+  "/home/varun/argus/argus/performance/scheduler.py": [
+    {
+      "name": "TaskNode",
+      "methods": [
+        "__init__"
+      ],
+      "doc": null
+    },
+    {
+      "name": "TaskScheduler",
+      "methods": [
+        "__init__",
+        "add_task",
+        "execute"
+      ],
+      "doc": "Schedules and executes tasks based on their dependencies."
+    }
+  ],
+  "/home/varun/argus/argus/performance/cache.py": [
+    {
+      "name": "ObjectCache",
+      "methods": [
+        "__init__",
+        "get",
+        "set",
+        "invalidate",
+        "clear"
+      ],
+      "doc": "Generic LRU Cache for managing memory and reducing duplicate objects."
+    },
+    {
+      "name": "ObservationCache",
+      "methods": [
+        "__init__"
+      ],
+      "doc": null
+    },
+    {
+      "name": "CorrelationCache",
+      "methods": [
+        "__init__"
+      ],
+      "doc": null
+    },
+    {
+      "name": "EvidenceCache",
+      "methods": [
+        "__init__"
+      ],
+      "doc": null
+    },
+    {
+      "name": "KnowledgeGraphCache",
+      "methods": [
+        "__init__"
+      ],
+      "doc": null
+    },
+    {
+      "name": "WorkflowCache",
+      "methods": [
+        "__init__"
+      ],
+      "doc": null
+    },
+    {
+      "name": "InvestigationCache",
+      "methods": [
+        "__init__"
+      ],
+      "doc": null
+    },
+    {
+      "name": "ExplanationCache",
+      "methods": [
+        "__init__"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/performance/parallel.py": [
+    {
+      "name": "ParallelExecutor",
+      "methods": [
+        "__init__",
+        "map_tasks"
+      ],
+      "doc": "Executes tasks in parallel using a ThreadPoolExecutor to share memory (mission state)."
+    }
+  ],
+  "/home/varun/argus/argus/performance/metrics.py": [
+    {
+      "name": "MetricsRegistry",
+      "methods": [
+        "__new__",
+        "_init",
+        "increment",
+        "record_time",
+        "set_gauge",
+        "get_summary",
+        "clear"
+      ],
+      "doc": "Centralized metrics tracker for performance monitoring."
+    }
+  ],
+  "/home/varun/argus/argus/performance/benchmark.py": [
+    {
+      "name": "BenchmarkSuite",
+      "methods": [
+        "__init__",
+        "_generate_workload",
+        "run_small",
+        "run_medium",
+        "run_large",
+        "run_very_large",
+        "run_all"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/performance/incremental.py": [
+    {
+      "name": "IncrementalTracker",
+      "methods": [
+        "__init__",
+        "compute_hash",
+        "mark_dirty",
+        "update_node",
+        "is_dirty",
+        "any_dirty",
+        "clear_dirty_state",
+        "reset"
+      ],
+      "doc": "Tracks dirty state and deltas for incremental processing."
+    }
+  ],
+  "/home/varun/argus/argus/planning/task_generator.py": [
+    {
+      "name": "TaskGenerator",
+      "methods": [
+        "__init__",
+        "from_gaps"
+      ],
+      "doc": "Generates ResearchTask objects from coverage gaps and mission context."
+    }
+  ],
+  "/home/varun/argus/argus/planning/research_planner.py": [
+    {
+      "name": "ResearchPlanner",
+      "methods": [
+        "__init__",
+        "plan",
+        "get_coverage",
+        "get_next_task"
+      ],
+      "doc": "Evaluates mission state and produces a prioritized research queue.\n\nOrchestrates:\n  1. Coverage computation\n  2. Gap analysis\n  3. Task generation from gaps\n  4. Priority scoring and dependency filtering\n  5. Mission storage updates"
+    }
+  ],
+  "/home/varun/argus/argus/planning/planner.py": [
+    {
+      "name": "MissionPlanner",
+      "methods": [
+        "__init__",
+        "analyze"
+      ],
+      "doc": "Analyzes a Mission and generates a dependency-aware Research Plan."
+    }
+  ],
+  "/home/varun/argus/argus/planning/models.py": [
+    {
+      "name": "TaskCategory",
+      "methods": [],
+      "doc": "Categories of research tasks the planner can generate."
+    },
+    {
+      "name": "ResearchTask",
+      "methods": [],
+      "doc": "A single recommended research action generated by the Research Planner."
+    },
+    {
+      "name": "CoverageGap",
+      "methods": [],
+      "doc": "Describes a specific area where analysis coverage is missing or weak."
+    },
+    {
+      "name": "CoverageReport",
+      "methods": [],
+      "doc": "Tracks analysis coverage across all mission dimensions."
+    },
+    {
+      "name": "PlanDependency",
+      "methods": [],
+      "doc": "Defines a dependency between two steps in the research plan."
+    },
+    {
+      "name": "PlanStep",
+      "methods": [],
+      "doc": "Represents a single executable step within the research plan."
+    },
+    {
+      "name": "ResearchPlan",
+      "methods": [],
+      "doc": "The structured Research Plan generated from a Mission."
+    }
+  ],
+  "/home/varun/argus/argus/planning/scheduler.py": [
+    {
+      "name": "PlanScheduler",
+      "methods": [
+        "schedule"
+      ],
+      "doc": "Schedules the execution order for a Research Plan."
+    }
+  ],
+  "/home/varun/argus/argus/planning/coverage.py": [
+    {
+      "name": "CoverageTracker",
+      "methods": [
+        "__init__",
+        "compute"
+      ],
+      "doc": "Computes a CoverageReport for the current mission state."
+    }
+  ],
+  "/home/varun/argus/argus/planning/dependencies.py": [
+    {
+      "name": "DependencyResolver",
+      "methods": [
+        "resolve",
+        "topological_sort"
+      ],
+      "doc": "Resolves dependencies between steps and builds a valid execution DAG."
+    }
+  ],
+  "/home/varun/argus/argus/planning/decision_engine.py": [
+    {
+      "name": "DecisionEngine",
+      "methods": [
+        "__init__",
+        "prioritize",
+        "_compute_priority",
+        "filter_by_scope"
+      ],
+      "doc": "Prioritizes, filters, and orders research tasks for the mission."
+    }
+  ],
+  "/home/varun/argus/argus/planning/gap_analysis.py": [
+    {
+      "name": "GapAnalyzer",
+      "methods": [
+        "__init__",
+        "analyze",
+        "_check_technology_gaps",
+        "_check_api_gaps",
+        "_check_graphql_gaps",
+        "_check_authentication_gaps",
+        "_check_authorization_gaps",
+        "_check_business_logic_gaps",
+        "_check_javascript_gaps",
+        "_check_correlation_gaps"
+      ],
+      "doc": "Identifies missing information in the current mission state."
+    }
+  ],
+  "/home/varun/argus/argus/collectors/httpx.py": [
+    {
+      "name": "HttpxCollector",
+      "methods": [
+        "__init__",
+        "collect"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/collectors/javascript.py": [
+    {
+      "name": "JavaScriptCollector",
+      "methods": [
+        "__init__",
+        "collect"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/collectors/katana.py": [
+    {
+      "name": "KatanaCollector",
+      "methods": [
+        "__init__",
+        "collect"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/collectors/technology.py": [
+    {
+      "name": "TechnologyCollector",
+      "methods": [
+        "collect"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/collectors/nuclei.py": [
+    {
+      "name": "NucleiCollector",
+      "methods": [
+        "__init__",
+        "collect"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/collectors/subfinder.py": [
+    {
+      "name": "SubfinderCollector",
+      "methods": [
+        "__init__",
+        "collect"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/collectors/base.py": [
+    {
+      "name": "BaseCollector",
+      "methods": [
+        "collect"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/execution/plan.py": [
+    {
+      "name": "ExecutionStep",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "ExecutionPlan",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/execution/validators.py": [
+    {
+      "name": "ExecutionValidator",
+      "methods": [
+        "validate_plan_prerequisites",
+        "validate_step_prerequisites"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/execution/executor.py": [
+    {
+      "name": "StepExecutor",
+      "methods": [
+        "__init__",
+        "execute_step"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/execution/state.py": [
+    {
+      "name": "ExecutionStatus",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/execution/results.py": [
+    {
+      "name": "ExecutionStepResult",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "ExecutionPlanResult",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/execution/engine.py": [
+    {
+      "name": "ExecutionEngine",
+      "methods": [
+        "__init__",
+        "execute_plan"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/runtime/context.py": [
+    {
+      "name": "MissionContext",
+      "methods": [
+        "set_active_mission",
+        "get_active_mission",
+        "clear"
+      ],
+      "doc": "Thread-safe context for accessing the currently active Mission."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/manager.py": [
+    {
+      "name": "MissionManager",
+      "methods": [
+        "__init__",
+        "create_mission",
+        "get_mission",
+        "start_mission",
+        "pause_mission",
+        "resume_mission",
+        "cancel_mission",
+        "list_missions"
+      ],
+      "doc": "Central orchestrator for the Mission Runtime."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/plugins.py": [
+    {
+      "name": "PluginExecutorAdapter",
+      "methods": [
+        "__init__",
+        "manager",
+        "execute_plugin",
+        "_instantiate_specialist_fallback"
+      ],
+      "doc": "Adapts class-based internal plugins to the tool execution interface."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/execution_context.py": [
+    {
+      "name": "ExecutionContext",
+      "methods": [
+        "__init__",
+        "scope",
+        "policy",
+        "configuration",
+        "knowledge_graph",
+        "workflow_graph",
+        "observations",
+        "correlations",
+        "evidence_bundles",
+        "investigations",
+        "hypotheses",
+        "learning_records",
+        "execution_metrics",
+        "activate",
+        "deactivate"
+      ],
+      "doc": "Provides a safe abstraction over Mission state and configuration."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/mission.py": [
+    {
+      "name": "MissionState",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "GraphQLState",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "JavaScriptState",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "Mission",
+      "methods": [
+        "__post_init__",
+        "get_relevant_knowledge"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/runtime/models.py": [
+    {
+      "name": "TaskState",
+      "methods": [],
+      "doc": "Lifecycle states for a scheduled task."
+    },
+    {
+      "name": "EventType",
+      "methods": [],
+      "doc": "Types of events emitted by the scheduler."
+    },
+    {
+      "name": "RetryPolicy",
+      "methods": [],
+      "doc": "Configurable retry policy for a task."
+    },
+    {
+      "name": "RetryRecord",
+      "methods": [],
+      "doc": "Record of a single retry attempt."
+    },
+    {
+      "name": "ScheduledTask",
+      "methods": [],
+      "doc": "A ResearchTask wrapped with scheduling metadata."
+    },
+    {
+      "name": "SchedulerEvent",
+      "methods": [],
+      "doc": "An event emitted by the scheduler."
+    },
+    {
+      "name": "ExecutionQueue",
+      "methods": [
+        "pending_count",
+        "ready_count",
+        "running_count",
+        "completed_count",
+        "failed_count"
+      ],
+      "doc": "The ordered execution queue for the scheduler."
+    },
+    {
+      "name": "ToolType",
+      "methods": [],
+      "doc": "Supported types of tools."
+    },
+    {
+      "name": "ToolExecutionStatus",
+      "methods": [],
+      "doc": "Execution lifecycle status for a tool."
+    },
+    {
+      "name": "OrchestratorEventType",
+      "methods": [],
+      "doc": "Event types emitted by the Tool Orchestrator."
+    },
+    {
+      "name": "Tool",
+      "methods": [
+        "__init__"
+      ],
+      "doc": "Metadata representing an executable tool or capability."
+    },
+    {
+      "name": "ToolExecutionContext",
+      "methods": [],
+      "doc": "The context injected into tools for execution."
+    },
+    {
+      "name": "ToolArtifact",
+      "methods": [],
+      "doc": "Artifact produced by a tool, stored with provenance."
+    },
+    {
+      "name": "ToolExecutionResult",
+      "methods": [],
+      "doc": "Standardized result wrapper for all tool execution types."
+    },
+    {
+      "name": "OrchestratorEvent",
+      "methods": [],
+      "doc": "An event emitted by the Tool Orchestrator."
+    },
+    {
+      "name": "Config",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/runtime/parser.py": [
+    {
+      "name": "ReconParser",
+      "methods": [
+        "parse_subfinder",
+        "parse_httpx",
+        "parse_katana"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/runtime/scheduler.py": [
+    {
+      "name": "MissionScheduler",
+      "methods": [
+        "__init__",
+        "register_phase_handler",
+        "step",
+        "_advance_phase",
+        "run_until_paused"
+      ],
+      "doc": "Coordinates the high-level phases of the mission:\nRecon -> Graph -> AI -> Planner -> Agents -> Execution -> Reports"
+    }
+  ],
+  "/home/varun/argus/argus/runtime/checkpoint.py": [
+    {
+      "name": "CheckpointAction",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "MissionCheckpointer",
+      "methods": [
+        "__init__",
+        "_get_path",
+        "checkpoint",
+        "recover",
+        "register_hook",
+        "evaluate_checkpoint"
+      ],
+      "doc": "Handles serialization, recovery of Mission state, and logical checkpoints."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/controller.py": [
+    {
+      "name": "MissionController",
+      "methods": [
+        "__init__",
+        "_create_runtime",
+        "start",
+        "pause",
+        "resume",
+        "cancel",
+        "recover"
+      ],
+      "doc": "Manages lifecycle and thread execution of missions via the autonomous runtime."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/mission_runtime.py": [
+    {
+      "name": "AutonomousMissionRuntime",
+      "methods": [
+        "__init__",
+        "step",
+        "run"
+      ],
+      "doc": "The central control loop orchestrating an Argus mission from start to finish."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/history.py": [
+    {
+      "name": "MissionStorage",
+      "methods": [
+        "__init__",
+        "_get_path",
+        "store",
+        "load"
+      ],
+      "doc": "Handles persistent storage of mission execution history, states, and metrics."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/queue.py": [
+    {
+      "name": "ExecutionQueueManager",
+      "methods": [
+        "__init__",
+        "add_tasks",
+        "get_ready_tasks",
+        "increment_workers",
+        "decrement_workers",
+        "get_task",
+        "is_complete"
+      ],
+      "doc": "Manages the lifecycle of tasks within the execution queue."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/registry.py": [
+    {
+      "name": "ToolRegistry",
+      "methods": [
+        "__init__",
+        "register",
+        "get",
+        "list",
+        "find_compatible_tools"
+      ],
+      "doc": "Registry for all executable capabilities (tools and plugins) in Argus."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/local.py": [
+    {
+      "name": "LocalRuntime",
+      "methods": [
+        "run_command"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/runtime/metrics.py": [
+    {
+      "name": "MissionMetrics",
+      "methods": [
+        "start_timer",
+        "stop_timer",
+        "increment_counter",
+        "record_task_executed",
+        "record_observation_produced",
+        "record_correlation_created",
+        "record_evidence_bundle",
+        "record_investigation",
+        "record_hypothesis",
+        "record_planner_update",
+        "record_checkpoint",
+        "record_recovery_event",
+        "get_summary"
+      ],
+      "doc": "Tracks performance and operational metrics for a Mission."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/state_machine.py": [
+    {
+      "name": "TransitionError",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "MissionStateMachine",
+      "methods": [
+        "__init__",
+        "can_transition",
+        "transition_to",
+        "get_previous_state"
+      ],
+      "doc": "Manages strict state machine transitions for a Mission."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/dependencies.py": [
+    {
+      "name": "TaskDependencyResolver",
+      "methods": [
+        "resolve",
+        "topological_order"
+      ],
+      "doc": "Resolves task dependencies and unblocks ready tasks."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/executor.py": [
+    {
+      "name": "TaskScheduler",
+      "methods": [
+        "__init__",
+        "schedule_tasks",
+        "get_executable_batch",
+        "report_success",
+        "report_failure",
+        "cancel_task",
+        "_update_mission_storage"
+      ],
+      "doc": "Schedules and coordinates the lifecycle of ResearchTasks."
+    },
+    {
+      "name": "ToolExecutor",
+      "methods": [
+        "execute"
+      ],
+      "doc": "Abstract Base Class for executing tools."
+    },
+    {
+      "name": "InternalPluginExecutor",
+      "methods": [
+        "execute"
+      ],
+      "doc": "Executes class-based internal plugins and specialist agents."
+    },
+    {
+      "name": "ExternalToolExecutor",
+      "methods": [
+        "execute"
+      ],
+      "doc": "Executes command-line binary tools within the sandbox."
+    },
+    {
+      "name": "RemoteWorkerExecutor",
+      "methods": [
+        "execute"
+      ],
+      "doc": "Placeholder for executing tools on a remote worker node."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/events.py": [
+    {
+      "name": "RuntimeEventType",
+      "methods": [],
+      "doc": "Events emitted by the autonomous mission runtime."
+    },
+    {
+      "name": "RuntimeEvent",
+      "methods": [],
+      "doc": "An event emitted across the Argus platform."
+    },
+    {
+      "name": "EventBus",
+      "methods": [
+        "__init__",
+        "subscribe",
+        "publish",
+        "get_history"
+      ],
+      "doc": "Publishes and subscribes to runtime events."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/results.py": [
+    {
+      "name": "ResultCollector",
+      "methods": [
+        "__init__",
+        "log",
+        "add_observation",
+        "add_evidence",
+        "add_knowledge_graph_update",
+        "add_workflow_update",
+        "add_file",
+        "add_metric",
+        "finalize"
+      ],
+      "doc": "Collects logs, artifacts, metrics, and state updates during tool execution."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/dispatcher.py": [
+    {
+      "name": "ToolDispatcher",
+      "methods": [
+        "__init__",
+        "resolve_tool",
+        "dispatch"
+      ],
+      "doc": "Selects and routes tool executions to internal, external, or remote execution engines."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/sandbox.py": [
+    {
+      "name": "SafetyViolationError",
+      "methods": [],
+      "doc": "Exception raised when a tool execution violates scope or policy safety constraints."
+    },
+    {
+      "name": "SafetyValidator",
+      "methods": [
+        "validate"
+      ],
+      "doc": "Validates targets, capabilities, permissions, and operations against Mission Scope and Policy."
+    },
+    {
+      "name": "Sandbox",
+      "methods": [
+        "__init__",
+        "execute_command"
+      ],
+      "doc": "Executes external commands inside a restricted sandbox environment."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/lifecycle.py": [
+    {
+      "name": "MissionLifecycle",
+      "methods": [
+        "create",
+        "start",
+        "pause",
+        "resume",
+        "cancel",
+        "complete"
+      ],
+      "doc": "Manages strict state machine transitions for a Mission."
+    },
+    {
+      "name": "TaskLifecycle",
+      "methods": [
+        "ready",
+        "start",
+        "complete",
+        "fail",
+        "skip",
+        "cancel"
+      ],
+      "doc": "Manages strict state machine transitions for a ScheduledTask."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/retry.py": [
+    {
+      "name": "RetryHandler",
+      "methods": [
+        "handle_failure"
+      ],
+      "doc": "Handles task failure logic according to its RetryPolicy."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/orchestrator.py": [
+    {
+      "name": "ToolOrchestrator",
+      "methods": [
+        "__init__",
+        "execute_task",
+        "_emit_event",
+        "_on_event",
+        "_store_in_mission",
+        "_save_to_history"
+      ],
+      "doc": "The Tool Orchestrator resolves task categories to compatible tools/plugins,\nchecks execution safety against mission policies/scopes, monitors duration,\ncollects artifacts, and publishes lifecycle events."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/monitor.py": [
+    {
+      "name": "ToolExecutionMonitor",
+      "methods": [
+        "__init__",
+        "start_monitoring",
+        "stop_monitoring"
+      ],
+      "doc": "Monitors running tools, records execution duration and status, and logs lifecycle details."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/recovery.py": [
+    {
+      "name": "RecoveryManager",
+      "methods": [
+        "__init__",
+        "recover_mission"
+      ],
+      "doc": "Handles recovery of interrupted or failed missions."
+    }
+  ],
+  "/home/varun/argus/argus/runtime/base.py": [
+    {
+      "name": "Runtime",
+      "methods": [
+        "run_command"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/provenance/validator.py": [
+    {
+      "name": "ProvenanceValidator",
+      "methods": [
+        "__init__",
+        "validate_graph",
+        "_has_root_evidence"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/provenance/models.py": [
+    {
+      "name": "ProvenanceRecord",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/provenance/trace.py": [
+    {
+      "name": "ArtifactTracer",
+      "methods": [
+        "__init__",
+        "parents",
+        "children",
+        "explain"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/provenance/graph.py": [
+    {
+      "name": "ProvenanceGraph",
+      "methods": [
+        "__init__",
+        "add_node",
+        "get_node",
+        "link",
+        "all_nodes"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/provenance/engine.py": [
+    {
+      "name": "ProvenanceEngine",
+      "methods": [
+        "__init__",
+        "register_artifact",
+        "link_artifacts",
+        "explain",
+        "trace",
+        "validate",
+        "get_stats"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/reasoning/engine.py": [
+    {
+      "name": "ReasoningEngine",
+      "methods": [
+        "__init__",
+        "generate",
+        "_collect_observations",
+        "_matches",
+        "_confidence"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/reasoning/hypothesis.py": [
+    {
+      "name": "Hypothesis",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/analyzers/javascript.py": [
+    {
+      "name": "JavaScriptAnalysisResult",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "JavaScriptAnalyzer",
+      "methods": [
+        "analyze"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/analyzers/authentication.py": [
+    {
+      "name": "AuthenticationAnalyzer",
+      "methods": [
+        "analyze",
+        "_contains"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/intelligence/models.py": [
+    {
+      "name": "APIEndpoint",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "Investigation",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/intelligence/parser.py": [
+    {
+      "name": "APIParser",
+      "methods": [
+        "parse",
+        "_resource",
+        "_has_identifier"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/intelligence/confidence.py": [
+    {
+      "name": "ConfidenceScorer",
+      "methods": [
+        "__init__",
+        "score"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/intelligence/research.py": [
+    {
+      "name": "ResearchGenerator",
+      "methods": [
+        "generate"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/intelligence/registry.py": [
+    {
+      "name": "HeuristicRegistry",
+      "methods": [
+        "__init__",
+        "register",
+        "unregister",
+        "get_all",
+        "get",
+        "get_by_category"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/intelligence/business.py": [
+    {
+      "name": "BusinessObjectAnalyzer",
+      "methods": [
+        "analyze"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/intelligence/workflow_models.py": [
+    {
+      "name": "WorkflowStep",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "Workflow",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/intelligence/api.py": [
+    {
+      "name": "APIIntelligence",
+      "methods": [
+        "__init__",
+        "analyze"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/intelligence/prioritizer.py": [
+    {
+      "name": "InvestigationPrioritizer",
+      "methods": [
+        "prioritize",
+        "_calculate_priority"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/intelligence/engine.py": [
+    {
+      "name": "VulnerabilityIntelligenceEngine",
+      "methods": [
+        "__init__",
+        "run"
+      ],
+      "doc": "Reasoning engine that converts collected knowledge into structured investigation hypotheses."
+    }
+  ],
+  "/home/varun/argus/argus/intelligence/heuristics.py": [
+    {
+      "name": "BaseHeuristic",
+      "methods": [
+        "id",
+        "name",
+        "description",
+        "category",
+        "required_inputs",
+        "run",
+        "score"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/intelligence/hypothesis.py": [
+    {
+      "name": "HypothesisGenerator",
+      "methods": [
+        "__init__",
+        "generate"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/intelligence/ranking.py": [
+    {
+      "name": "APIRanker",
+      "methods": [
+        "score"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/intelligence/workflow_builder.py": [
+    {
+      "name": "WorkflowBuilder",
+      "methods": [
+        "__init__",
+        "build"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/intelligence/business_models.py": [
+    {
+      "name": "BusinessObject",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/agents/scheduler.py": [
+    {
+      "name": "AgentScheduler",
+      "methods": [
+        "__init__",
+        "run"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/agents/recon.py": [
+    {
+      "name": "ReconAgent",
+      "methods": [
+        "__init__",
+        "think",
+        "execute",
+        "evaluate"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/agents/registry.py": [
+    {
+      "name": "AgentRegistry",
+      "methods": [
+        "__init__",
+        "register",
+        "get_agent",
+        "list_agents",
+        "resolve_execution_order"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/agents/results.py": [
+    {
+      "name": "AgentHealth",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "AgentMetric",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "AgentResult",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/agents/base.py": [
+    {
+      "name": "BaseAgent",
+      "methods": [
+        "__init__",
+        "run",
+        "think",
+        "execute",
+        "evaluate",
+        "produce",
+        "confidence",
+        "health"
+      ],
+      "doc": "Base class for every Argus agent."
+    }
+  ],
+  "/home/varun/argus/argus/agents/authorization/models.py": [
+    {
+      "name": "AuthzHeuristicResult",
+      "methods": [],
+      "doc": "Wrapper for hypotheses returned by an authz heuristic."
+    },
+    {
+      "name": "AuthzContext",
+      "methods": [],
+      "doc": "Context object passed to authorization heuristics."
+    }
+  ],
+  "/home/varun/argus/argus/agents/authorization/ownership.py": [
+    {
+      "name": "OwnershipAnalyzer",
+      "methods": [
+        "get_cross_tenant_objects"
+      ],
+      "doc": "Analyzes ownership chains for cross-tenant and IDOR risks."
+    }
+  ],
+  "/home/varun/argus/argus/agents/authorization/confidence.py": [
+    {
+      "name": "AuthzConfidenceScorer",
+      "methods": [
+        "score"
+      ],
+      "doc": "Scores authorization hypotheses based on evidence quality and graph completeness."
+    }
+  ],
+  "/home/varun/argus/argus/agents/authorization/permissions.py": [
+    {
+      "name": "PermissionAnalyzer",
+      "methods": [
+        "get_unprotected_mutations"
+      ],
+      "doc": "Analyzes endpoints for function-level authorization risks."
+    }
+  ],
+  "/home/varun/argus/argus/agents/authorization/roles.py": [
+    {
+      "name": "RoleAnalyzer",
+      "methods": [
+        "get_admin_roles",
+        "get_overlapping_roles"
+      ],
+      "doc": "Analyzes role hierarchies for vertical privilege escalation risks."
+    }
+  ],
+  "/home/varun/argus/argus/agents/authorization/agent.py": [
+    {
+      "name": "AuthorizationSpecialist",
+      "methods": [
+        "__init__",
+        "analyze"
+      ],
+      "doc": "Specialist agent for identifying authorization risks."
+    }
+  ],
+  "/home/varun/argus/argus/agents/authorization/graph.py": [
+    {
+      "name": "GraphHelper",
+      "methods": [
+        "__init__",
+        "get_multi_role_resources",
+        "get_isolated_resources"
+      ],
+      "doc": "Helper methods for extracting specific insights from the Authorization Graph."
+    }
+  ],
+  "/home/varun/argus/argus/agents/authorization/heuristics.py": [
+    {
+      "name": "BaseAuthzHeuristic",
+      "methods": [
+        "id",
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "CrossTenantObjectHeuristic",
+      "methods": [
+        "id",
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "MultiRoleResourceHeuristic",
+      "methods": [
+        "id",
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "AdministrativeEndpointHeuristic",
+      "methods": [
+        "id",
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "OwnerAdminWorkflowHeuristic",
+      "methods": [
+        "id",
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "ObjectUpdateEndpointHeuristic",
+      "methods": [
+        "id",
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "DeleteOperationHeuristic",
+      "methods": [
+        "id",
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "NestedResourceHeuristic",
+      "methods": [
+        "id",
+        "run"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/agents/business_logic/planner.py": [
+    {
+      "name": "BusinessLogicPlanner",
+      "methods": [
+        "generate_plan"
+      ],
+      "doc": "Provides high-level guidance for investigating business logic."
+    }
+  ],
+  "/home/varun/argus/argus/agents/business_logic/models.py": [
+    {
+      "name": "State",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "StateMachine",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "BusinessLogicContext",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "BusinessHeuristicResult",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/agents/business_logic/objects.py": [
+    {
+      "name": "ObjectAnalyzer",
+      "methods": [
+        "get_critical_objects"
+      ],
+      "doc": "Identifies business objects and their relations."
+    }
+  ],
+  "/home/varun/argus/argus/agents/business_logic/confidence.py": [
+    {
+      "name": "BusinessLogicConfidenceScorer",
+      "methods": [
+        "score"
+      ],
+      "doc": "Scores business logic hypotheses based on context completeness."
+    }
+  ],
+  "/home/varun/argus/argus/agents/business_logic/agent.py": [
+    {
+      "name": "BusinessLogicSpecialist",
+      "methods": [
+        "__init__",
+        "analyze"
+      ],
+      "doc": "Specialist agent for identifying business logic risks and state machine vulnerabilities."
+    }
+  ],
+  "/home/varun/argus/argus/agents/business_logic/transitions.py": [
+    {
+      "name": "TransitionAnalyzer",
+      "methods": [
+        "infer_transitions"
+      ],
+      "doc": "Analyzes and validates allowed state transitions."
+    }
+  ],
+  "/home/varun/argus/argus/agents/business_logic/states.py": [
+    {
+      "name": "StateMachineBuilder",
+      "methods": [
+        "extract"
+      ],
+      "doc": "Extracts state machines from workflows."
+    }
+  ],
+  "/home/varun/argus/argus/agents/business_logic/workflow.py": [
+    {
+      "name": "WorkflowAnalyzer",
+      "methods": [
+        "extract_rules"
+      ],
+      "doc": "Analyzes workflow preconditions and dependencies."
+    }
+  ],
+  "/home/varun/argus/argus/agents/business_logic/heuristics.py": [
+    {
+      "name": "BaseBusinessLogicHeuristic",
+      "methods": [
+        "id",
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "UnexpectedStateTransitionHeuristic",
+      "methods": [
+        "id",
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "MissingPrerequisiteHeuristic",
+      "methods": [
+        "id",
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "WorkflowShortcutHeuristic",
+      "methods": [
+        "id",
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "ReplayableTransactionHeuristic",
+      "methods": [
+        "id",
+        "run"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/agents/business_logic/tests/test_business_logic.py": [
+    {
+      "name": "DupHeuristic",
+      "methods": [
+        "id",
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "PluginHeuristic",
+      "methods": [
+        "id",
+        "run"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/agents/specialists/graphql.py": [
+    {
+      "name": "GraphQLAgent",
+      "methods": [
+        "__init__",
+        "think",
+        "execute",
+        "evaluate",
+        "produce"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/agents/specialists/upload.py": [
+    {
+      "name": "FileUploadAgent",
+      "methods": [
+        "__init__",
+        "think",
+        "execute",
+        "evaluate",
+        "produce"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/agents/specialists/javascript.py": [
+    {
+      "name": "JavaScriptAgent",
+      "methods": [
+        "__init__",
+        "think",
+        "execute",
+        "evaluate",
+        "produce"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/agents/specialists/api.py": [
+    {
+      "name": "RESTAPIAgent",
+      "methods": [
+        "__init__",
+        "think",
+        "execute",
+        "evaluate",
+        "produce"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/agents/specialists/business_logic.py": [
+    {
+      "name": "BusinessLogicAgent",
+      "methods": [
+        "__init__",
+        "think",
+        "execute",
+        "evaluate",
+        "produce"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/agents/specialists/oauth.py": [
+    {
+      "name": "OAuthAgent",
+      "methods": [
+        "__init__",
+        "think",
+        "execute",
+        "evaluate",
+        "produce"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/graph/builder.py": [
+    {
+      "name": "KnowledgeGraphBuilder",
+      "methods": [
+        "build"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/graph/graph.py": [
+    {
+      "name": "KnowledgeGraph",
+      "methods": [
+        "__init__",
+        "add",
+        "get",
+        "connect",
+        "all",
+        "node_count",
+        "edge_count",
+        "nodes_by_type",
+        "edges_from",
+        "edges_to",
+        "neighbors",
+        "summary"
+      ],
+      "doc": "Central memory structure mapping discovered entities and relationships."
+    }
+  ],
+  "/home/varun/argus/argus/graph/workflow.py": [
+    {
+      "name": "WorkflowGraph",
+      "methods": [
+        "__init__",
+        "add",
+        "get",
+        "connect",
+        "all"
+      ],
+      "doc": "Workflow Graph for mapping multi-step business state transitions and relationships."
+    }
+  ],
+  "/home/varun/argus/argus/graph/edge.py": [
+    {
+      "name": "Edge",
+      "methods": [],
+      "doc": "Represents a directional relationship between two Nodes in the Knowledge Graph.\n\nAttributes:\n    source (str): The ID of the origin Node.\n    target (str): The ID of the destination Node.\n    type (str): The type of relationship (e.g., 'HAS_ENDPOINT').\n    metadata (dict[str, Any]): Additional context or properties for the edge."
+    }
+  ],
+  "/home/varun/argus/argus/graph/node.py": [
+    {
+      "name": "Node",
+      "methods": [],
+      "doc": "Represents a discrete entity within the Knowledge Graph.\n\nAttributes:\n    id (str): Unique identifier for the node.\n    type (str): The category or classification of the node (e.g., 'Business Object').\n    value (str): The core value or name represented by the node.\n    metadata (dict[str, Any]): Additional context or properties for the node."
+    }
+  ],
+  "/home/varun/argus/argus/core/scheduler.py": [
+    {
+      "name": "Scheduler",
+      "methods": [
+        "run"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/core/event_bus.py": [
+    {
+      "name": "EventBus",
+      "methods": [
+        "__init__",
+        "subscribe",
+        "publish"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/investigation/generator.py": [
+    {
+      "name": "InvestigationGenerator",
+      "methods": [
+        "__init__",
+        "process_bundle",
+        "_determine_category",
+        "_find_duplicate",
+        "_merge"
+      ],
+      "doc": "Converts Evidence Bundles into Investigations without asserting vulnerabilities."
+    }
+  ],
+  "/home/varun/argus/argus/investigation/weights.py": [
+    {
+      "name": "WeightConfig",
+      "methods": [
+        "validate_weights_on_init",
+        "validate_weights",
+        "log_weights"
+      ],
+      "doc": "Configurable weights for prioritizing investigations.\nDefault distribution reflects core priority model out of 1.0 (or 100%)."
+    }
+  ],
+  "/home/varun/argus/argus/investigation/models.py": [
+    {
+      "name": "InvestigationCategory",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "InvestigationPriority",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "InvestigationStatus",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "Investigation",
+      "methods": [],
+      "doc": "Represents an evidence-backed area for human review.\nDoes NOT assert vulnerabilities or exploits."
+    }
+  ],
+  "/home/varun/argus/argus/investigation/priority_engine.py": [
+    {
+      "name": "PriorityEngine",
+      "methods": [
+        "__init__",
+        "evaluate",
+        "evaluate_all",
+        "_map_score_to_priority"
+      ],
+      "doc": "Evaluates investigations and updates their priority, score, and explanation\nwithout determining whether something is a vulnerability."
+    }
+  ],
+  "/home/varun/argus/argus/investigation/manual_validation.py": [
+    {
+      "name": "ManualValidationGenerator",
+      "methods": [
+        "generate_guidance"
+      ],
+      "doc": "Generates non-destructive manual validation guidance for Investigations."
+    }
+  ],
+  "/home/varun/argus/argus/investigation/builder.py": [
+    {
+      "name": "InvestigationBuilder",
+      "methods": [
+        "__init__",
+        "build_all",
+        "prioritize_all",
+        "update_reasoning_tree"
+      ],
+      "doc": "Orchestrator to pull bundles from Mission and queue up new investigations."
+    }
+  ],
+  "/home/varun/argus/argus/investigation/confidence.py": [
+    {
+      "name": "InvestigationConfidenceScorer",
+      "methods": [
+        "__init__",
+        "calculate_confidence"
+      ],
+      "doc": "Calculates overall Investigation confidence based on underlying Evidence Bundles."
+    }
+  ],
+  "/home/varun/argus/argus/investigation/explanation.py": [
+    {
+      "name": "ReasoningTreeBuilder",
+      "methods": [
+        "__init__",
+        "build_tree",
+        "generate_reasoning_text"
+      ],
+      "doc": "Builds reasoning chains explaining the provenance of Investigations."
+    }
+  ],
+  "/home/varun/argus/argus/investigation/registry.py": [
+    {
+      "name": "InvestigationRegistry",
+      "methods": [
+        "__init__",
+        "add",
+        "remove",
+        "find",
+        "search",
+        "filter_by_category",
+        "get_all",
+        "clear"
+      ],
+      "doc": "Centralized store for Investigation objects."
+    }
+  ],
+  "/home/varun/argus/argus/investigation/ranking.py": [
+    {
+      "name": "InvestigationRanker",
+      "methods": [
+        "rank"
+      ],
+      "doc": "Sorts and filters investigations for the Priority Engine."
+    }
+  ],
+  "/home/varun/argus/argus/investigation/scoring.py": [
+    {
+      "name": "ScoreCalculator",
+      "methods": [
+        "__init__",
+        "calculate",
+        "_calculate_evidence_strength",
+        "_calculate_observation_confidence",
+        "_calculate_correlation_confidence",
+        "_calculate_workflow_importance",
+        "_calculate_bo_importance",
+        "_calculate_reachability",
+        "_calculate_graph_completeness",
+        "_calculate_technology_confidence",
+        "_is_administrative",
+        "_is_authorization_related",
+        "_is_authentication_related",
+        "_matches_mission_policy",
+        "_is_in_mission_scope"
+      ],
+      "doc": "Calculates a 0-100 priority score for an investigation based on configurable weights and context.\nMUST NOT determine vulnerability status \u2014 only prioritizes investigation opportunities based on evidence."
+    }
+  ],
+  "/home/varun/argus/argus/planner/planner.py": [
+    {
+      "name": "Planner",
+      "methods": [
+        "build_plan"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/planner/tasks.py": [
+    {
+      "name": "Task",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/correlation/observation.py": [
+    {
+      "name": "Observation",
+      "methods": [],
+      "doc": "Universal Observation model produced by all Argus specialists."
+    }
+  ],
+  "/home/varun/argus/argus/correlation/models.py": [
+    {
+      "name": "ObservationCategory",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "ObservationPriority",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/correlation/strength.py": [
+    {
+      "name": "EvidenceStrengthScorer",
+      "methods": [
+        "__init__",
+        "calculate_strength"
+      ],
+      "doc": "Calculates Evidence Strength (0-100) for Evidence Bundles."
+    }
+  ],
+  "/home/varun/argus/argus/correlation/confidence.py": [
+    {
+      "name": "ConfidenceCalculator",
+      "methods": [
+        "calculate_confidence"
+      ],
+      "doc": "Calculates overall Evidence Bundle confidence."
+    }
+  ],
+  "/home/varun/argus/argus/correlation/registry.py": [
+    {
+      "name": "ObservationRegistry",
+      "methods": [
+        "__init__",
+        "add",
+        "remove",
+        "merge",
+        "find",
+        "search",
+        "filter",
+        "get_all",
+        "clear"
+      ],
+      "doc": "Centralized in-memory store for Observations across the Mission."
+    },
+    {
+      "name": "CorrelationRegistry",
+      "methods": [
+        "__init__",
+        "add",
+        "remove",
+        "merge",
+        "find",
+        "search",
+        "get_all",
+        "clear"
+      ],
+      "doc": "Centralized in-memory store for Correlations across the Mission."
+    },
+    {
+      "name": "EvidenceBundleRegistry",
+      "methods": [
+        "__init__",
+        "add",
+        "remove",
+        "merge",
+        "find",
+        "search",
+        "get_all",
+        "clear"
+      ],
+      "doc": "Centralized in-memory store for Evidence Bundles across the Mission."
+    }
+  ],
+  "/home/varun/argus/argus/correlation/evidence.py": [
+    {
+      "name": "EvidenceBundle",
+      "methods": [],
+      "doc": "Represents multiple pieces of evidence supporting the same application behavior\nor investigation area. Fuses observations and correlations together."
+    }
+  ],
+  "/home/varun/argus/argus/correlation/fusion.py": [
+    {
+      "name": "EvidenceFusionEngine",
+      "methods": [
+        "__init__",
+        "process_mission_state",
+        "_fuse_item",
+        "_create_bundle",
+        "_update_bundle",
+        "_add_item_to_bundle",
+        "_merge_bundles",
+        "_sync_metadata"
+      ],
+      "doc": "Combines observations and correlations into unified EvidenceBundles.\nDoes NOT generate investigations or security conclusions."
+    }
+  ],
+  "/home/varun/argus/argus/correlation/serializer.py": [
+    {
+      "name": "_JSONEncoder",
+      "methods": [
+        "default"
+      ],
+      "doc": null
+    },
+    {
+      "name": "ObservationSerializer",
+      "methods": [
+        "to_dict",
+        "from_dict",
+        "to_json",
+        "from_json",
+        "to_yaml",
+        "from_yaml",
+        "to_msgpack",
+        "from_msgpack",
+        "to_protobuf"
+      ],
+      "doc": "Handles serialization of Observation models across formats."
+    }
+  ],
+  "/home/varun/argus/argus/correlation/graph.py": [
+    {
+      "name": "CorrelationGraph",
+      "methods": [
+        "__init__",
+        "add_observation",
+        "add_correlation",
+        "link_observations",
+        "link_observation_to_correlation",
+        "get_correlations_for_observation",
+        "get_related_observations",
+        "to_dict"
+      ],
+      "doc": "Directed graph representing relationships between Observations and Correlations.\nObservations are linked to other Observations via rules, and to Correlations when grouped."
+    }
+  ],
+  "/home/varun/argus/argus/correlation/matcher.py": [
+    {
+      "name": "CorrelationMatcher",
+      "methods": [
+        "__init__",
+        "find_matches"
+      ],
+      "doc": "Matches observations against each other using modular rules."
+    }
+  ],
+  "/home/varun/argus/argus/correlation/engine.py": [
+    {
+      "name": "CorrelationEngine",
+      "methods": [
+        "__init__",
+        "process_observation",
+        "_create_correlation",
+        "_update_correlation",
+        "_merge_correlations",
+        "_sync_correlation_metadata"
+      ],
+      "doc": "Central engine for discovering relationships between observations.\nConsumes observations, evaluates matching rules, and maintains correlations.\nDoes NOT generate investigations."
+    }
+  ],
+  "/home/varun/argus/argus/correlation/scoring.py": [
+    {
+      "name": "CorrelationScorer",
+      "methods": [
+        "__init__",
+        "calculate_score"
+      ],
+      "doc": "Calculates a normalized correlation score (0-100)."
+    }
+  ],
+  "/home/varun/argus/argus/correlation/correlation.py": [
+    {
+      "name": "Correlation",
+      "methods": [],
+      "doc": "Represents multiple related observations that appear to describe the same \napplication behavior or security context."
+    }
+  ],
+  "/home/varun/argus/argus/correlation/deduplication.py": [
+    {
+      "name": "EvidenceDeduplicator",
+      "methods": [
+        "deduplicate"
+      ],
+      "doc": "Removes duplicate evidence while maintaining provenance."
+    }
+  ],
+  "/home/varun/argus/argus/knowledge/manager.py": [
+    {
+      "name": "KnowledgeManager",
+      "methods": [
+        "__init__",
+        "load_all",
+        "_save",
+        "add",
+        "update",
+        "delete",
+        "get",
+        "filter_by_category",
+        "filter_by_tag",
+        "search",
+        "related",
+        "export",
+        "import_file"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/knowledge/models.py": [
+    {
+      "name": "KnowledgeCategory",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "KnowledgeEntry",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/knowledge/base.py": [
+    {
+      "name": "KnowledgeBase",
+      "methods": [
+        "__init__",
+        "_load_rules",
+        "rules_for"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/manager.py": [
+    {
+      "name": "PluginManager",
+      "methods": [
+        "__init__",
+        "load_all",
+        "initialize_plugins",
+        "register_hooks",
+        "shutdown_plugins",
+        "get_registered_plugins"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/registry.py": [
+    {
+      "name": "PluginRegistry",
+      "methods": [
+        "__init__",
+        "register",
+        "get_plugin",
+        "list_plugins",
+        "remove_plugin",
+        "resolve_load_order"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/loader.py": [
+    {
+      "name": "PluginLoader",
+      "methods": [
+        "__init__",
+        "discover_and_load",
+        "_load_from_file",
+        "_load_from_module",
+        "_extract_plugin"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/interfaces.py": [
+    {
+      "name": "PluginType",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "ControlledMission",
+      "methods": [
+        "__init__",
+        "target",
+        "evidence",
+        "publish_finding"
+      ],
+      "doc": "A read-only or strictly controlled interface to the Mission object.\nPlugins should interact with this instead of the raw Mission."
+    },
+    {
+      "name": "BasePlugin",
+      "methods": [
+        "__init__",
+        "initialize",
+        "register",
+        "execute",
+        "shutdown"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/events.py": [
+    {
+      "name": "EventBus",
+      "methods": [
+        "__init__",
+        "subscribe",
+        "unsubscribe",
+        "publish"
+      ],
+      "doc": "A lightweight in-memory event bus for Plugin pub/sub."
+    }
+  ],
+  "/home/varun/argus/argus/plugins/manifest.py": [
+    {
+      "name": "PluginManifest",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/authentication/plugin.py": [
+    {
+      "name": "AuthenticationPlugin",
+      "methods": [
+        "__init__",
+        "initialize",
+        "register",
+        "execute",
+        "shutdown"
+      ],
+      "doc": "Authentication & Session Intelligence Plugin."
+    }
+  ],
+  "/home/varun/argus/argus/plugins/authentication/confidence.py": [
+    {
+      "name": "AuthenticationConfidenceScorer",
+      "methods": [
+        "score"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/authentication/sessions.py": [
+    {
+      "name": "Session",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "SessionAnalyzer",
+      "methods": [
+        "analyze"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/authentication/agent.py": [
+    {
+      "name": "AuthenticationIntelligenceSpecialist",
+      "methods": [
+        "__init__",
+        "analyze"
+      ],
+      "doc": "Specialist agent for identifying authentication mechanisms."
+    }
+  ],
+  "/home/varun/argus/argus/plugins/authentication/tokens.py": [
+    {
+      "name": "Token",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "TokenAnalyzer",
+      "methods": [
+        "analyze"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/authentication/identity.py": [
+    {
+      "name": "Identity",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "IdentityAnalyzer",
+      "methods": [
+        "extract_identities"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/authentication/oauth.py": [
+    {
+      "name": "OAuthAnalyzer",
+      "methods": [
+        "analyze"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/authentication/heuristics.py": [
+    {
+      "name": "BaseAuthenticationHeuristic",
+      "methods": [
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "SessionLifecycleHeuristic",
+      "methods": [
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "AccountRecoveryHeuristic",
+      "methods": [
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "OAuthIntegrationHeuristic",
+      "methods": [
+        "run"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/authentication/mfa.py": [
+    {
+      "name": "MFAAnalyzer",
+      "methods": [
+        "analyze"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/graphql/models.py": [
+    {
+      "name": "Observation",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "GraphQLEndpoint",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "GraphQLArgument",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "GraphQLField",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "GraphQLType",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "GraphQLOperation",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "GraphQLEnum",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "GraphQLUnion",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "GraphQLInterface",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "GraphQLSchema",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "GraphQLRelationship",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "GraphQLBusinessObject",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "GraphQLCRUD",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "GraphQLWorkflowNode",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "GraphQLWorkflow",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "GraphQLInvestigation",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/graphql/plugin.py": [
+    {
+      "name": "GraphQLPlugin",
+      "methods": [
+        "__init__",
+        "initialize",
+        "register",
+        "execute",
+        "shutdown"
+      ],
+      "doc": "GraphQL Specialist Plugin."
+    }
+  ],
+  "/home/varun/argus/argus/plugins/graphql/business.py": [
+    {
+      "name": "BusinessKnowledgeAnalyzer",
+      "methods": [
+        "__init__",
+        "analyze",
+        "_infer_business_objects",
+        "_infer_relationships",
+        "_infer_crud",
+        "_infer_workflows",
+        "_add_observation"
+      ],
+      "doc": "Analyzes GraphQL schema to infer business objects, relationships, CRUD ops, and workflows."
+    }
+  ],
+  "/home/varun/argus/argus/plugins/graphql/schema.py": [
+    {
+      "name": "GraphQLSchemaAnalyzer",
+      "methods": [
+        "__init__",
+        "analyze",
+        "acquire_schema",
+        "infer_schema",
+        "_extract_typenames",
+        "_update_mission",
+        "_save_to_cache",
+        "_load_from_cache"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/graphql/agent.py": [
+    {
+      "name": "GraphQLSpecialist",
+      "methods": [
+        "__init__",
+        "discover",
+        "collect_context",
+        "analyze",
+        "generate_observations",
+        "generate_investigations",
+        "explain",
+        "confidence"
+      ],
+      "doc": "Specialist agent for discovering and modeling GraphQL APIs."
+    }
+  ],
+  "/home/varun/argus/argus/plugins/graphql/discovery.py": [
+    {
+      "name": "GraphQLDiscovery",
+      "methods": [
+        "__init__",
+        "discover",
+        "_add_or_update",
+        "_guess_framework"
+      ],
+      "doc": "Discovers GraphQL endpoints from multiple evidence sources."
+    }
+  ],
+  "/home/varun/argus/argus/plugins/graphql/config.py": [
+    {
+      "name": "GraphQLConfig",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/graphql/reasoning.py": [
+    {
+      "name": "GraphQLReasoningEngine",
+      "methods": [
+        "__init__",
+        "analyze",
+        "_analyze_workflow",
+        "_analyze_crud",
+        "_merge_investigation",
+        "_prioritize"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/file_upload/uploads.py": [
+    {
+      "name": "UploadEndpoint",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "DownloadEndpoint",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "UploadAnalyzer",
+      "methods": [
+        "extract_endpoints"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/file_upload/plugin.py": [
+    {
+      "name": "FileUploadPlugin",
+      "methods": [
+        "__init__",
+        "initialize",
+        "register",
+        "execute",
+        "shutdown"
+      ],
+      "doc": "File Upload Specialist Plugin."
+    }
+  ],
+  "/home/varun/argus/argus/plugins/file_upload/objects.py": [
+    {
+      "name": "FileObject",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "ObjectAnalyzer",
+      "methods": [
+        "classify"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/file_upload/confidence.py": [
+    {
+      "name": "FileUploadConfidenceScorer",
+      "methods": [
+        "score"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/file_upload/agent.py": [
+    {
+      "name": "FileUploadSpecialist",
+      "methods": [
+        "__init__",
+        "analyze"
+      ],
+      "doc": "Specialist agent for identifying file upload and processing mechanisms."
+    }
+  ],
+  "/home/varun/argus/argus/plugins/file_upload/workflow.py": [
+    {
+      "name": "FileUploadWorkflow",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/file_upload/heuristics.py": [
+    {
+      "name": "BaseFileUploadHeuristic",
+      "methods": [
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "AttachmentWorkflowHeuristic",
+      "methods": [
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "DataImportExportHeuristic",
+      "methods": [
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "TemporaryStorageHeuristic",
+      "methods": [
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "FileProcessingHeuristic",
+      "methods": [
+        "run"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/file_upload/storage.py": [
+    {
+      "name": "StorageLocation",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "StorageAnalyzer",
+      "methods": [
+        "infer_storage"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/api/plugin.py": [
+    {
+      "name": "APIIntelligencePlugin",
+      "methods": [
+        "__init__",
+        "initialize",
+        "register",
+        "execute",
+        "shutdown"
+      ],
+      "doc": "API Intelligence Specialist Plugin."
+    }
+  ],
+  "/home/varun/argus/argus/plugins/api/resource_model.py": [
+    {
+      "name": "APIResource",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "APICollection",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "APISingleton",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/api/confidence.py": [
+    {
+      "name": "APIConfidenceScorer",
+      "methods": [
+        "score"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/api/operations.py": [
+    {
+      "name": "APIOperation",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "OperationAnalyzer",
+      "methods": [
+        "extract_operations"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/api/agent.py": [
+    {
+      "name": "APIIntelligenceSpecialist",
+      "methods": [
+        "__init__",
+        "analyze"
+      ],
+      "doc": "Specialist agent for identifying API resources and relationships."
+    }
+  ],
+  "/home/varun/argus/argus/plugins/api/versions.py": [
+    {
+      "name": "VersionDetector",
+      "methods": [
+        "detect_versions"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/api/heuristics.py": [
+    {
+      "name": "BaseAPIHeuristic",
+      "methods": [
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "AdministrativeAPIHeuristic",
+      "methods": [
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "BulkModificationHeuristic",
+      "methods": [
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "HiddenResourceHeuristic",
+      "methods": [
+        "run"
+      ],
+      "doc": null
+    },
+    {
+      "name": "IncompleteCRUDHeuristic",
+      "methods": [
+        "run"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/api/relationships.py": [
+    {
+      "name": "ResourceRelationship",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "RelationshipInferencer",
+      "methods": [
+        "infer"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/api/schemas.py": [
+    {
+      "name": "SchemaParser",
+      "methods": [
+        "parse_endpoints"
+      ],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/javascript/models.py": [
+    {
+      "name": "JavaScriptObservation",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "JavaScriptInvestigation",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "JavaScriptSymbol",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "JavaScriptModule",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "JavaScriptASTNode",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "JavaScriptRoute",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "JavaScriptFramework",
+      "methods": [],
+      "doc": null
+    },
+    {
+      "name": "JavaScriptWebSocket",
+      "methods": [],
+      "doc": null
+    }
+  ],
+  "/home/varun/argus/argus/plugins/javascript/plugin.py": [
+    {
+      "name": "JavaScriptPlugin",
+      "methods": [
+        "__init__",
+        "initialize",
+        "register",
+        "execute",
+        "shutdown"
+      ],
+      "doc": "JavaScript Specialist Plugin."
+    }
+  ],
+  "/home/varun/argus/argus/plugins/javascript/parser.py": [
+    {
+      "name": "JavaScriptParser",
+      "methods": [
+        "parse"
+      ],
+      "doc": "Heuristic parser to extract AST-like structures and symbols from JavaScript.\nProductionized to use pre-compiled class-level regex patterns and inline \ndeduplication for improved performance and reduced memory overhead during \nlarge bundle parsing."
+    }
+  ],
+  "/home/varun/argus/argus/plugins/javascript/agent.py": [
+    {
+      "name": "JavaScriptSpecialist",
+      "methods": [
+        "__init__",
+        "discover",
+        "collect_context",
+        "analyze",
+        "generate_observations",
+        "generate_investigations",
+        "explain",
+        "confidence"
+      ],
+      "doc": "Specialist agent for discovering and modeling JavaScript files and frameworks."
+    }
+  ],
+  "/home/varun/argus/argus/plugins/javascript/discovery.py": [
+    {
+      "name": "JavaScriptDiscovery",
+      "methods": [
+        "__init__",
+        "discover",
+        "_extract_from_json",
+        "_check_url_for_resources",
+        "_check_content_for_resources"
+      ],
+      "doc": "Discovers JavaScript resources from multiple evidence sources."
+    }
+  ],
+  "/home/varun/argus/argus/plugins/javascript/config.py": [
+    {
+      "name": "JavaScriptPluginConfig",
+      "methods": [],
+      "doc": null
+    }
+  ]
+}

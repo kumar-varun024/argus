@@ -92,6 +92,23 @@ registry.register(
     )
 )
 
+registry.register(
+    Tool(
+        id="nuclei",
+        name="Nuclei",
+        capability="vulnerability_scanner",
+        command="nuclei",
+        description="Template based vulnerability scanner",
+        supported_tasks=["Vulnerability Scanning", "Evidence Correlation", "API Discovery"],
+        required_inputs=["live_hosts"],
+        produced_outputs=["vulnerabilities", "observations"],
+        capabilities=["vulnerability_scanner"],
+        safety_requirements={"type": "external", "permissions": ["network"]},
+        timeout=600.0,
+        priority=90
+    )
+)
+
 # Register internal specialist tools/plugins
 registry.register(
     Tool(
