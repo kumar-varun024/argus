@@ -5,6 +5,8 @@ from argus.investigation.scoring import ScoreCalculator
 from argus.investigation.weights import WeightConfig
 from argus.investigation.ranking import InvestigationRanker
 
+from argus.graph.graph import KnowledgeGraph
+
 logger = logging.getLogger(__name__)
 
 class PriorityEngine:
@@ -18,17 +20,19 @@ class PriorityEngine:
         self.weight_config = weight_config or WeightConfig()
         self.score_calculator = ScoreCalculator(self.weight_config)
         
-    def evaluate(self, investigation: Investigation, mission: Any = None) -> InvestigationPriority:
+    def evaluate(self, investigation: Investigation, mission: Any = None, graph: Optional[KnowledgeGraph] = None) -> InvestigationPriority:
         """
         Calculates priority score, updates the investigation model,
         and returns the assigned priority level.
         """
         self.weight_config.log_weights()
+        kg = graph or (getattr(mission, 'attack_surface_graph', None) if mission else None)
         
         score, explanations = self.score_calculator.calculate(
             investigation, 
             self.bundle_registry, 
-            mission
+            mission,
+            graph=kg
         )
         
         investigation.priority_score = score
@@ -42,13 +46,14 @@ class PriorityEngine:
         
         return investigation.priority
 
-    def evaluate_all(self, investigations: List[Investigation], mission: Any = None) -> List[Investigation]:
+    def evaluate_all(self, investigations: List[Investigation], mission: Any = None, graph: Optional[KnowledgeGraph] = None) -> List[Investigation]:
         """
         Evaluates a list of investigations, updates scores, priority, and explanations,
         ranks them highest first, updates mission storage if provided, and returns the ranked list.
         """
+        kg = graph or (getattr(mission, 'attack_surface_graph', None) if mission else None)
         for inv in investigations:
-            self.evaluate(inv, mission)
+            self.evaluate(inv, mission, graph=kg)
             
         ranked = InvestigationRanker.rank(investigations, highest_first=True)
         

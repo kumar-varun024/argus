@@ -37,17 +37,17 @@ class KatanaCollector(BaseCollector):
             endpoints = ReconParser.parse_katana(result["stdout"])
 
             for endpoint in endpoints:
+                url_str = endpoint["url"] if isinstance(endpoint, dict) else str(endpoint)
 
-                if endpoint in seen:
+                if url_str in seen:
                     continue
 
-                seen.add(endpoint)
+                seen.add(url_str)
 
-                mission.endpoints.append(
-                    {
-                        "host": host["url"],
-                        "url": endpoint,
-                    }
-                )
+                endpoint_record = dict(endpoint) if isinstance(endpoint, dict) else {"url": url_str, "path": ""}
+                endpoint_record["host"] = host["url"]
+                endpoint_record["url"] = url_str
+
+                mission.endpoints.append(endpoint_record)
 
         print(f"✓ Found {len(mission.endpoints)} endpoints")

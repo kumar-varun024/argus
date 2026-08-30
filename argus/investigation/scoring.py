@@ -3,6 +3,8 @@ from typing import List, Tuple, Any, Optional
 from argus.investigation.models import Investigation, InvestigationCategory
 from argus.investigation.weights import WeightConfig
 
+from argus.graph.graph import KnowledgeGraph
+
 logger = logging.getLogger(__name__)
 
 class ScoreCalculator:
@@ -14,7 +16,7 @@ class ScoreCalculator:
     def __init__(self, weight_config: Optional[WeightConfig] = None):
         self.weights = weight_config or WeightConfig()
         
-    def calculate(self, investigation: Investigation, bundle_registry: Any = None, mission: Any = None) -> Tuple[float, List[str]]:
+    def calculate(self, investigation: Investigation, bundle_registry: Any = None, mission: Any = None, graph: Optional[KnowledgeGraph] = None) -> Tuple[float, List[str]]:
         """
         Calculates the 0-100 priority score and provides explainable reasoning strings.
         Returns (score, explanations).
@@ -97,7 +99,74 @@ class ScoreCalculator:
             score *= self.weights.mission_scope_bonus
             explanations.append("Directly in mission scope focus.")
 
-        # 14. Bounding & Deduplication
+        # 14. Graph Topology Connectivity & Vulnerability Bonuses
+        kg = graph or (getattr(mission, 'attack_surface_graph', None) if mission else None)
+        if kg is not None and hasattr(kg, 'nodes'):
+            candidate_node_ids = set(investigation.related_graph_nodes or [])
+            for ep in (investigation.related_endpoints or []):
+                candidate_node_ids.add(str(ep))
+                candidate_node_ids.add(f"endpoint:{ep}")
+                candidate_node_ids.add(f"live_host:{ep}")
+            for t in (investigation.technologies or []):
+                candidate_node_ids.add(f"technology:{t}")
+
+            resolved_nodes = []
+            for cid in candidate_node_ids:
+                if cid in kg.nodes:
+                    resolved_nodes.append(kg.nodes[cid])
+                else:
+                    for nid, n in kg.nodes.items():
+                        if n.value == cid or (n.metadata and (n.metadata.get("url") == cid or n.metadata.get("host") == cid)):
+                            resolved_nodes.append(n)
+
+            host_nodes = {}
+            for n in resolved_nodes:
+                if n.type == "live_host":
+                    host_nodes[n.id] = n
+                elif hasattr(kg, 'get_host_for_node'):
+                    h = kg.get_host_for_node(n)
+                    if h:
+                        host_nodes[h.id] = h
+
+            # Connectivity bonus: host node degree >= 3
+            max_degree = 0
+            for h in host_nodes.values():
+                if hasattr(kg, 'get_node_degree'):
+                    deg = kg.get_node_degree(h)
+                    if deg > max_degree:
+                        max_degree = deg
+            for n in resolved_nodes:
+                if hasattr(kg, 'get_node_degree'):
+                    deg = kg.get_node_degree(n)
+                    if deg > max_degree:
+                        max_degree = deg
+
+            if max_degree >= 3:
+                score *= self.weights.graph_connectivity_bonus
+                explanations.append("High host topology connectivity bonus.")
+
+            # Vulnerability bonus: host with HAS_VULNERABILITY edge
+            has_vulnerability = False
+            host_ids = set(host_nodes.keys())
+            resolved_ids = {n.id for n in resolved_nodes}
+            target_ids = host_ids | resolved_ids
+
+            for e in kg.edges:
+                if e.type == "HAS_VULNERABILITY" and (e.source in target_ids or e.target in target_ids):
+                    has_vulnerability = True
+                    break
+
+            if not has_vulnerability:
+                for n in resolved_nodes:
+                    if n.type == "vulnerability":
+                        has_vulnerability = True
+                        break
+
+            if has_vulnerability:
+                score *= self.weights.graph_vulnerability_bonus
+                explanations.append("Host has confirmed vulnerability associations.")
+
+        # 15. Bounding & Deduplication
         final_score = float(round(min(100.0, max(0.0, score)), 2))
         
         # Deduplicate explanations preserving order

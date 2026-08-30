@@ -205,10 +205,11 @@ class ExternalToolExecutor(ToolExecutor):
             # Pass subdomains if already discovered, otherwise target
             subdomains = getattr(context.mission, "subdomains", [])
             if subdomains:
-                args = ["-l", ",".join(subdomains), "-json"]
+                subdomain_strs = [s["hostname"] if isinstance(s, dict) else str(s) for s in subdomains]
+                args = ["-l", ",".join(subdomain_strs), "-json"]
             else:
                 args = ["-u", target, "-json"]
-        elif "katana" in tool.id:
+        elif tool.id == "katana_crawler" or "katana" in tool.id:
             args = ["-u", target]
         elif tool.id == "nuclei":
             args = ["-u", target, "-json-export", "-"]
@@ -234,17 +235,20 @@ class ExternalToolExecutor(ToolExecutor):
                 from argus.runtime.parser import ReconParser
                 subdomains = ReconParser.parse_subfinder(stdout)
                 
-                # Update mission state
-                context.mission.subdomains = subdomains
+                # Update mission state (list of strings for backward compatibility)
+                context.mission.subdomains = [s["hostname"] if isinstance(s, dict) else str(s) for s in subdomains]
                 collector.add_metric("subdomains_discovered", len(subdomains))
 
                 # Store as evidence
                 for sub in subdomains:
+                    hostname = sub["hostname"] if isinstance(sub, dict) else str(sub)
+                    source = sub.get("source", "subfinder") if isinstance(sub, dict) else "subfinder"
                     ev = Evidence(
                         category="subdomain",
-                        value=sub,
+                        value=hostname,
                         source="subfinder",
-                        description=f"Discovered subdomain {sub} for target {target}"
+                        description=f"Discovered subdomain {hostname} for target {target}",
+                        metadata={"source": "subfinder", "hostname": hostname},
                     )
                     # Add to mission evidence store
                     if hasattr(context.mission, "evidence") and context.mission.evidence is not None:
@@ -255,35 +259,65 @@ class ExternalToolExecutor(ToolExecutor):
                 from argus.runtime.parser import ReconParser
                 hosts = ReconParser.parse_httpx(stdout)
                 
-                context.mission.live_hosts = [h["url"] for h in hosts]
+                context.mission.live_hosts = hosts
                 collector.add_metric("live_hosts_discovered", len(hosts))
                 
+                if not hasattr(context.mission, "technologies") or context.mission.technologies is None:
+                    context.mission.technologies = []
+
                 for h in hosts:
+                    host_val = h.get("url") or h.get("host") or ""
                     ev = Evidence(
                         category="live_host",
-                        value=h["url"],
+                        value=host_val,
                         source="httpx",
-                        description=f"Discovered live host {h['url']}"
+                        description=f"Discovered live host {h.get('url') or host_val}",
+                        metadata=h,
                     )
                     if hasattr(context.mission, "evidence") and context.mission.evidence is not None:
                         context.mission.evidence.add(ev)
                     collector.add_evidence(ev)
 
-            elif tool.id == "katana_crawler":
+                    for tech in h.get("technologies", []):
+                        if tech and tech not in context.mission.technologies:
+                            context.mission.technologies.append(tech)
+                        
+                        tech_ev = Evidence(
+                            category="technology",
+                            value=tech,
+                            source="httpx",
+                            description=f"Detected technology {tech} on {h.get('url') or target}",
+                            metadata={
+                                "name": tech,
+                                "host": h.get("host"),
+                                "url": h.get("url"),
+                                "source": "httpx",
+                            },
+                        )
+                        if hasattr(context.mission, "evidence") and context.mission.evidence is not None:
+                            context.mission.evidence.add(tech_ev)
+                        collector.add_evidence(tech_ev)
+
+            elif tool.id == "katana_crawler" or "katana" in tool.id:
                 from argus.runtime.parser import ReconParser
                 endpoints = ReconParser.parse_katana(stdout)
                 
-                if not hasattr(context.mission, "endpoints"):
+                if not hasattr(context.mission, "endpoints") or context.mission.endpoints is None:
                     context.mission.endpoints = []
                 context.mission.endpoints.extend(endpoints)
                 collector.add_metric("endpoints_discovered", len(endpoints))
                 
                 for ep in endpoints:
+                    url_val = ep.get("url") if isinstance(ep, dict) else str(ep)
+                    metadata_val = ep if isinstance(ep, dict) else {"url": url_val, "path": ""}
+                    if "url" not in metadata_val:
+                        metadata_val["url"] = url_val
                     ev = Evidence(
                         category="endpoint",
-                        value=ep,
+                        value=url_val,
                         source="katana",
-                        description=f"Discovered endpoint {ep}"
+                        description=f"Discovered endpoint {url_val}",
+                        metadata=metadata_val,
                     )
                     if hasattr(context.mission, "evidence") and context.mission.evidence is not None:
                         context.mission.evidence.add(ev)
@@ -293,18 +327,24 @@ class ExternalToolExecutor(ToolExecutor):
                 from argus.runtime.parser import ReconParser
                 vulnerabilities = ReconParser.parse_nuclei(stdout)
                 
-                if not hasattr(context.mission, "vulnerabilities"):
+                if not hasattr(context.mission, "vulnerabilities") or context.mission.vulnerabilities is None:
                     context.mission.vulnerabilities = []
                 context.mission.vulnerabilities.extend(vulnerabilities)
                 collector.add_metric("vulnerabilities_discovered", len(vulnerabilities))
                 
                 for vuln in vulnerabilities:
+                    name_val = vuln.get("name") or vuln.get("template_id") or "Vulnerability"
+                    sev_val = str(vuln.get("severity") or "info").lower()
+                    metadata_val = dict(vuln)
+                    if "template_id" not in metadata_val:
+                        metadata_val["template_id"] = vuln.get("template_id")
                     ev = Evidence(
                         category="vulnerability",
-                        value=vuln["name"],
+                        value=name_val,
                         source="nuclei",
-                        description=vuln.get("description", ""),
-                        metadata={"severity": vuln.get("severity"), "host": vuln.get("host")}
+                        severity=sev_val,
+                        description=vuln.get("description", "") or name_val,
+                        metadata=metadata_val,
                     )
                     if hasattr(context.mission, "evidence") and context.mission.evidence is not None:
                         context.mission.evidence.add(ev)

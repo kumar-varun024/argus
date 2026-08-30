@@ -23,6 +23,8 @@ class WeightConfig(BaseModel):
     mission_scope_bonus: float = Field(1.1, description="Multiplier if in mission scope focus")
     graph_completeness_weight: float = Field(0.05, description="Weight for graph completeness bonus")
     technology_confidence_weight: float = Field(0.05, description="Weight for technology confidence bonus")
+    graph_connectivity_bonus: float = Field(1.15, description="Multiplier if host node degree >= 3")
+    graph_vulnerability_bonus: float = Field(1.30, description="Multiplier if host has HAS_VULNERABILITY edge")
 
     @model_validator(mode='after')
     def validate_weights_on_init(self) -> 'WeightConfig':

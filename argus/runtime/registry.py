@@ -16,6 +16,25 @@ class ToolRegistry:
         """Retrieves a tool by ID or capability name."""
         if key in self.tools:
             return self.tools[key]
+        aliases = {
+            "cross_site_scripting": "xss",
+            "sqli": "sql_injection",
+            "cmdi": "command_injection",
+            "cmd_injection": "command_injection",
+            "command_injection_collector": "command_injection",
+            "os_command_injection": "command_injection",
+            "rce": "command_injection",
+            "ssrf_validator": "ssrf",
+            "ssrf_collector": "ssrf",
+            "server_side_request_forgery": "ssrf",
+            "oauth_collector": "oauth",
+            "oidc": "oauth",
+            "oidc_collector": "oauth",
+            "oauth_oidc": "oauth",
+        }
+
+        if key in aliases and aliases[key] in self.tools:
+            return self.tools[aliases[key]]
         # Fallback to capability lookup for backwards compatibility
         for tool in self.tools.values():
             if tool.capability == key or key in tool.capabilities:
@@ -41,6 +60,23 @@ class ToolRegistry:
 registry = ToolRegistry()
 
 # Register legacy/external CLI tools
+registry.register(
+    Tool(
+        id="dnsx",
+        name="dnsx",
+        capability="dns_resolver",
+        command="dnsx",
+        description="DNS resolution and CNAME record querying utility",
+        supported_tasks=["DNS Resolution", "Subdomain Takeover Detection", "Subdomain Enumeration"],
+        required_inputs=["subdomains"],
+        produced_outputs=["dns_records", "cnames"],
+        capabilities=["dns_resolver"],
+        safety_requirements={"type": "external", "permissions": ["network"]},
+        timeout=300.0,
+        priority=100,
+    )
+)
+
 registry.register(
     Tool(
         id="subfinder",
@@ -221,3 +257,156 @@ registry.register(
         priority=100
     )
 )
+
+registry.register(
+    Tool(
+        id="info_disclosure",
+        name="Information Disclosure Collector",
+        capability="information_disclosure_detector",
+        description="Actively probes live hosts and endpoints for exposed configuration files, .env, .git, and actuator endpoints.",
+        supported_tasks=["Information Disclosure Detection", "Information Disclosure", "Vulnerability Scanning", "Evidence Correlation", "API Discovery", "Technology Discovery"],
+        required_inputs=["live_hosts"],
+        produced_outputs=["vulnerabilities", "observations", "evidence", "subdomains"],
+        capabilities=["information_disclosure_detector"],
+        safety_requirements={"type": "internal", "permissions": ["network", "db_read", "db_write"]},
+        timeout=300.0,
+        priority=95
+    )
+)
+
+registry.register(
+    Tool(
+        id="access_control",
+        name="Access Control & IDOR Collector",
+        capability="access_control_collector",
+        description="Tests for horizontal IDOR, vertical privilege escalation, and access control bypasses across identities.",
+        supported_tasks=["Authorization Analysis", "Access Control Analysis", "IDOR Detection", "Vulnerability Scanning", "Evidence Correlation"],
+        required_inputs=["endpoints"],
+        produced_outputs=["vulnerabilities", "observations", "evidence"],
+        capabilities=["access_control_collector"],
+        safety_requirements={"type": "internal", "permissions": ["network", "db_read", "db_write"]},
+        timeout=300.0,
+        priority=95,
+    )
+)
+
+registry.register(
+    Tool(
+        id="path_traversal",
+        name="Path Traversal Collector",
+        capability="path_traversal_detector",
+        description="Actively fuzzes endpoints and parameters for directory escape and arbitrary file read vulnerabilities.",
+        supported_tasks=["Path Traversal Detection", "Directory Traversal", "Vulnerability Scanning", "Evidence Correlation", "API Discovery"],
+        required_inputs=["endpoints"],
+        produced_outputs=["vulnerabilities", "observations", "evidence"],
+        capabilities=["path_traversal_detector", "path_traversal_collector"],
+        safety_requirements={"type": "internal", "permissions": ["network", "db_read", "db_write"]},
+        timeout=300.0,
+        priority=95,
+    )
+)
+
+registry.register(
+    Tool(
+        id="sql_injection",
+        name="SQL Injection Collector",
+        capability="sql_injection_detector",
+        description="Actively injects SQL payloads into discovered endpoint parameters (query, body, headers) detecting error-based, boolean-based, and time-based blind SQLi.",
+        supported_tasks=["SQL Injection Detection", "SQL Injection", "Vulnerability Scanning", "Evidence Correlation", "API Discovery"],
+        required_inputs=["endpoints"],
+        produced_outputs=["vulnerabilities", "observations", "evidence"],
+        capabilities=["sql_injection_detector", "sql_injection_collector"],
+        safety_requirements={"type": "internal", "permissions": ["network", "db_read", "db_write"]},
+        timeout=300.0,
+        priority=95,
+    )
+)
+
+registry.register(
+    Tool(
+        id="xss",
+        name="Cross-Site Scripting (XSS) Collector",
+        capability="xss_detector",
+        description="Actively injects context-aware XSS payloads into discovered endpoint parameters and forms detecting reflected and stored XSS using AuthenticatedHttpClient.",
+        supported_tasks=["XSS Detection", "Cross-Site Scripting", "Vulnerability Scanning", "Evidence Correlation", "API Discovery"],
+        required_inputs=["endpoints"],
+        produced_outputs=["vulnerabilities", "observations", "evidence"],
+        capabilities=["xss_detector", "xss_collector"],
+        safety_requirements={"type": "internal", "permissions": ["network", "db_read", "db_write"]},
+        timeout=300.0,
+        priority=95,
+    )
+)
+
+registry.register(
+    Tool(
+        id="command_injection",
+        name="Command Injection Collector",
+        capability="command_injection_detector",
+        description="Actively injects command injection payloads into discovered endpoint parameters (query, body, path, headers) detecting result-based, time-based blind, and error-based OS command injection using AuthenticatedHttpClient.",
+        supported_tasks=["Command Injection Detection", "Command Injection", "OS Command Injection", "Remote Code Execution", "Vulnerability Scanning", "Evidence Correlation", "API Discovery"],
+        required_inputs=["endpoints"],
+        produced_outputs=["vulnerabilities", "observations", "evidence"],
+        capabilities=["command_injection_detector", "command_injection_collector", "cmdi_detector", "cmdi_collector"],
+        safety_requirements={"type": "internal", "permissions": ["network", "db_read", "db_write"]},
+        timeout=300.0,
+        priority=95,
+    )
+)
+
+registry.register(
+    Tool(
+        id="ssrf",
+        name="SSRF Validation Collector",
+        capability="ssrf_detector",
+        description="Actively injects SSRF payloads into discovered endpoint parameters (query, body, path, headers) probing cloud metadata, internal services, and blind differential timing using AuthenticatedHttpClient.",
+        supported_tasks=["SSRF Detection", "Server-Side Request Forgery", "SSRF Validation", "Cloud Metadata Probe", "Internal Service Probe", "Vulnerability Scanning", "Evidence Correlation", "API Discovery"],
+        required_inputs=["endpoints"],
+        produced_outputs=["vulnerabilities", "observations", "evidence"],
+        capabilities=["ssrf_detector", "ssrf_collector", "ssrf_validator", "server_side_request_forgery"],
+        safety_requirements={"type": "internal", "permissions": ["network", "db_read", "db_write"]},
+        timeout=300.0,
+        priority=95,
+    )
+)
+
+registry.register(
+    Tool(
+        id="oauth",
+        name="OAuth/OIDC Authentication Collector",
+        capability="oauth_oidc_detector",
+        description="Actively tests discovered OAuth and OIDC endpoints for authentication and authorization misconfigurations, JWT signature and claims validation, and stateful session security using AuthenticatedHttpClient.",
+        supported_tasks=[
+            "OAuth Detection",
+            "OIDC Detection",
+            "Token Validation",
+            "Stateful Authentication",
+            "Session Management",
+            "Authorization Analysis",
+            "Authentication Analysis",
+            "Evidence Correlation",
+            "API Discovery",
+        ],
+        required_inputs=["endpoints"],
+        produced_outputs=["vulnerabilities", "observations", "evidence"],
+        capabilities=[
+            "oauth_oidc_detector",
+            "oauth_collector",
+            "oidc_collector",
+            "oauth_detector",
+            "jwt_validator",
+            "session_security_analyzer",
+        ],
+        safety_requirements={"type": "internal", "permissions": ["network", "db_read", "db_write"]},
+        timeout=300.0,
+        priority=95,
+    )
+)
+
+
+
+
+
+
+
+

@@ -55,7 +55,20 @@ class ResearchPlanner:
             logger.info("Gap identified: area=%s, severity=%.2f", gap.area, gap.severity)
 
         # 3. Generate tasks from gaps
-        tasks = self.task_generator.from_gaps(gaps)
+        recon_areas = {"subdomains", "live hosts", "endpoints", "vulnerability scanning", "subdomain discovery", "live host discovery", "endpoint crawling", "vulnerability scan"}
+        has_recon_gap = any((gap.area or "").lower() in recon_areas for gap in gaps)
+
+        if has_recon_gap:
+            recon_tasks = self.task_generator.generate_recon_tasks()
+            gap_tasks = self.task_generator.from_gaps(gaps)
+            seen_titles = {t.title for t in recon_tasks}
+            tasks = list(recon_tasks)
+            for t in gap_tasks:
+                if t.title not in seen_titles:
+                    tasks.append(t)
+                    seen_titles.add(t.title)
+        else:
+            tasks = self.task_generator.from_gaps(gaps)
         logger.info("Tasks generated: %d", len(tasks))
 
         try:

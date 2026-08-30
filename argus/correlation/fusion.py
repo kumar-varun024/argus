@@ -47,6 +47,11 @@ def fuse_shared_client_route(item1, item2) -> bool:
     u2 = getattr(item2, 'urls', [])
     return bool(set(u1) & set(u2))
 
+def fuse_shared_graph_nodes(item1, item2) -> bool:
+    g1 = getattr(item1, 'graph_nodes', [])
+    g2 = getattr(item2, 'graph_nodes', [])
+    return bool(set(g1) & set(g2))
+
 DEFAULT_FUSION_RULES = [
     ("fuse_shared_business_objects", fuse_shared_business_objects),
     ("fuse_shared_workflows", fuse_shared_workflows),
@@ -56,7 +61,8 @@ DEFAULT_FUSION_RULES = [
     ("fuse_shared_authentication_context", fuse_shared_authentication_context),
     ("fuse_shared_authorization_context", fuse_shared_authorization_context),
     ("fuse_shared_api_resource", fuse_shared_api_resource),
-    ("fuse_shared_client_route", fuse_shared_client_route)
+    ("fuse_shared_client_route", fuse_shared_client_route),
+    ("fuse_shared_graph_nodes", fuse_shared_graph_nodes),
 ]
 
 class EvidenceFusionEngine:

@@ -86,6 +86,33 @@ class PluginExecutorAdapter:
             elif "business" in plugin_id:
                 from argus.agents.business_logic.agent import BusinessLogicSpecialist
                 return BusinessLogicSpecialist()
+            elif "info_disclosure" in plugin_id or "information_disclosure" in plugin_id:
+                from argus.collectors.information_disclosure import InformationDisclosureCollector
+                return InformationDisclosureCollector()
+            elif "access_control" in plugin_id or "idor" in plugin_id:
+                from argus.collectors.access_control import AccessControlCollector
+                return AccessControlCollector()
+            elif "path_traversal" in plugin_id or "traversal" in plugin_id or "lfi" in plugin_id:
+                from argus.collectors.path_traversal import PathTraversalCollector
+                return PathTraversalCollector()
+            elif "sql_injection" in plugin_id or "sqli" in plugin_id or plugin_id == "sql":
+                from argus.collectors.sql_injection import SQLInjectionCollector
+                return SQLInjectionCollector()
+            elif "xss" in plugin_id or "cross_site_scripting" in plugin_id:
+                from argus.collectors.xss import XSSCollector
+                return XSSCollector()
+            elif "command_injection" in plugin_id or "cmdi" in plugin_id or "cmd_injection" in plugin_id or plugin_id == "command":
+                from argus.collectors.command_injection import CommandInjectionCollector
+                return CommandInjectionCollector()
+            elif "ssrf" in plugin_id or "server_side_request_forgery" in plugin_id:
+                from argus.collectors.ssrf import SSRFCollector
+                return SSRFCollector()
+            elif "oauth" in plugin_id or "oidc" in plugin_id:
+                from argus.collectors.oauth import OAuthCollector
+                return OAuthCollector()
         except Exception as e:
+
             logger.error(f"PluginExecutorAdapter: Failed instantiating fallback for {plugin_id}: {e}")
         return None
+
+

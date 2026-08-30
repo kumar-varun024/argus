@@ -9,6 +9,8 @@ from argus.investigation.priority_engine import PriorityEngine
 from argus.investigation.manual_validation import ManualValidationGenerator
 from argus.investigation.explanation import ReasoningTreeBuilder
 
+from argus.graph.graph import KnowledgeGraph
+
 logger = logging.getLogger(__name__)
 
 class InvestigationGenerator:
@@ -23,10 +25,10 @@ class InvestigationGenerator:
         self.val_gen = val_gen
         self.reasoning_builder = reasoning_builder
 
-    def process_bundle(self, bundle: EvidenceBundle) -> Optional[Investigation]:
+    def process_bundle(self, bundle: EvidenceBundle, mission: Any = None, graph: Optional[KnowledgeGraph] = None) -> Optional[Investigation]:
         """
         Creates or updates an Investigation based on an EvidenceBundle.
-        Deduplicates if an existing investigation covers the same context.
+        Deduplicates if an existing investigation covers the same context or host subgraph.
         """
         if bundle.strength < 20 and bundle.confidence < 0.2:
             # Skip very weak evidence
@@ -36,9 +38,9 @@ class InvestigationGenerator:
         category = self._determine_category(bundle)
         
         # Deduplication Check
-        existing_inv = self._find_duplicate(bundle, category)
+        existing_inv = self._find_duplicate(bundle, category, mission=mission, graph=graph)
         if existing_inv:
-            self._merge(existing_inv, bundle)
+            self._merge(existing_inv, bundle, mission=mission, graph=graph)
             logger.info(f"Investigation merged: {existing_inv.id}")
             return existing_inv
             
@@ -49,7 +51,7 @@ class InvestigationGenerator:
             description=bundle.description,
             category=category
         )
-        self._merge(inv, bundle)
+        self._merge(inv, bundle, mission=mission, graph=graph)
         self.inv_registry.add(inv)
         logger.info(f"Investigation generated: {inv.id}")
         return inv
@@ -70,18 +72,42 @@ class InvestigationGenerator:
         
         return InvestigationCategory.TECHNOLOGY
 
-    def _find_duplicate(self, bundle: EvidenceBundle, category: InvestigationCategory) -> Optional[Investigation]:
-        """Finds if an existing investigation covers similar grounds."""
+    def _find_duplicate(self, bundle: EvidenceBundle, category: InvestigationCategory, mission: Any = None, graph: Optional[KnowledgeGraph] = None) -> Optional[Investigation]:
+        """Finds if an existing investigation covers similar grounds or belongs to the same host subgraph."""
+        kg = graph or (getattr(mission, 'attack_surface_graph', None) if mission else None)
+        bundle_nodes = set(bundle.graph_nodes or [])
+        for ep in bundle.metadata.get('endpoints', []):
+            bundle_nodes.add(str(ep))
+
         for inv in self.inv_registry.get_all():
             if inv.category == category:
-                # If they share primary business objects or workflows, merge them
+                # 1. If they share primary business objects or workflows, merge them
                 shared_bo = set(inv.business_objects) & set(bundle.business_objects)
                 shared_wf = set(inv.workflows) & set(bundle.workflows)
                 if shared_bo or shared_wf:
                     return inv
+
+                # 2. Host subgraph clustering via KnowledgeGraph
+                if kg is not None and hasattr(kg, 'nodes'):
+                    inv_nodes = set(inv.related_graph_nodes or [])
+                    for ep in inv.related_endpoints:
+                        inv_nodes.add(str(ep))
+
+                    if bundle_nodes and inv_nodes and bool(bundle_nodes & inv_nodes):
+                        return inv
+
+                    for bn in bundle_nodes:
+                        for in_node in inv_nodes:
+                            b_id = bn if bn in kg.nodes else f"live_host:{bn}" if f"live_host:{bn}" in kg.nodes else f"endpoint:{bn}" if f"endpoint:{bn}" in kg.nodes else None
+                            i_id = in_node if in_node in kg.nodes else f"live_host:{in_node}" if f"live_host:{in_node}" in kg.nodes else f"endpoint:{in_node}" if f"endpoint:{in_node}" in kg.nodes else None
+                            if b_id and i_id:
+                                if hasattr(kg, 'in_same_host_subgraph') and kg.in_same_host_subgraph(b_id, i_id):
+                                    return inv
+                                if hasattr(kg, 'are_connected') and kg.are_connected(b_id, i_id, max_depth=2):
+                                    return inv
         return None
 
-    def _merge(self, inv: Investigation, bundle: EvidenceBundle) -> None:
+    def _merge(self, inv: Investigation, bundle: EvidenceBundle, mission: Any = None, graph: Optional[KnowledgeGraph] = None) -> None:
         """Merges bundle data into the investigation and updates metrics."""
         if bundle.id not in inv.evidence_bundles:
             inv.evidence_bundles.append(bundle.id)
@@ -99,7 +125,7 @@ class InvestigationGenerator:
             if cid not in inv.correlations: inv.correlations.append(cid)
             
         # Update metrics
-        inv.priority = self.prio_engine.evaluate(inv)
+        inv.priority = self.prio_engine.evaluate(inv, mission=mission, graph=graph)
         logger.info("Priority assigned")
         
         inv.confidence = self.conf_scorer.calculate_confidence(inv)

@@ -9,6 +9,8 @@ from argus.correlation.scoring import CorrelationScorer
 from argus.correlation.graph import CorrelationGraph
 from argus.correlation.registry import ObservationRegistry, CorrelationRegistry
 
+from argus.graph.graph import KnowledgeGraph
+
 logger = logging.getLogger(__name__)
 
 class CorrelationEngine:
@@ -20,12 +22,23 @@ class CorrelationEngine:
 
     def __init__(self, observation_registry: ObservationRegistry, 
                  correlation_registry: CorrelationRegistry, 
-                 graph: CorrelationGraph):
+                 graph: CorrelationGraph,
+                 knowledge_graph: Optional[KnowledgeGraph] = None):
         self.obs_registry = observation_registry
         self.corr_registry = correlation_registry
         self.graph = graph
-        self.matcher = CorrelationMatcher()
+        self._knowledge_graph = knowledge_graph
+        self.matcher = CorrelationMatcher(graph=knowledge_graph)
         self.scorer = CorrelationScorer(self.obs_registry)
+
+    @property
+    def knowledge_graph(self) -> Optional[KnowledgeGraph]:
+        return self._knowledge_graph
+
+    @knowledge_graph.setter
+    def knowledge_graph(self, kg: Optional[KnowledgeGraph]) -> None:
+        self._knowledge_graph = kg
+        self.matcher.graph = kg
 
     def process_observation(self, new_obs: Observation) -> None:
         """Process a newly discovered observation."""

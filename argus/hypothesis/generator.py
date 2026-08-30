@@ -11,6 +11,8 @@ from argus.hypothesis.confidence import HypothesisConfidenceScorer
 from argus.hypothesis.ranking import HypothesisRanker
 from argus.hypothesis.templates import HypothesisTemplateBuilder
 
+from argus.graph.graph import KnowledgeGraph
+
 logger = logging.getLogger(__name__)
 
 class HypothesisGenerator:
@@ -22,10 +24,11 @@ class HypothesisGenerator:
         self.ranker = ranker
         self.template_builder = HypothesisTemplateBuilder()
 
-    def process_investigation(self, investigation: Investigation, mission: 'Mission' = None) -> Optional[Hypothesis]:
+    def process_investigation(self, investigation: Investigation, mission: 'Mission' = None, graph: Optional[KnowledgeGraph] = None) -> Optional[Hypothesis]:
         """
         Evaluates an investigation and creates or refines a hypothesis if evidence is sufficient.
         """
+        kg = graph or (getattr(mission, 'attack_surface_graph', None) if mission else None)
         # Threshold: Do not create hypotheses from very low confidence investigations unless they have multiple evidence bundles.
         if investigation.confidence < 0.4 and len(investigation.evidence_bundles) < 2:
             logger.info(f"Investigation {investigation.id} lacks sufficient evidence to form a hypothesis.")
@@ -40,7 +43,7 @@ class HypothesisGenerator:
         # Check for existing hypotheses that can be refined
         existing = self._find_overlapping(investigation, category)
         if existing:
-            self._refine(existing, investigation, mission)
+            self._refine(existing, investigation, mission, graph=kg)
             return existing
 
         # Create new hypothesis
@@ -52,7 +55,7 @@ class HypothesisGenerator:
             status=HypothesisStatus.DRAFT
         )
         
-        self._refine(hyp, investigation, mission)
+        self._refine(hyp, investigation, mission, graph=kg)
         self.registry.add(hyp)
         logger.info(f"Hypothesis {hyp.id} generated from investigation {investigation.id}.")
         return hyp
@@ -66,7 +69,7 @@ class HypothesisGenerator:
                 return hyp
         return None
 
-    def _refine(self, hyp: Hypothesis, inv: Investigation, mission: 'Mission') -> None:
+    def _refine(self, hyp: Hypothesis, inv: Investigation, mission: 'Mission', graph: Optional[KnowledgeGraph] = None) -> None:
         """Merges investigation data into the hypothesis."""
         if inv.id not in hyp.related_investigations:
             hyp.related_investigations.append(inv.id)
@@ -94,5 +97,6 @@ class HypothesisGenerator:
         hyp.manual_validation = self.template_builder.generate_manual_validation(hyp)
         
         # Update metrics
-        hyp.confidence = self.conf_scorer.calculate_confidence(hyp, mission)
-        self.ranker.evaluate_priority(hyp, mission)
+        kg = graph or (getattr(mission, 'attack_surface_graph', None) if mission else None)
+        hyp.confidence = self.conf_scorer.calculate_confidence(hyp, mission, graph=kg)
+        self.ranker.evaluate_priority(hyp, mission, graph=kg)

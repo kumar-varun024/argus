@@ -8,8 +8,9 @@ from typing import Any, Optional
 
 from argus.evidence import EvidenceStore
 from argus.facts import FactStore
-from argus.models import AuthenticationModel
+from argus.models import AuthenticationModel, TestIdentity
 from argus.reporting.queue import ResearchQueue
+from argus.graph.graph import KnowledgeGraph
 
 if typing.TYPE_CHECKING:
     from argus.ai.models import AIResponse
@@ -89,13 +90,18 @@ class Mission:
     policy: dict = field(default_factory=dict)
     credentials: list[dict] = field(default_factory=list)
     configuration: dict = field(default_factory=dict)
+    test_identities: list[TestIdentity] = field(default_factory=list)
+    active_identity_id: Optional[str] = None
+    environment: dict = field(default_factory=dict)
     
     # State & Graph
     subdomains: list[str] = field(default_factory=list)
     live_hosts: list[dict] = field(default_factory=list)
     technologies: list[str] = field(default_factory=list)
     endpoints: list[dict] = field(default_factory=list)
+    vulnerabilities: list[dict] = field(default_factory=list)
     evidence: EvidenceStore = field(default_factory=EvidenceStore)
+    attack_surface_graph: KnowledgeGraph = field(default_factory=KnowledgeGraph)
     plan: Optional[Any] = None
     plan_steps: list = field(default_factory=list)
     plan_dependencies: list = field(default_factory=list)
@@ -159,6 +165,10 @@ class Mission:
         self.evidence_bundles = EvidenceBundleRegistry()
         self.investigations = InvestigationRegistry()
 
+        if getattr(self, "attack_surface_graph", None) is None:
+            self.attack_surface_graph = KnowledgeGraph()
+        self.graph = self.attack_surface_graph
+
         # Hypothesis Engine registry (graceful if module not yet installed)
         try:
             from argus.hypothesis.registry import HypothesisRegistry
@@ -211,7 +221,6 @@ class Mission:
     ai_research: 'AIResponse' = None
     
     # Datastores
-    evidence: EvidenceStore = field(default_factory=EvidenceStore)
     facts: FactStore = field(default_factory=FactStore)
     
     # Modules
@@ -250,3 +259,51 @@ class Mission:
                 unique_results.append(r)
                 
         return unique_results
+
+    def add_test_identity(self, identity: TestIdentity) -> None:
+        """Adds a TestIdentity to the mission and sets as active if active or first."""
+        for idx, existing in enumerate(self.test_identities):
+            if existing.id == identity.id:
+                self.test_identities[idx] = identity
+                if identity.is_active or self.active_identity_id == identity.id:
+                    self.active_identity_id = identity.id
+                return
+        self.test_identities.append(identity)
+        if self.active_identity_id is None or identity.is_active:
+            self.active_identity_id = identity.id
+
+    def get_test_identity(self, identity_id: str) -> Optional[TestIdentity]:
+        """Finds a TestIdentity by ID or name."""
+        for ident in self.test_identities:
+            if ident.id == identity_id or ident.name == identity_id:
+                return ident
+        return None
+
+    def get_active_identity(self) -> Optional[TestIdentity]:
+        """Returns the currently active TestIdentity if set, or the first active one."""
+        if self.active_identity_id:
+            for ident in self.test_identities:
+                if ident.id == self.active_identity_id:
+                    return ident
+        for ident in self.test_identities:
+            if ident.is_active:
+                return ident
+        return self.test_identities[0] if self.test_identities else None
+
+    def set_active_identity(self, identity_id: str) -> Optional[TestIdentity]:
+        """Sets the active identity by ID or name and returns it."""
+        ident = self.get_test_identity(identity_id)
+        if ident:
+            self.active_identity_id = ident.id
+            ident.is_active = True
+        return ident
+
+    def clear_test_identities(self) -> None:
+        """Clears all test identities from the mission."""
+        self.test_identities.clear()
+        self.active_identity_id = None
+
+    def list_test_identities(self) -> list[TestIdentity]:
+        """Returns a copy of all test identities."""
+        return list(self.test_identities)
+

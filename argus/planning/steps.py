@@ -91,10 +91,20 @@ def build_explain_step() -> PlanStep:
         expected_artifacts=["Explanation Graph"]
     )
 
+def build_probe_information_disclosure_step() -> PlanStep:
+    return PlanStep(
+        name="Probe Information Disclosure",
+        description="Probe live hosts and endpoints for exposed sensitive files and secrets.",
+        dependencies=["Discover APIs"],
+        outputs=["Information Disclosure Findings", "Exposed Secrets"],
+        expected_artifacts=["Information Disclosure Inventory"]
+    )
+
 ALL_STEPS_BUILDERS = [
     build_discover_technologies_step,
     build_discover_apis_step,
     build_discover_graphql_step,
+    build_probe_information_disclosure_step,
     build_analyze_authentication_step,
     build_analyze_authorization_step,
     build_analyze_business_logic_step,
@@ -103,3 +113,4 @@ ALL_STEPS_BUILDERS = [
     build_prioritize_step,
     build_explain_step
 ]
+

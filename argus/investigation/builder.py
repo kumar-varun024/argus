@@ -1,5 +1,5 @@
 import logging
-from typing import Any, List
+from typing import Any, List, Optional
 from argus.correlation.registry import EvidenceBundleRegistry, CorrelationRegistry, ObservationRegistry
 from argus.investigation.registry import InvestigationRegistry
 from argus.investigation.generator import InvestigationGenerator
@@ -9,6 +9,7 @@ from argus.investigation.weights import WeightConfig
 from argus.investigation.manual_validation import ManualValidationGenerator
 from argus.investigation.explanation import ReasoningTreeBuilder
 from argus.investigation.models import Investigation
+from argus.graph.graph import KnowledgeGraph
 
 logger = logging.getLogger(__name__)
 
@@ -32,15 +33,17 @@ class InvestigationBuilder:
             self.val_gen, self.reasoning_builder
         )
 
-    def build_all(self) -> None:
+    def build_all(self, mission: Any = None, graph: Optional[KnowledgeGraph] = None) -> None:
         """Processes all Evidence Bundles to form Investigations."""
+        kg = graph or (getattr(mission, 'attack_surface_graph', None) if mission else None)
         for bundle in self.bundle_registry.get_all():
-            self.generator.process_bundle(bundle)
+            self.generator.process_bundle(bundle, mission=mission, graph=kg)
             
-    def prioritize_all(self, mission: Any = None) -> List[Investigation]:
+    def prioritize_all(self, mission: Any = None, graph: Optional[KnowledgeGraph] = None) -> List[Investigation]:
         """Evaluates and ranks all investigations, updating mission storage if mission is provided."""
+        kg = graph or (getattr(mission, 'attack_surface_graph', None) if mission else None)
         invs = self.inv_registry.get_all()
-        ranked = self.prio_engine.evaluate_all(invs, mission)
+        ranked = self.prio_engine.evaluate_all(invs, mission=mission, graph=kg)
         return ranked
 
     def update_reasoning_tree(self, reasoning_tree: dict) -> None:

@@ -21,6 +21,24 @@ class ToolDispatcher:
         # Resolve task category string
         category = getattr(task, "category", None)
         category_name = category.value if hasattr(category, "value") else str(category)
+        # Explicit tool requested by the planner.
+        metadata = getattr(task, "metadata", {}) or {}
+        requested_tool_id = metadata.get("tool_id") if isinstance(metadata, dict) else None
+        
+        if requested_tool_id:
+            tool = self.registry.get(requested_tool_id)
+            
+            if tool:
+                logger.info(
+                    f"Dispatcher: Task explicitly requested "
+                    f"tool '{requested_tool_id}'"
+                )
+                return tool
+                
+            logger.warning(
+                f"Dispatcher: Requested tool '{requested_tool_id}' "
+                f"was not found in registry"
+            )
 
         # Check required specialists in task metadata/specialists list
         required_specialists = getattr(task, "required_specialists", []) or []

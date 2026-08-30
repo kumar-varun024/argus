@@ -40,6 +40,9 @@ class AutonomousMissionRuntime:
         learning_engine: LearningEngine
     ):
         self.context = ExecutionContext(mission)
+        if not getattr(mission, "environment", None):
+            from argus.utils.environment import EnvironmentDetector
+            mission.environment = EnvironmentDetector().detect(mission.target)
         self.state_machine = state_machine
         self.checkpointer = checkpointer
         
@@ -60,7 +63,12 @@ class AutonomousMissionRuntime:
         
         # 1. Planning Phase
         if mission.status == MissionState.PLANNING:
+            if not getattr(mission, "environment", None):
+                from argus.utils.environment import EnvironmentDetector
+                mission.environment = EnvironmentDetector().detect(mission.target)
             self.mission_planner.analyze()
+            from argus.graph.attack_surface import AttackSurfaceGraphBuilder
+            AttackSurfaceGraphBuilder().build(mission)
             self.research_planner.plan()
             self.state_machine.transition_to(MissionState.RESEARCHING, "Executing scheduled tasks")
             return
@@ -111,6 +119,8 @@ class AutonomousMissionRuntime:
 
         # 3. Evidence Collection & Correlation
         elif mission.status == MissionState.COLLECTING_EVIDENCE:
+            from argus.graph.attack_surface import AttackSurfaceGraphBuilder
+            AttackSurfaceGraphBuilder().build(mission)
             self.state_machine.transition_to(MissionState.CORRELATING, "Correlating evidence")
             return
             
@@ -118,20 +128,68 @@ class AutonomousMissionRuntime:
             from argus.correlation.observation import Observation
             from argus.correlation.models import ObservationCategory, ObservationPriority
             
+            # Sync attack surface graph to correlation engine
+            self.correlation_engine.knowledge_graph = getattr(mission, 'attack_surface_graph', None)
+
             if hasattr(mission, "evidence") and mission.evidence:
                 if not hasattr(mission, "_correlated_evidence_ids"):
                     mission._correlated_evidence_ids = set()
                     
                 for ev in mission.evidence.all():
                     if ev.evidence_id not in mission._correlated_evidence_ids:
+                        category_val = getattr(ev, 'category', 'technology')
+                        cat_enum = ObservationCategory.TECHNOLOGY
+                        try:
+                            if category_val == "vulnerability":
+                                cat_enum = ObservationCategory.VULNERABILITY
+                            elif category_val in ("endpoint", "api"):
+                                cat_enum = ObservationCategory.API
+                            elif category_val in ("live_host", "subdomain", "target"):
+                                cat_enum = ObservationCategory.TECHNOLOGY
+                        except Exception:
+                            pass
+
+                        graph_nodes = []
+                        endpoints = []
+                        urls = []
+                        technologies = []
+
+                        val_str = str(ev.value) if ev.value is not None else ""
+                        if category_val == "subdomain":
+                            graph_nodes.append(f"subdomain:{val_str}")
+                        elif category_val == "live_host":
+                            graph_nodes.append(f"live_host:{val_str}")
+                            urls.append(val_str)
+                            if ev.metadata and "technologies" in ev.metadata:
+                                techs = ev.metadata["technologies"]
+                                if isinstance(techs, list):
+                                    technologies.extend([str(t) for t in techs])
+                                elif isinstance(techs, str):
+                                    technologies.extend([t.strip() for t in techs.split(",") if t.strip()])
+                        elif category_val == "endpoint":
+                            graph_nodes.append(f"endpoint:{val_str}")
+                            endpoints.append(val_str)
+                            urls.append(val_str)
+                        elif category_val == "technology":
+                            graph_nodes.append(f"technology:{val_str}")
+                            technologies.append(val_str)
+                        elif category_val == "vulnerability":
+                            graph_nodes.append(f"vulnerability:{val_str}")
+                            if ev.metadata and "url" in ev.metadata:
+                                urls.append(str(ev.metadata["url"]))
+
                         obs = Observation(
                             source="evidence_collector",
-                            category=ObservationCategory.TECHNOLOGY,
+                            category=cat_enum,
                             title=f"Evidence: {ev.category}",
                             description=ev.description or str(ev.value),
                             confidence=0.8,
                             priority=ObservationPriority.MEDIUM,
-                            evidence=[ev]
+                            evidence=[ev],
+                            graph_nodes=graph_nodes,
+                            endpoints=endpoints,
+                            urls=urls,
+                            technology=technologies
                         )
                         self.correlation_engine.process_observation(obs)
                         mission._correlated_evidence_ids.add(ev.evidence_id)
@@ -151,12 +209,15 @@ class AutonomousMissionRuntime:
         elif mission.status == MissionState.BUILDING_INVESTIGATIONS:
             from argus.runtime.events import EventBus, RuntimeEventType
             EventBus().publish(RuntimeEventType.INVESTIGATION_STARTED, mission.id)
-            self.investigation_builder.build_all()
+            self.investigation_builder.build_all(mission)
             self.investigation_builder.prioritize_all(mission)
             self.state_machine.transition_to(MissionState.GENERATING_HYPOTHESES, "Generating hypotheses")
             return
 
         elif mission.status == MissionState.GENERATING_HYPOTHESES:
+            if hasattr(mission, "investigations") and hasattr(mission.investigations, "get_all"):
+                for inv in mission.investigations.get_all():
+                    self.hypothesis_engine.process_investigation(inv, mission)
             self.hypothesis_engine.evaluate_all(mission)
             self.learning_engine.process_mission(mission)
             

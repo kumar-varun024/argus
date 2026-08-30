@@ -1,11 +1,12 @@
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from argus.hypothesis.models import Hypothesis, HypothesisPriority
+from argus.graph.graph import KnowledgeGraph
 
 logger = logging.getLogger(__name__)
 
 class HypothesisRanker:
-    """Evaluates and ranks hypotheses based on evidence, impact, and confidence."""
+    """Evaluates and ranks hypotheses based on evidence, impact, confidence, and graph topology."""
 
     @staticmethod
     def rank(hypotheses: List[Hypothesis], highest_first: bool = True,
@@ -31,7 +32,7 @@ class HypothesisRanker:
         filtered.sort(key=lambda h: (h.priority_score, h.confidence), reverse=highest_first)
         return filtered
 
-    def evaluate_priority(self, hypothesis: Hypothesis, mission_context: Any = None) -> float:
+    def evaluate_priority(self, hypothesis: Hypothesis, mission_context: Any = None, graph: Optional[KnowledgeGraph] = None) -> float:
         """
         Calculate a priority score (0-100) for a hypothesis.
         """
@@ -51,6 +52,13 @@ class HypothesisRanker:
         # 4. Evidence Strength / Volume (up to 20 points)
         total_evidence = len(hypothesis.related_evidence) + len(hypothesis.related_investigations)
         score += min(total_evidence * 5, 20)
+
+        # 5. Topology Connectivity (up to 10 bonus points)
+        kg = graph or (getattr(mission_context, 'attack_surface_graph', None) if mission_context else None)
+        if kg is not None and hasattr(kg, 'nodes'):
+            nodes_count = len(hypothesis.supporting_graph_nodes) + len(hypothesis.supporting_graph_edges)
+            if nodes_count > 0:
+                score += min(nodes_count * 2.5, 10.0)
 
         # Update the hypothesis fields
         hypothesis.priority_score = min(score, 100.0)

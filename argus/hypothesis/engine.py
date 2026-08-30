@@ -8,6 +8,8 @@ from argus.hypothesis.ranking import HypothesisRanker
 from argus.hypothesis.lifecycle import HypothesisLifecycleManager
 from argus.hypothesis.generator import HypothesisGenerator
 
+from argus.graph.graph import KnowledgeGraph
+
 if TYPE_CHECKING:
     from argus.runtime.mission import Mission
 
@@ -23,11 +25,12 @@ class HypothesisEngine:
         self.lifecycle = HypothesisLifecycleManager()
         self.generator = HypothesisGenerator(self.registry, self.conf_scorer, self.ranker)
 
-    def process_investigation(self, investigation: Investigation, mission: 'Mission' = None) -> Optional[Hypothesis]:
+    def process_investigation(self, investigation: Investigation, mission: 'Mission' = None, graph: Optional[KnowledgeGraph] = None) -> Optional[Hypothesis]:
         """
         Main entry point for generating or refining a hypothesis from an investigation.
         """
-        hyp = self.generator.process_investigation(investigation, mission)
+        kg = graph or (getattr(mission, 'attack_surface_graph', None) if mission else None)
+        hyp = self.generator.process_investigation(investigation, mission, graph=kg)
         if hyp:
             logger.info(f"HypothesisEngine processed investigation {investigation.id} into hypothesis {hyp.id}")
             
@@ -37,13 +40,14 @@ class HypothesisEngine:
                 
         return hyp
 
-    def evaluate_all(self, mission: 'Mission' = None) -> None:
+    def evaluate_all(self, mission: 'Mission' = None, graph: Optional[KnowledgeGraph] = None) -> None:
         """
         Re-evaluates confidence and priority for all hypotheses.
         """
+        kg = graph or (getattr(mission, 'attack_surface_graph', None) if mission else None)
         for hyp in self.registry.get_all():
-            hyp.confidence = self.conf_scorer.calculate_confidence(hyp, mission)
-            self.ranker.evaluate_priority(hyp, mission)
+            hyp.confidence = self.conf_scorer.calculate_confidence(hyp, mission, graph=kg)
+            self.ranker.evaluate_priority(hyp, mission, graph=kg)
             
     def get_ranked_hypotheses(self) -> List[Hypothesis]:
         """Returns all hypotheses, sorted by highest priority and confidence."""
