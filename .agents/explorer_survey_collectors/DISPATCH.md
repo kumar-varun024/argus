@@ -1,26 +1,20 @@
-## 2026-08-30T11:11:00Z
-You are an Explorer subagent for the ARGUS platform.
-Your working directory is /home/varun/argus/.agents/explorer_survey_collectors/
-Your role is to investigate the existing collector architecture and vulnerability detection mechanisms in /home/varun/argus.
+## 2026-08-31T12:03:33Z
 
-MANDATORY FIRST STEP: Read the requirements in /home/varun/argus/.agents/ORIGINAL_REQUEST.md (especially section ## 2026-08-30T11:08:07Z for Sprint 11 Command Injection).
+User/Parent Request:
+You are Survey Explorer 1: Collector Architecture Researcher for Sprint 17 (GraphQL Security).
 
-Tasks to investigate:
-1. Examine existing collectors:
-   - argus/collectors/sql_injection.py
-   - argus/collectors/path_traversal.py
-   - argus/collectors/xss.py (or whatever exists for sprint 10)
-   - argus/collectors/base.py (or common collector base classes / abstractions)
-2. Examine how parameter injection points are discovered, formatted, and tested (query params, POST body fields, path segments, HTTP headers).
-3. Examine how evidence, severity, findings, and confidence scores are constructed (Evidence model, categories, severities like CRITICAL, HIGH, etc.).
-4. Examine how mutation engines or payload generators are designed (e.g. in sql_injection.py or elsewhere).
-5. Examine how time-based differential analysis and error pattern detection are implemented in existing collectors.
+Your Working Directory is: /home/varun/argus/.agents/explorer_survey_collectors/
+Read ORIGINAL_REQUEST at: /home/varun/argus/.agents/ORIGINAL_REQUEST.md
 
-Deliverable:
-Write a comprehensive report to /home/varun/argus/.agents/explorer_survey_collectors/handoff.md detailing:
-- Exact class names, inheritance, interfaces, and method signatures used by collectors.
-- Exact mechanism for parameter testing (query, body, path, headers).
-- Pattern for result-based, time-based differential, and error-based detection.
-- Recommendations and code layout for implementing `argus/collectors/command_injection.py` (CommandInjectionCollector).
-
-When complete, write progress.md and handoff.md in your working directory, and send a final completion message to the orchestrator.
+Task:
+1. Thoroughly investigate existing collectors in the ARGUS codebase (especially `argus/collectors/deserialization.py`, `argus/collectors/xml_parser.py`, `argus/collectors/ssrf.py`, `argus/collectors/access_control.py`, `argus/collectors/base.py` if present).
+2. Examine `argus/http/client.py`, `argus/models/` (finding, evidence, target, etc.), and helper utilities.
+3. Understand how collectors:
+   - Accept targets/endpoints and configurations
+   - Send HTTP requests using `AuthenticatedHttpClient`
+   - Handle timeouts, retries, and errors
+   - Structure detection routines and vulnerability categories
+   - Create and return Evidence objects / Findings
+   - Avoid false positives
+4. Write a comprehensive survey report to `/home/varun/argus/.agents/explorer_survey_collectors/handoff.md`.
+5. When finished, send a brief completion message back. Do NOT send intermediate progress messages.

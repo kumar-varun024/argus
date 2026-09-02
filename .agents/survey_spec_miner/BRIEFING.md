@@ -1,40 +1,43 @@
-# BRIEFING — 2026-08-29T16:26:30Z
+# BRIEFING — 2026-09-01T01:17:00+05:30
 
 ## Mission
-Probe and document full specifications for SQL Injection (SQLi) engine detection (error-based, boolean-based, time-based, FP rejection, WAF bypass mutations) and establish test suite baseline and testing conventions.
+Investigate requirements and technical specifications for Web Cache Poisoning & Cache Deception Detection Module in ARGUS (R1-R5: Cache Security Collector & Prober, Multi-Vector Detection Modes, Mutation & Evasion Strategies, Pipeline/Graph connectivity, and False Positive Rejection Rules).
 
 ## 🔒 My Identity
-- Archetype: Specification Miner
-- Roles: SQLi Engine & Test Baseline Spec Miner
+- Archetype: specification_miner
+- Roles: Specification Mining Specialist, Concurrency Testing & Security Specification Specialist
 - Working directory: /home/varun/argus/.agents/survey_spec_miner
-- Original parent: 71389a44-4f47-4088-bff6-32e338d7482c
-- Milestone: SQLi Engine & Test Baseline Spec Mining Completed
+- Original parent: bd1437ca-69f9-48ac-a1a2-96f044de54e2
+- Milestone: Sprint 20 Race Conditions & Concurrency Vulnerabilities Specification Mining
+- [Sprint 23 Identity]: Web Cache Poisoning & Cache Deception Specification Specialist; Parent: 14e0efdd-8b68-4210-b30c-f8f6e3106536
 
 ## 🔒 Key Constraints
-- Read-only analysis — do NOT implement anything.
-- Probe authoritative specs, codebases, tests, and documentation.
-- Must cover error-based, boolean-based, time-based, FP rejection, WAF bypass (5 strategies), and test baseline/mocks.
-- Report all discoveries in handoff.md following 5-component format.
+- Read-only probe; do NOT modify any codebase files.
+- Discover and document technical specifications thoroughly for HTTP Request Smuggling validation.
+- Cover all desynchronization variants (CL.TE, TE.CL, TE.TE, H2.CL, H2.TE, H2 CRLF downgrading), at least 5 distinct obfuscation strategies, differential response time analysis, sequential 2-request confirmation pipelines, false positive rejection, defensive safe assessment guidelines, and mock server / test fixture architecture.
+- Ensure strict alignment with ARGUS architecture (BaseCollector, Evidence, AttackSurfaceGraph, registry, TaskGenerator, CVSS/CWE).
+- [Sprint 20]: Analyze and document detection and verification models for 5 concurrency scenarios (Limit Overrun, TOCTOU, Session & State Concurrency, Multi-Endpoint Concurrency, Differential State Verification Pipeline).
+- [Sprint 20]: Document at least 5 distinct synchronization & concurrency mechanisms (HTTP/2 Single-Packet Multiplexing, Connection Pre-Warming, Microsecond Barrier Synchronization, Header/Body Padding for TCP Alignment, Dynamic Concurrency Scaling).
+- [Sprint 20]: Document CWE-362 and CWE-367 classification, CVSS v3.1 scoring formulas, and test payload generation requirements.
+- [Sprint 23]: Read-only probe. Discover and formalize all requirements for Web Cache Poisoning & Cache Deception: R1 (Collector & Prober with AuthenticatedHttpClient, baseline vs perturbed requests), R2 (Unkeyed headers, unkeyed params, WCD, normalization flaws, cache fingerprinting), R3 (5+ mutation & evasion strategies), R4 (Pipeline & Graph connectivity), R5 (False positive rejection rules).
 
 ## Current Parent
-- Conversation ID: 71389a44-4f47-4088-bff6-32e338d7482c
-- Updated: 2026-08-29T16:26:30Z
+- Conversation ID: 14e0efdd-8b68-4210-b30c-f8f6e3106536
+- Updated: 2026-09-01T01:17:00+05:30
 
 ## Task Summary
-- **What to build**: Specification report for SQLi engine detection & test baseline
-- **Success criteria**: Comprehensive handoff.md with features, edge cases, baseline test results, fixtures/mocks inventory, and exact SQLi detection specs
-- **Interface contracts**: /home/varun/argus/.agents/ORIGINAL_REQUEST.md
-- **Code layout**: /home/varun/argus
+- **What to build/document**: Comprehensive specification for Web Cache Poisoning & Web Cache Deception detection collector (`CacheSecurityCollector` / `CacheSecurityAnalyzer` / `CacheSecurityPayloadGenerator`), probers (`CacheProber`, `AuthenticatedHttpClient`), lifecycle fingerprinting (`CF-Cache-Status`, `X-Cache`, `Age`, `Cache-Control`, Akamai/CloudFront/Fastly/Varnish/Nginx/ATS), 5+ mutation/evasion strategies, multi-vector detection matrices, verification oracle logic, false positive rejection rules, and graph integration.
+- **Success criteria**: Detailed `handoff.md` covering all requirements R1-R5, exhaustive tables, payload matrices, oracle logic, fingerprinting signatures, and verification methods.
+- **Interface contracts**: Argus tripartite collector pattern (`CacheSecurityCollector`), `Evidence`, `AttackSurfaceGraph` (`HAS_VULNERABILITY` edges), `registry.py`, `TaskGenerator`, `CVSSCalculator` (CWE-444, CWE-524, CWE-525, CWE-613, etc.).
 
 ## Key Decisions Made
-- Baseline established: 861 tests passing.
-- Extracted complete signature sets for MySQL, PostgreSQL, MSSQL, Oracle, and SQLite.
-- Fully specified differential heuristics for boolean-based blind injection.
-- Fully specified baseline latency calculation and $\ge 4.0$s delay threshold for time-based blind injection.
-- Specified 5 WAF bypass mutation strategies.
-- Cataloged all pipeline and graph integration points (`task_generator.py`, `registry.py`, `plugins.py`, `attack_surface.py`).
-- Produced full handoff report at `/home/varun/argus/.agents/survey_spec_miner/handoff.md`.
+- Investigating codebase architecture: `BaseCollector`, `AuthenticatedHttpClient`, `Evidence`, `TaskGenerator`, `registry.py`, `AttackSurfaceGraph`, existing collectors (e.g. `ssti`, `request_smuggling`, `race_conditions`, `business_logic`).
+- Structuring 5 multi-vector detection modes: Unkeyed Header Poisoning, Unkeyed Query Parameter Poisoning, Web Cache Deception, Cache Key Normalization Flaws, and Cache Header & Lifecycle Fingerprinting.
+- Defining precise oracle verification logic: Baseline Request -> Perturbed Probe Request (with unique cache buster) -> Cache Validation / Replay Request (confirming poisoned state without probe header) -> Second Cache Buster Control Request (confirming isolation).
 
 ## Artifact Index
-- /home/varun/argus/.agents/survey_spec_miner/handoff.md — Final specification report
+- /home/varun/argus/.agents/survey_spec_miner/DISPATCH.md — Dispatch log
+- /home/varun/argus/.agents/survey_spec_miner/BRIEFING.md — Situational awareness
 - /home/varun/argus/.agents/survey_spec_miner/progress.md — Liveness & progress tracker
+- /home/varun/argus/.agents/survey_spec_miner/handoff.md — Final spec mining report
+

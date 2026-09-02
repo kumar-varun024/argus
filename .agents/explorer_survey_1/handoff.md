@@ -1,10 +1,9 @@
-# Sprint 13 Codebase Survey — Collector Architecture & Integration Blueprint
+# Explorer 1: Codebase Architecture & Collectors Survey Report
 
 ## 1. Observation
 
-### 1.1 Existing Vulnerability Collectors and Base Class
-We investigated the following collector implementations in `argus/collectors/`:
-- **Base Collector Interface** (`argus/collectors/base.py`, lines 1-10):
+### 1.1 BaseCollector Architecture and Lifecycle
+- **Definition Location**: `argus/collectors/base.py:1-10`
   ```python
   from abc import ABC, abstractmethod
 
@@ -14,189 +13,239 @@ We investigated the following collector implementations in `argus/collectors/`:
           """Collect information and update the mission."""
           pass
   ```
-- **SQL Injection Collector** (`argus/collectors/sql_injection.py`, lines 533-1184):
-  - Class: `SQLInjectionCollector(BaseCollector)`
-  - Subcomponents: `SQLInjectionPayloadGenerator`, `SQLInjectionAnalyzer`
-  - Techniques: Error-based, boolean-based blind, time-based blind delay with DBMS signatures (MySQL, PostgreSQL, MSSQL, Oracle, SQLite).
-- **Cross-Site Scripting Collector** (`argus/collectors/xss.py`, lines 526-1079):
-  - Class: `XSSCollector(BaseCollector)`
-  - Subcomponents: `XSSPayloadGenerator`, `XSSAnalyzer`, `XSSContext`
-  - Techniques: Reflected XSS, stored XSS (stateful POST then GET verification), DOM/attribute injection.
-- **Path Traversal Collector** (`argus/collectors/path_traversal.py`, lines 225-591):
-  - Class: `PathTraversalCollector(BaseCollector)`
-  - Subcomponents: `PathTraversalPayloadGenerator`, `PathTraversalAnalyzer`
-  - Signatures: UNIX (`/etc/passwd`, `/etc/shadow`, `/proc/self/environ`), Windows (`win.ini`, `boot.ini`).
-- **Command Injection Collector** (`argus/collectors/command_injection.py`, lines 642-1339):
-  - Class: `CommandInjectionCollector(BaseCollector)`
-  - Subcomponents: `CommandInjectionPayloadGenerator`, `CommandInjectionAnalyzer`
-  - Techniques: Result-based OS command injection, blind timing delay, error signatures.
-- **SSRF Collector** (`argus/collectors/ssrf.py`, lines 942-1665):
-  - Class: `SSRFCollector(BaseCollector)`
-  - Subcomponents: `SSRFPayloadGenerator`, `SSRFAnalyzer`
-  - Techniques: AWS/GCP/Azure/DigitalOcean metadata endpoints, internal RFC1918 probing, timing delays.
-- **Access Control & IDOR Collector** (`argus/collectors/access_control.py`, lines 59-397):
-  - Class: `AccessControlCollector(BaseCollector)`
-  - Subcomponents: `ResponseDiscrepancyAnalyzer`
-  - Techniques: Horizontal IDOR, vertical privilege escalation (admin route access by unprivileged user), reverse proxy header bypasses (`X-Original-URL`, `X-Rewrite-URL`, `X-Forwarded-Host`).
-- **Information Disclosure Collector** (`argus/collectors/information_disclosure.py`, lines 23-556):
-  - Class: `InformationDisclosureCollector(BaseCollector)`
-  - Subcomponents: `SecretExtractor`
+- **Execution Hook Conventions Across Active Collectors** (e.g. `argus/collectors/cache_security.py:1324-1523`, `argus/collectors/websocket.py:1218-1345`, `argus/collectors/graphql.py:1650-1790`, `argus/collectors/deserialization.py:1003-1400`):
+  - Subclassing: Collectors directly inherit from `BaseCollector`.
+  - Primary Entry Point: `collect(self, mission: Any) -> List[Evidence]`.
+  - Execution Alias: `execute(self, mission: Any) -> List[Evidence]` (delegates directly to `self.collect(mission)`). This satisfies both `BaseCollector` and `BasePlugin` / `PluginExecutorAdapter` contracts.
+  - Backwards Compatibility Aliases: Class aliases provided at module bottom (e.g., `CORSSecurityCollector`, `CORSCollector`, `CORSMisconfigurationCollector`, `HTTPHeaderAuditorCollector`).
 
-### 1.2 Collector Lifecycle Methods & Execution Pattern
-Across all production collectors in Argus, the lifecycle follows an established 4-phase pattern:
-1. **Instantiation (`__init__`)**:
-   - Accepts optional `http_client` (defaults to `None` or instantiated `AuthenticatedHttpClient` / `MultiIdentitySessionCoordinator`), `payload_generator`, `analyzer`, and `timeout: float = 10.0`.
-2. **Candidate Extraction (`_extract_candidate_endpoints(self, mission)`)**:
-   - Reads `mission.endpoints` (can be list of dicts with `url`, `method`, `params`, `body`, `headers` or list of string URLs).
-   - Reads `mission.live_hosts` and `mission.target` to construct base URLs and fallback probe routes.
-   - Handles `ControlledMission` wrapper via `raw_mission = getattr(mission, "_mission", mission)`.
-3. **Active Probing & Discrepancy/Vulnerability Analysis (`collect(self, mission) -> List[Evidence]`)**:
-   - Executes HTTP requests via `_execute_request` or `_execute`.
-   - Analyzes response body, status codes, headers, and response latency with dedicated Analyzers.
-4. **State Mutation & Attack Surface Graph Expansion (`_create_evidence_and_update_state`)**:
-   - Creates `Evidence` object (`argus/evidence/model.py`) with `status="CONFIRMED"`, `confidence` (0.95–1.0), and `severity` (`"critical"`, `"high"`, `"medium"`, `"low"`).
-   - Appends to `raw_mission.evidence` (using `.add(ev)` if `EvidenceStore` or `.append(ev)` if `list`).
-   - Appends finding dict to `raw_mission.vulnerabilities`.
-   - Expands `mission.attack_surface_graph` / `mission.graph`:
-     - Adds `Node(id="live_host:<host>", type="live_host", ...)`
-     - Adds `Node(id="endpoint:<url>", type="endpoint", ...)`
-     - Adds `Node(id="vulnerability:<template_id>:<url>...", type="vulnerability", ...)`
-     - Connects `HAS_ENDPOINT` edge (`live_host` -> `endpoint`)
-     - Connects `HAS_VULNERABILITY` edges (`live_host` -> `vulnerability` and `endpoint` -> `vulnerability`).
-5. **Adapter Method (`execute(self, mission) -> List[Evidence]`)**:
-   - Alias calling `self.collect(mission)` to support the plugin / specialist execution adapter interface.
+### 1.2 Candidate Endpoint Discovery & Extraction Patterns
+- Active collectors implement `_discover_candidate_endpoints(self, mission: Any) -> List[str]` (`argus/collectors/cache_security.py:1334-1381`, `argus/collectors/graphql.py:1660-1710`):
+  - Handles raw missions and wrapped missions: `raw_mission = getattr(mission, "_raw_mission", getattr(mission, "_mission", mission))`.
+  - Extracts endpoints from:
+    1. `raw_mission.endpoints`: Extracts `ep.get("url") or ep.get("path")` if dict, or string `ep`.
+    2. `raw_mission.live_hosts`: Extracts `lh.get("url")` if dict, or string `lh`.
+    3. `raw_mission.target`: If string `target` is provided without scheme, normalizes to `https://{target}` or `http://{target}`.
+    4. `raw_mission.evidence`: Iterates over evidence items (`raw_mission.evidence.all()` or list), extracting `metadata.get("url")` or `metadata.get("endpoint")`.
+  - Fallback Target Synthesis: If `endpoints` list is completely empty, synthesizes default URLs from `live_hosts` or `target`.
 
-### 1.3 HTTP Client Architecture & Authentication Management
-Located in `argus/http/client.py` and `argus/http/coordinator.py`:
-- **`AuthorizedHttpClient`** (`argus/http/client.py`, lines 86-298):
-  - Wraps `httpx` with `ScopeResolver` (blocks requests to out-of-scope targets) and `authorization_gate` (verifies user/action permissions).
-  - Sanitizes sensitive authorization headers, tokens, and cookies from audit logs while sending raw credentials on the wire.
-  - Automatically emits `Evidence(category="HTTP Response", severity="info")` for every executed HTTP request.
-- **`AuthenticatedHttpClient`** (`argus/http/client.py`, lines 300-587):
-  - Subclasses `AuthorizedHttpClient`.
-  - Maintains persistent `httpx.Client` session with connection pooling, retries, and backoff.
-  - Injects `TestIdentity` credentials automatically into request headers (`Authorization: Bearer <token>`, `Authorization: Basic <base64>`, `X-API-Key`) and cookies.
-  - Syncs incoming cookies from response headers back into `active_identity.cookies` via `active_identity.update_session(cookies=dict(response.cookies))`.
-  - Implements `login(self, mission, identity, login_url, payload, login_type, headers)` to perform automated login and capture bearer/JWT tokens into identity state.
-  - Supports context manager (`with AuthenticatedHttpClient(...) as client:`).
-- **`MultiIdentitySessionCoordinator`** (`argus/http/coordinator.py`, lines 34-235):
-  - Coordinates isolated `AuthenticatedHttpClient` instances per `TestIdentity.id` to guarantee isolated cookie jars and distinct session state.
-  - Provides `get_client_for_identity(identity)` and `get_unauthenticated_client()`.
-  - Provides `execute_as(identity, mission, method, url, **kwargs) -> HttpResponse`.
-  - Provides `execute_comparison(mission, method, url, primary_identity, secondary_identity) -> MultiIdentityComparison`.
+### 1.3 HTTP Client Infrastructure & Polymorphic Dispatch
+- **Definition Location**: `argus/http/client.py`
+  - `HttpResponse` Dataclass (`lines 71-85`):
+    - `success: bool`
+    - `status_code: Optional[int] = None`
+    - `headers: Dict[str, str] = field(default_factory=dict)`
+    - `request_headers: Dict[str, str] = field(default_factory=dict)`
+    - `body: Optional[str] = None`
+    - `raw_body: Optional[str] = None`
+    - `url: str = ""`
+    - `method: str = ""`
+    - `elapsed: float = 0.0`
+    - `error: Optional[str] = None`
+    - `scope_decision: Optional[ScopeDecision] = None`
+    - `authorization_decision: Optional[AuthDecision] = None`
+  - `AuthenticatedHttpClient` Class (`lines 300-587`):
+    - Subclasses `AuthorizedHttpClient`.
+    - `__init__(identity=None, proxy=None, verify_ssl=False, timeout=10.0, max_retries=3, backoff_factor=0.5, follow_redirects=True, headers=None, cookies=None)`.
+    - Supports context management: `__enter__()` and `__exit__()` calling `self.close()`.
+    - Enforces strict in-scope verification via `ScopeResolver.check_scope(url, mission.id)` before sending requests (`lines 377-389`).
+    - Enforces authorization gating via `authorization_gate.can_execute_action(...)` (`lines 392-405`).
+    - Injects identity headers and cookies via `TestIdentity` (`lines 407-421`).
+    - Automatic retry with exponential backoff on `httpx.TimeoutException` and `httpx.RequestError` (`lines 433-497`).
+    - Sanitizes sensitive headers (`Authorization`, `Cookie`, `X-API-Key`, etc.) and passwords in URLs and bodies (`lines 17-70`).
+    - Automatically records `Evidence(category="HTTP Response")` on successful dispatch (`lines 475-477`).
+- **Polymorphic Prober HTTP Execution Helper** (`argus/collectors/graphql.py:1056-1160`, `argus/collectors/deserialization.py:970-1001`):
+  ```python
+  def _execute_request(
+      self,
+      mission: Any,
+      method: str,
+      url: str,
+      headers: Optional[Dict[str, str]] = None,
+      cookies: Optional[Dict[str, str]] = None,
+      data: Optional[Any] = None,
+      json_data: Optional[Any] = None,
+      params: Optional[Dict[str, Any]] = None,
+  ) -> Optional[HttpResponse]:
+      method = method.upper()
+      req_headers = dict(headers or {})
+      req_cookies = dict(cookies or {})
 
-### 1.4 Pipeline Registration & Task DAG Architecture
-- **Task Generator DAG** (`argus/planning/task_generator.py`, lines 13-146, 245-450):
-  - `_RECON_TEMPLATES` catalog defines task metadata: `title`, `goal`, `category`, `required_inputs`, `expected_outputs`, `dependencies`, `metadata: {"tool_id": ...}`.
-  - In `generate_recon_tasks()` and `_resolve_template_for_gap()`, collectors are scheduled with dependency on `katana_crawler` (i.e. `dependencies: ["Discover API Endpoints"]`).
-- **Runtime Plugin Factory** (`argus/runtime/plugins.py`, lines 65-114):
-  - `PluginExecutorAdapter._instantiate_specialist_fallback(plugin_id)` instantiates internal collectors by keyword matching (`sql_injection`, `access_control`, `path_traversal`, `xss`, `command_injection`, `ssrf`).
-- **Attack Surface Graph Builder** (`argus/graph/attack_surface.py`, lines 454-630):
-  - `AttackSurfaceGraphBuilder.build_from_evidence()` processes evidence categories and builds graph nodes and `HAS_VULNERABILITY` edges.
-- **Baseline Test Suite**:
-  - `python -m pytest tests/ --ignore=tests/workspace -x -q` passed with **1127 passed** in 48.43s.
+      try:
+          if self.http_client is not None:
+              client = self.http_client
+              # 1. Direct method calls: client.get, client.post, client.options
+              if method == "GET" and hasattr(client, "get"):
+                  try:
+                      return client.get(mission, url, params=params, headers=req_headers, cookies=req_cookies, timeout=self.timeout)
+                  except TypeError:
+                      return client.get(url, params=params, headers=req_headers, cookies=req_cookies)
+              if method == "POST" and hasattr(client, "post"):
+                  try:
+                      return client.post(mission, url, data=data, json=json_data, headers=req_headers, cookies=req_cookies, timeout=self.timeout)
+                  except TypeError:
+                      return client.post(url, data=data, json=json_data, headers=req_headers, cookies=req_cookies)
+              if method == "OPTIONS" and hasattr(client, "options"):
+                  try:
+                      return client.options(mission, url, headers=req_headers, cookies=req_cookies, timeout=self.timeout)
+                  except TypeError:
+                      return client.options(url, headers=req_headers, cookies=req_cookies)
+              # 2. Universal request method: client.request
+              if hasattr(client, "request"):
+                  try:
+                      return client.request(mission, method=method, url=url, params=params, data=data, json=json_data, headers=req_headers, cookies=req_cookies, timeout=self.timeout)
+                  except TypeError:
+                      return client.request(method=method, url=url, params=params, data=data, json=json_data, headers=req_headers, cookies=req_cookies)
+              # 3. Callable mock function
+              if callable(client):
+                  return client(method=method, url=url, params=params, data=data, json=json_data, headers=req_headers, cookies=req_cookies)
+
+          # Fallback to AuthenticatedHttpClient context manager
+          with AuthenticatedHttpClient(timeout=self.timeout, max_retries=1) as client:
+              if method == "GET":
+                  return client.get(mission, url, params=params, headers=req_headers, cookies=req_cookies, timeout=self.timeout)
+              elif method == "POST":
+                  return client.post(mission, url, data=data, json=json_data, headers=req_headers, cookies=req_cookies, timeout=self.timeout)
+              elif method == "OPTIONS":
+                  return client.options(mission, url, headers=req_headers, cookies=req_cookies, timeout=self.timeout)
+              else:
+                  return client.request(mission, method, url, params=params, data=data, json=json_data, headers=req_headers, cookies=req_cookies, timeout=self.timeout)
+      except Exception as e:
+          logger.debug("HTTP request to %s failed: %s", url, e)
+      return None
+  ```
+
+### 1.4 Quadruple State Publishing Pattern
+When active collectors discover a confirmed finding, they update four distinct state locations (`argus/collectors/cache_security.py:1383-1481`, `argus/collectors/websocket.py:1260-1340`):
+1. **`raw_mission.evidence`**:
+   - Creates `Evidence(category=..., value=..., source=..., status="CONFIRMED", confidence=1.0, severity=..., title=..., description=..., provenance=ProvenanceData(...), tags=[...], metadata={...})`.
+   - Appends via `raw_mission.evidence.add(ev)` (if `EvidenceStore`) or `raw_mission.evidence.append(ev)`.
+2. **`raw_mission.vulnerabilities`**:
+   - Appends dictionary `{"name": title, "template_id": template_id, "severity": severity, "host": base_url, "url": target_url, "description": description, "technique": technique, "parameter": parameter, "strategy": strategy, "cwe_id": cwe_id, "cvss_score": cvss_score}`.
+3. **`raw_mission.attack_surface_graph` (KnowledgeGraph)**:
+   - Adds nodes:
+     - `Node(id=f"live_host:{base_url}", type="live_host", value=base_url, metadata={"url": base_url, "host": hostname})`
+     - `Node(id=f"endpoint:{target_url}", type="endpoint", value=target_url, metadata={"url": target_url, "status_code": status_code})`
+     - `Node(id=f"vulnerability:{template_id}:{target_url}:{vector_name}", type="vulnerability", value=title, metadata=ev.metadata)`
+   - Connects directional edges:
+     - `graph.connect(lh_id, ep_id, edge_type="HAS_ENDPOINT")`
+     - `graph.connect(lh_id, vuln_id, edge_type="HAS_VULNERABILITY")`
+     - `graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")`
+4. **`ControlledMission.publish_finding`**:
+   - If `mission` is a `ControlledMission` wrapper, calls `mission.publish_finding(ev.evidence_id, ev)`.
+
+### 1.5 Pipeline Connectivity & System Integration
+- **`argus/planning/task_generator.py`**:
+  - `_RECON_TEMPLATES`: Recon task template definition with `title`, `goal`, `category=TaskCategory.EVIDENCE_CORRELATION`, `required_inputs=["endpoints"]`, `expected_outputs=["vulnerabilities", "observations", "evidence"]`, `dependencies=["Discover API Endpoints"]`, `metadata={"tool_id": "cors_headers"}`, `priority=0.82`.
+  - `_resolve_template_for_gap`: Keyword mapping in `TaskCategory.EVIDENCE_CORRELATION` for `"cors"`, `"cors security"`, `"cors misconfiguration"`, `"security headers"`, `"http security headers"`, `"csp"`, `"hsts"`, `"x-frame-options"`, `"clickjacking"`.
+  - `from_gaps`: Inclusion in the `tool_id in (...)` tuple on line 792 to auto-populate input URLs from `mission.endpoints`.
+- **`argus/runtime/registry.py`**:
+  - Registers `Tool(id="cors_headers", name="CORS & HTTP Security Header Audit Collector", capability="cors_headers_detector", ...)` with supported tasks, inputs/outputs, capabilities, safety requirements (`{"type": "internal", "permissions": ["network", "db_read", "db_write"]}`), timeout (300.0s), priority (95).
+  - Aliases in `ToolRegistry.get()`: maps `"cors"`, `"cors_security"`, `"cors_collector"`, `"cors_misconfiguration"`, `"security_headers"`, `"http_headers"`, `"header_auditor"`, `"csp"`, `"hsts"` to `"cors_headers"`.
+- **`argus/runtime/plugins.py`**:
+  - `PluginExecutorAdapter._instantiate_specialist_fallback`: Dispatches matching `plugin_id` to instantiate `CORSSecurityCollector()`.
+- **`argus/graph/attack_surface.py`**:
+  - `AttackSurfaceGraphBuilder.build_from_evidence`: Category handler for `"cors"`, `"cors_misconfiguration"`, `"http_security_headers"`, `"cors_headers"`, `"security_headers"` creating `live_host`, `endpoint`, and `vulnerability` nodes with `HAS_ENDPOINT` and `HAS_VULNERABILITY` edges.
+- **`argus/reporting/cvss.py`**:
+  - `CWE_DATABASE`: Maps CORS findings to `CWE-942` ("Permissive Cross-origin Resource Sharing Policy"), security header findings to `CWE-693` ("Protection Mechanism Failure"), `CWE-1021` ("Improper Restriction of Rendered UI Layers or Frames"), `CWE-319` ("Cleartext Transmission of Sensitive Information"), `CWE-525` ("Use of Web Browser Cache Containing Sensitive Information").
+  - `_get_preset_vector`: Maps severity band scoring for CORS and header vulnerabilities (Critical: 9.8 / High: 8.1 / Medium: 5.3 / Low: 2.7 / Info: 0.0).
+
+### 1.6 Current Test Suite Status
+- Command executed: `python -m pytest tests/ --ignore=tests/workspace -q`
+- Result: **1,740 passed in 65.02s (0 failures, 0 errors)**.
 
 ---
 
 ## 2. Logic Chain
 
-From the observations above, we establish the step-by-step logic for implementing Sprint 13 OAuth/OIDC, Token Validation, and Stateful Authentication collectors:
+1. **Adherence to BaseCollector Contract**:
+   - `BaseCollector` defines the abstract contract `collect(mission)`.
+   - To integrate seamlessly into both direct collector invocations and runtime adapters (`PluginExecutorAdapter.execute_plugin`), the new module (`argus/collectors/cors_headers.py`) must implement `CORSSecurityCollector(BaseCollector)` exposing both `collect(mission)` and `execute(mission)`.
 
-### Step 1: Collector Architecture & File Layout
-To match the existing collector architecture (e.g. `SQLInjectionCollector`, `SSRFCollector`, `AccessControlCollector`), the new auth testing capabilities can be organized as either dedicated collectors or a cohesive module in `argus/collectors/oauth.py` (or `argus/collectors/auth_vulnerability.py` / `argus/collectors/oauth_oidc.py`):
-1. **`OAuthOIDCCollector`** (or `OAuthCollector` in `argus/collectors/oauth.py` or `argus/collectors/oauth_oidc.py`):
-   - Inherits from `BaseCollector`.
-   - Coordinates tests across:
-     - **OAuth/OIDC Flow Testing** (R1): Redirect URI manipulation, state parameter enforcement, token leakage via Referer, authorization code reuse.
-     - **Token Validation Testing** (R2): Signature validation (`alg: none`, invalid signatures), claims validation (`exp`, `aud`, `iss`, `nbf`), token scope tampering.
-     - **Stateful Authentication Testing** (R3): Session fixation, session invalidation on logout, cookie security attributes (`Secure`, `HttpOnly`, `SameSite`), concurrent session handling.
-   - Includes subcomponents:
-     - `OAuthPayloadGenerator`: Generates manipulated `redirect_uri` payloads (e.g., `https://attacker.com`, `https://target.com/../../attacker`, `https://target.com.attacker.com`, `https://attacker-target.com`), state manipulation vectors, and mock tokens.
-     - `TokenValidationAnalyzer` / `JWTValidatorAnalyzer`: Generates tampered JWTs (`alg: none`, modified signatures, expired timestamps, forged claims, modified scopes) and evaluates whether endpoints accept or reject them.
-     - `SessionWorkflowAnalyzer`: Inspects session cookies before and after login, post-logout invalidation, and validates cookie security attributes (`Secure`, `HttpOnly`, `SameSite`).
+2. **Decoupled Architecture (Generator, Prober, Analyzer, Collector)**:
+   - Modern active collectors in the codebase follow a 4-part architecture:
+     - `CORSPayloadGenerator` / `HeaderAuditPayloadGenerator`: Constructs target probe structures, crafted origins, preflight options, and header mutations.
+     - `CORSProber`: Manages polymorphic HTTP execution (`AuthenticatedHttpClient` / mock client), timeout resilience, and response normalization.
+     - `CORSAnalyzer` & `HTTPHeaderAuditor`: Inspects response headers (`Access-Control-*`, `Content-Security-Policy`, `Strict-Transport-Security`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, `Cache-Control`), evaluates misconfigurations, eliminates false positives, and assigns CWE/CVSS scores.
+     - `CORSSecurityCollector(BaseCollector)`: Discovers candidate endpoints, drives probes, evaluates findings, and executes Quadruple State Publishing.
 
-### Step 2: Evidence and Attack Surface Graph Integration
-When a vulnerability is confirmed:
-1. `Evidence` is created with:
-   - `category`: `"oauth_oidc"` (or `"oauth_misconfiguration"`, `"token_validation"`, `"session_management"`).
-   - `severity`: `"critical"` (for `alg:none` bypass, open redirect token leakage, invalid signature acceptance, session fixation) or `"high"` / `"medium"` (for missing state parameter, missing `Secure`/`HttpOnly` flags).
-   - `status`: `"CONFIRMED"`.
-   - `confidence`: `0.95` to `1.0`.
-   - `tags`: `["oauth", "oidc", "token_validation", "session_management", template_id]`.
-2. Graph Node & Edge Creation:
-   - Adds `Node(id=lh_id, type="live_host", ...)`
-   - Adds `Node(id=ep_id, type="endpoint", ...)`
-   - Adds `Node(id=vuln_id, type="vulnerability", ...)`
-   - Connects `graph.connect(lh_id, vuln_id, edge_type="HAS_VULNERABILITY")`
-   - Connects `graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")`
-3. Update `AttackSurfaceGraphBuilder` in `argus/graph/attack_surface.py` to ingest `"oauth_oidc"`, `"token_validation"`, and `"session_management"` categories into the graph.
+3. **Multi-Vector CORS & Header Audit Coverage (R2, R3, R4)**:
+   - Multi-vector CORS detection (R2):
+     - Origin Reflection: Arbitrary origin reflection in `Access-Control-Allow-Origin`.
+     - Null Origin Acceptance: `Origin: null` accepted with `Access-Control-Allow-Credentials: true`.
+     - Wildcard with Credentials: `Access-Control-Allow-Origin: *` combined with `Access-Control-Allow-Credentials: true`.
+     - Subdomain Trust Abuse: Overly broad trust (`https://attacker.example.com` or `https://example.com.attacker.com`).
+     - Pre-flight Bypass: OPTIONS preflight response with overly permissive methods (`PUT`, `DELETE`, `PATCH`) or headers.
+     - Origin Parser Differential: Prefix bypass (`target.com.attacker.com`), suffix bypass (`attacker.target.com`), URL-encoded origins (`%2e%2e`), unescaped regex dots (`targetXcom`), protocol confusion (`http://` vs `https://`).
+   - HTTP Security Header Audit (R3):
+     - CSP: missing, `unsafe-inline`, `unsafe-eval`, wildcard sources (`*`), missing `frame-ancestors`.
+     - HSTS: missing, `max-age < 31536000`, missing `includeSubDomains`, missing `preload`.
+     - X-Frame-Options: missing, invalid values (not `DENY` or `SAMEORIGIN`).
+     - X-Content-Type-Options: missing `nosniff`.
+     - Referrer-Policy: missing, overly permissive (`unsafe-url`, `no-referrer-when-downgrade`).
+     - Permissions-Policy: missing, overly permissive.
+     - X-XSS-Protection: `0` or missing.
+     - Cache-Control: missing `no-store` / `no-cache` on sensitive endpoints.
+   - Mutation & Evasion Strategies (R4 - at least 5 distinct strategies):
+     1. Origin Casing Variations (`https://TARGET.COM`, `https://TaRgEt.CoM`)
+     2. Protocol Smuggling (`http://` downgrade, `ws://` / `wss://`, `ftp://`)
+     3. Subdomain Injection Patterns (`attacker-target.com`, `target.com.attacker.com`, `targetacom`)
+     4. Header Duplication & Folding (multiple `Origin` headers, comma-separated origins)
+     5. Pre-flight Method/Header Enumeration (non-standard methods `PATCH`, `TRACE`, custom headers `X-Custom-Auth`)
 
-### Step 3: Pipeline & Tool Registry Integration
-1. **`argus/planning/task_generator.py`**:
-   - Add `"oauth_oidc"` template to `_RECON_TEMPLATES`:
-     ```python
-     "oauth_oidc": {
-         "title": "Analyze OAuth & OIDC Authentication",
-         "goal": "Test OAuth/OIDC endpoints, token validation signatures/claims, and stateful session management using AuthenticatedHttpClient.",
-         "category": TaskCategory.AUTHENTICATION_ANALYSIS,
-         "required_inputs": ["endpoints"],
-         "expected_outputs": ["vulnerabilities", "observations", "evidence"],
-         "dependencies": ["Discover API Endpoints"],
-         "required_specialists": [],
-         "metadata": {"tool_id": "oauth_oidc"},
-         "estimated_duration_minutes": 10,
-         "priority": 0.82,
-     }
-     ```
-   - Update `_resolve_template_for_gap()` to map auth gaps and keywords (`oauth`, `oidc`, `jwt`, `token validation`, `session management`) to `_RECON_TEMPLATES["oauth_oidc"]`.
-2. **`argus/runtime/plugins.py`**:
-   - Add `"oauth"` / `"oauth_oidc"` / `"oidc"` / `"token_validation"` cases in `PluginExecutorAdapter._instantiate_specialist_fallback` to return the new collector.
-3. **`argus/collectors/__init__.py`**:
-   - Export `OAuthOIDCCollector` (and any related analyzers/generators) and include in `__all__`.
+4. **Pipeline Compatibility & Victory Conditions (R5, R6)**:
+   - DAG scheduling via `TaskGenerator` requires `_RECON_TEMPLATES["cors_headers"]` and gap resolution.
+   - Tool registry requires `Tool(id="cors_headers", ...)` with aliases in `argus/runtime/registry.py`.
+   - Fallback dispatch requires matching cases in `PluginExecutorAdapter._instantiate_specialist_fallback`.
+   - Attack surface graph reconstruction requires category processing in `AttackSurfaceGraphBuilder.build_from_evidence`.
+   - CVSS/CWE scoring requires database and heuristic mapping in `argus/reporting/cvss.py`.
+   - All 1,740 passing tests must continue to pass with zero regressions.
 
 ---
 
 ## 3. Caveats
 
-1. **Scope and Authorization Gate Enforcement**:
-   - `AuthenticatedHttpClient` strictly verifies target URLs against `ScopeResolver`. During testing of `redirect_uri` manipulation pointing to external domains (e.g. `https://attacker.com`), requests sent directly to external domains might be blocked by the scope gate if not mocking client responses. The collector should test whether the *target authorization server* accepts and redirects to the manipulated URI (by analyzing the `Location` header in 302 responses or body from the in-scope target server) rather than attempting to navigate out of scope.
-2. **Mock vs Real HTTP Client Injection**:
-   - Following unit test patterns in `test_access_control.py` and `test_ssrf.py`, collectors must accept an optional `http_client` in `__init__`. The collector's `_execute_request` method must support injected mock clients with custom routing and response structures.
-3. **Deprecation Warnings in Test Suite**:
-   - Notice in the test output that `datetime.datetime.utcnow()` and per-request `cookies` produce deprecation warnings in Python 3.13. New code should use `datetime.now(timezone.utc).isoformat()` and standard cookie dictionaries.
+- **No Caveats on Architecture**: The architectural conventions for collectors, probers, HTTP dispatch, graph wiring, and DAG scheduling are completely uniform and consistent across all 20+ collectors in the repository.
+- **Benchmark & Offline Safety**: All active probes in ARGUS must execute without third-party network dependencies. Testing harnesses must use mock HTTP clients or local HTTP servers without reaching external internet endpoints.
 
 ---
 
 ## 4. Conclusion
 
-The Argus collector subsystem is highly consistent across SQLi, XSS, Path Traversal, CMDi, SSRF, and Access Control. Implementing the Sprint 13 OAuth/OIDC and Stateful Authentication modules requires:
-
-### Exact File & Class Implementation Blueprint
-
-| Component | Target File | Class / Function Names | Responsibilities |
-|---|---|---|---|
-| **Collector Core** | `argus/collectors/oauth.py` (or `oauth_oidc.py`) | `OAuthOIDCCollector(BaseCollector)` | Orchestrates R1 (OAuth redirect/state/leakage/reuse), R2 (JWT alg:none, signature, claims, scope), and R3 (session fixation, logout invalidation, cookie attributes). |
-| **Payload Generator** | `argus/collectors/oauth.py` | `OAuthPayloadGenerator` | Produces manipulated redirect URIs, forged JWTs (`alg:none`, expired `exp`, bad `aud`/`iss`, reduced scope), and test state parameters. |
-| **Analyzers** | `argus/collectors/oauth.py` | `OAuthAnalyzer`, `TokenValidationAnalyzer`, `SessionSecurityAnalyzer` | Detects open redirects, missing state, signature bypasses, claim acceptance, session fixation, and missing cookie flags. |
-| **Exports** | `argus/collectors/__init__.py` | Export `OAuthOIDCCollector`, etc. | Registers classes into collector module namespace. |
-| **Graph Builder** | `argus/graph/attack_surface.py` | `AttackSurfaceGraphBuilder.build_from_evidence()` | Ingests `oauth_oidc`, `token_validation`, `session_management` evidence categories to construct `HAS_VULNERABILITY` edges. |
-| **Task Generator** | `argus/planning/task_generator.py` | `_RECON_TEMPLATES["oauth_oidc"]`, `_resolve_template_for_gap` | Schedules OAuth/OIDC analysis in DAG after `Discover API Endpoints`. |
-| **Plugin Adapter** | `argus/runtime/plugins.py` | `_instantiate_specialist_fallback` | Instantiates `OAuthOIDCCollector` on `oauth_oidc` / `oauth` / `token_validation` tool IDs. |
-| **Test Suite** | `tests/collectors/test_oauth.py` (and adversarial tests) | Unit and integration tests (20+ tests) | Validates R1-R4 acceptance criteria: open redirect detection, alg:none rejection, session cookie flags, false positive suppression, DAG & graph edge verification. |
+The ARGUS codebase possesses a mature, well-structured collector and pipeline architecture. Implementing the CORS Misconfiguration & HTTP Security Header Audit Module requires:
+1. Creating `argus/collectors/cors_headers.py` containing:
+   - Enums: `CORSVulnerabilityType`, `HeaderVulnerabilityType`, `CORSMutationStrategy`, `CORSSeverity`
+   - Data structures: `CORSProbe`, `CORSProbeResponse`, `CORSSecurityResult`, `HeaderAuditResult`
+   - `CORSPayloadGenerator`: Generates multi-vector CORS probes and 5+ mutation strategies
+   - `CORSProber`: Executes polymorphic HTTP requests with timeout/error resilience
+   - `CORSAnalyzer` & `HTTPHeaderAuditor`: Evaluates CORS and security headers, suppresses false positives, and calculates CVSS/CWE
+   - `CORSSecurityCollector(BaseCollector)`: Discovers endpoints, orchestrates audits, and executes Quadruple State Publishing
+2. Updating `argus/collectors/__init__.py` to export the new classes and aliases.
+3. Updating `argus/planning/task_generator.py` with `_RECON_TEMPLATES["cors_headers"]`, gap resolution keywords, and `from_gaps` input extraction.
+4. Updating `argus/runtime/registry.py` with `Tool(id="cors_headers", ...)` and alias resolutions.
+5. Updating `argus/runtime/plugins.py` with fallback instantiation in `PluginExecutorAdapter`.
+6. Updating `argus/graph/attack_surface.py` with Section 25 in `AttackSurfaceGraphBuilder.build_from_evidence`.
+7. Updating `argus/reporting/cvss.py` with CWE-942, CWE-693, CWE-1021 mappings and heuristic scoring bands.
+8. Writing comprehensive test suites in `tests/collectors/test_cors_headers.py` and `tests/collectors/test_cors_headers_adversarial.py` (at least 25 new tests) maintaining 100% test pass rate across all 1,740+ existing tests.
 
 ---
 
 ## 5. Verification Method
 
-To verify existing functionality and any proposed changes:
-1. Run the test suite:
+To independently verify all findings and validate future implementations:
+1. **Run full test suite**:
    ```bash
-   python -m pytest tests/ --ignore=tests/workspace -x -q
+   python -m pytest tests/ --ignore=tests/workspace -q
    ```
-   **Expected**: 1127+ passed, 0 failures.
-2. Verify collector interface conformance:
-   - Ensure `OAuthOIDCCollector` inherits from `BaseCollector` and implements both `collect(self, mission)` and `execute(self, mission)`.
-   - Ensure `Evidence` created by the collector uses standard fields (`category`, `severity`, `confidence`, `metadata`, `provenance`).
-   - Ensure graph nodes (`type="live_host"`, `type="endpoint"`, `type="vulnerability"`) and edges (`HAS_ENDPOINT`, `HAS_VULNERABILITY`) are created properly.
-3. Verify test coverage:
-   - Add new tests in `tests/collectors/test_oauth.py` (or `test_oauth_oidc.py`) covering all acceptance criteria with mock HTTP clients.
+   (Expected: 1,740+ passed).
+2. **Inspect BaseCollector & Active Collector Architecture**:
+   - `argus/collectors/base.py`
+   - `argus/collectors/cache_security.py:1324-1523`
+   - `argus/collectors/websocket.py:1218-1345`
+   - `argus/http/client.py:300-587`
+3. **Inspect Pipeline Wiring Targets**:
+   - `argus/planning/task_generator.py:13-266, 680-822`
+   - `argus/runtime/registry.py:15-180, 750-869`
+   - `argus/runtime/plugins.py:65-212`
+   - `argus/graph/attack_surface.py:1208-1277`
+   - `argus/reporting/cvss.py:33-180, 372-444`

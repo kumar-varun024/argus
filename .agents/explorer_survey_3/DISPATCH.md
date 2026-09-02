@@ -1,14 +1,19 @@
-## 2026-08-30T12:17:40Z
-You are Explorer 3 for Sprint 13 Codebase Survey.
-Your working directory is /home/varun/argus/.agents/explorer_survey_3.
-Create your working directory and maintain progress.md and handoff.md in it.
+## 2026-09-01T16:59:28Z
+You are Explorer 3 (Spec Miner & Test Suite Explorer).
+Your working directory is: `/home/varun/argus/.agents/explorer_survey_3`
+Read `/home/varun/argus/.agents/orchestrator/ORIGINAL_REQUEST.md`.
 
-Read /home/varun/argus/.agents/ORIGINAL_REQUEST.md.
+Your mission is to explore and analyze:
+1. Test suite layout in `tests/`, test fixtures, mock HTTP clients / aiohttp / httpx / pytest patterns used across tests.
+2. Verify test execution command: `python -m pytest tests/ --ignore=tests/workspace -x -q`.
+3. Requirements R1-R6 mapping:
+   - CORS detection modes (Reflection, Null origin, Wildcard + creds, Subdomain trust abuse, Pre-flight bypass, Origin parser differentials)
+   - HTTP Security Header checks (CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, X-XSS-Protection, Cache-Control on sensitive endpoints)
+   - Mutation & evasion strategies (Casing, Protocol smuggling, Subdomain injection, Header duplication & folding, Pre-flight enumeration)
+4. Detail all exact header specifications, parsing logic, and edge cases to ensure zero false positives/negatives.
 
-Your mission is to explore existing Test Suites, Mocking Infrastructures, and Test Conventions in Argus:
-1. Examine existing tests in tests/ (e.g. tests for SQLInjectionCollector, XSSCollector, SSRFCollector, etc.).
-2. Check how HTTP requests/endpoints are mocked (pytest fixtures, responses, respx, aioresponses, mock servers, etc.).
-3. Check how Evidence / Findings / Graph assertions are tested.
-4. Check current test suite execution (`pytest tests/ --ignore=tests/workspace -x -q`) and identify total test counts, structure, and test execution time.
-5. Provide concrete templates and patterns for writing >=20 comprehensive unit and integration tests for OAuth/OIDC, Token Validation, and Session Management collectors.
-6. Write your detailed findings to /home/varun/argus/.agents/explorer_survey_3/handoff.md and report back via send_message to parent. Operate silently during execution.
+Write your comprehensive findings and evidence report to:
+`/home/varun/argus/.agents/explorer_survey_3/handoff.md`
+
+Update `/home/varun/argus/.agents/explorer_survey_3/progress.md` with your status.
+When finished, send a message to parent with summary and file path.

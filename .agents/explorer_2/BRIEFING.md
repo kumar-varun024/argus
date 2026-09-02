@@ -1,36 +1,42 @@
-# BRIEFING — 2026-08-30T17:24:15+05:30
+# BRIEFING — 2026-09-01T17:02:15Z
 
 ## Mission
-Investigate ARGUS testing architecture, vulnerability graph models/edges, collector integration, and TaskGenerator/Tool Registry for Sprint 12 (SSRF Validation Collector).
+Investigate TaskGenerator DAG scheduling, Tool registry, endpoint context flow, and collector configuration in ARGUS.
 
 ## 🔒 My Identity
-- Archetype: Specification Miner / Test & Pipeline Investigator
-- Roles: Test & Pipeline Investigator
+- Archetype: explorer
+- Roles: codebase investigation, pipeline/registry/DAG architecture analysis
 - Working directory: /home/varun/argus/.agents/explorer_2
-- Original parent: 871f3b47-cb60-4d26-bab9-3ea0f83c9f79
-- Milestone: Sprint 12 Exploration
+- Original parent: b6dd75c1-18cb-43c3-9b6f-79b50b7005a1
+- Milestone: Sprint 25 CORS & HTTP Security Header Audit exploration
 
 ## 🔒 Key Constraints
-- Read-only regarding project code and tests (do not modify project source or tests).
-- Write findings only to `.agents/explorer_2/`.
-- Zero unsolicited messages during investigation. Send complete handoff upon completion.
+- Read-only investigation — do NOT implement / modify project code
+- Detailed report written to /home/varun/argus/.agents/explorer_2/handoff.md
+- Use send_message only when 100% complete
 
 ## Current Parent
-- Conversation ID: 871f3b47-cb60-4d26-bab9-3ea0f83c9f79
-- Updated: 2026-08-30T17:24:15+05:30
+- Conversation ID: b6dd75c1-18cb-43c3-9b6f-79b50b7005a1
+- Updated: 2026-09-01T17:02:15Z
 
-## Task Summary
-- **What was explored**:
-  1. Test Suite: structure across `tests/`, verified 1071 passed with `python -m pytest tests/ --ignore=tests/workspace -x -q`, collector mocking harnesses (`HttpResponse`, `MockHttpClient`), adversarial test patterns.
-  2. Graph Models & Edges: `Node`, `Edge`, `KnowledgeGraph`, `AttackSurfaceGraphBuilder`, `HAS_VULNERABILITY` and `HAS_ENDPOINT` edge triads, `Evidence` creation and schema.
-  3. Pipeline & Tool Registry: `TaskGenerator` DAG recon templates and gap resolution, `ToolRegistry` tool registration and aliases, `PluginExecutorAdapter` fallback instantiation.
-- **Success criteria**: Completed comprehensive, evidence-backed report in `.agents/explorer_2/handoff.md` and updated `progress.md`.
+## Investigation State
+- **Explored paths**:
+  - `argus/planning/task_generator.py`, `research_planner.py`, `gap_analysis.py`, `planner.py`, `steps.py`
+  - `argus/scanning/dag.py`, `engine.py`
+  - `argus/runtime/registry.py`, `models.py`, `plugins.py`, `dispatcher.py`, `executor.py`, `orchestrator.py`
+  - `argus/collectors/` (`base.py`, `__init__.py`, `cache_security.py`, etc.)
+  - `argus/http/client.py` (`AuthenticatedHttpClient`, `HttpResponse`)
+  - `argus/graph/attack_surface.py` (`HAS_VULNERABILITY`, `HAS_ENDPOINT`)
+  - `argus/reporting/cvss.py` (`CWE_DATABASE`, `_get_preset_vector`)
+  - `argus/cli/tools_cli.py`
+- **Key findings**: Complete mapping of the 9 integration touchpoints for Sprint 25 CORS & Security Headers Module.
+- **Unexplored areas**: None for this exploratory scope.
 
 ## Key Decisions Made
-- Fully documented all integration touchpoints and edge cases for Sprint 12 SSRF Validation Collector.
+- Exploration report formatted according to the 5-component protocol and stored in `handoff.md`.
 
 ## Artifact Index
-- `/home/varun/argus/.agents/explorer_2/DISPATCH.md` — Incoming user request
-- `/home/varun/argus/.agents/explorer_2/BRIEFING.md` — Agent briefing and state
-- `/home/varun/argus/.agents/explorer_2/progress.md` — Liveness and progress tracking (COMPLETE)
-- `/home/varun/argus/.agents/explorer_2/handoff.md` — Final handoff report
+- /home/varun/argus/.agents/explorer_2/DISPATCH.md — Dispatch instructions
+- /home/varun/argus/.agents/explorer_2/BRIEFING.md — Memory and state
+- /home/varun/argus/.agents/explorer_2/progress.md — Progress log
+- /home/varun/argus/.agents/explorer_2/handoff.md — Final investigation report

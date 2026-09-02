@@ -1,65 +1,23 @@
-## 2026-08-29T14:32:19Z
+## 2026-09-01T18:15:45Z
+You are the Remediation Worker for the CORS Misconfiguration & HTTP Security Header Audit Module in ARGUS.
+Your working directory is: `/home/varun/argus/.agents/worker_remediation`
 
-You are worker_impl_2, the Sprint 6 Remediation Lead for ARGUS Access Control / IDOR Engine.
-Your working directory is `/home/varun/argus/.agents/worker_remediation/`.
-Target codebase root: `/home/varun/argus`
+Tasks:
+1. Apply the targeted edge case fixes in `argus/collectors/cors_headers.py`:
+   a. In `_extract_host_parts()`: Safely handle port extraction with `try...except (ValueError, TypeError, AttributeError): port = None` so non-numeric or malformed ports (e.g. `https://target.com:abc`) do not raise an unhandled `ValueError`.
+   b. In `CORSProbeResponse.allow_credentials`: Add `.strip()` so whitespace-padded values like `" true "` or `"  true  "` evaluate correctly to `True`.
+   c. In `HTTPHeaderAuditor._audit_hsts`: Update max-age regex to handle quoted values like `max-age="300"`: `re.search(r"max-age\s*=\s*\"?(\d+)\"?", hsts_lower)`.
+   d. In `HTTPHeaderAuditor._audit_permissions_policy`: Update regex to match parenthesized W3C wildcard syntax like `camera=(*)`: `re.search(r"(camera|microphone|geolocation|payment)\s*=\s*(\*|\(\s*\*\s*\))", perm_lower)`.
+2. Ensure test file imports and assertions are clean across:
+   - `tests/collectors/test_cors_headers.py`
+   - `tests/collectors/test_cors_headers_adversarial.py`
+   - `tests/graph/test_cors_graph_pipeline_adversarial.py`
+3. Execute verification:
+   - `python -m pytest tests/collectors/test_cors_headers.py -v`
+   - `python -m pytest tests/collectors/test_cors_headers_adversarial.py -v`
+   - `python -m pytest tests/graph/test_cors_graph_pipeline_adversarial.py -v`
+   - `python -m pytest tests/ --ignore=tests/workspace -x -q` (all tests passing with 0 failures).
 
-Read:
-- `/home/varun/argus/.agents/ORIGINAL_REQUEST.md`
-- `/home/varun/argus/.agents/PROJECT.md`
-- `/home/varun/argus/.agents/challenger_1/handoff.md`
-- `/home/varun/argus/.agents/challenger_2/handoff.md`
-
-MANDATORY INTEGRITY WARNING — DO NOT CHEAT. All implementations must be genuine. DO NOT hardcode test results or create dummy stubs. A forensic auditor will independently verify your work.
-
-Your task is to implement the remediations identified by Challenger 1 and Challenger 2:
-
-1. `argus/analyzers/response_discrepancy.py`:
-   - Fix 1: Update `ERROR_TEXT_PATTERNS` to match camelCase (`PermissionDenied`, `AccessDenied`), snake_case (`access_denied`, `permission_denied`), and phrasing variations (`"you do not have access"`, `"you don't have access"`, `"you do not have permission"`, `"insufficient privileges"`, `"access restricted"`):
-     ```python
-     ERROR_TEXT_PATTERNS = [
-         re.compile(
-             r"\b(access[_\-\s]*denied|unauthorized|forbidden|authentication[_\-\s]*required|"
-             r"please\s+log\s+in|sign\s+in\s+to\s+continue|session[_\-\s]*expired|invalid[_\-\s]*session|"
-             r"invalid[_\-\s]*credentials|permission[_\-\s]*denied|you\s+do\s+not\s+have\s+(?:the\s+)?(?:permission|access|authorization)|"
-             r"you\s+don'?t\s+have\s+(?:the\s+)?(?:permission|access|authorization)|insufficient[_\-\s]*(?:privileges?|permissions?|scope)|"
-             r"not\s+authorized|not\s+permitted|access\s+restricted|user\s+not\s+found|resource\s+not\s+found|unauthenticated)\b",
-             re.IGNORECASE,
-         ),
-     ]
-     ```
-   - Fix 2: In `extract_identity_leakage`, unescape Unicode when inspecting JSON response bodies (`json.dumps(parsed_json, ensure_ascii=False)`) so that `\uXXXX` escaped Unicode strings (e.g. `\u00fc`, `\u00e9`) in JSON responses match identity metadata containing international characters.
-
-2. `argus/collectors/access_control.py`:
-   - Fix 3: Fix `HORIZONTAL_PATH_PATTERNS` regex to avoid double slash requirement when `/api` is omitted (e.g. support `/users/alice`, `/profiles/bob`, `/orders/ORD-1001`) and support deeply nested multi-resource paths (e.g. `/api/v2/organizations/org_123/projects/prj_456/users/usr_789`):
-     ```python
-     HORIZONTAL_PATH_PATTERNS = [
-         re.compile(r"/(?:(?:api(?:/v\d+)?/)?|(?:[a-zA-Z0-9_\-]+/)+)?(?:users?|accounts?|profiles?|orders?|invoices?|customers?|documents?|items?|patients?|members?)/([^/?#]+)", re.IGNORECASE),
-         re.compile(r"/(?:[a-zA-Z0-9_\-]+)/([a-zA-Z0-9_\-]+|\d+)(?:/|$|\?)", re.IGNORECASE),
-     ]
-     ```
-   - Fix 4: Fix `QUERY_ID_PARAM_REGEX` to support array brackets (e.g. `?ids[]=1`, `?user_id[]=123`):
-     ```python
-     QUERY_ID_PARAM_REGEX = re.compile(
-         r"[?&](?:id|ids|user_id|userId|account_id|accountId|order_id|orderId|uid|doc_id|docId|customer_id)(?:\[\])?=([^&#]+)",
-         re.IGNORECASE,
-     )
-     ```
-
-3. `argus/graph/attack_surface.py`:
-   - Fix 5: In `AttackSurfaceGraphBuilder.build()` mission vulnerabilities loop, align the vulnerability ID schema with `build_from_evidence()`:
-     ```python
-     url = meta.get("url")
-     vuln_id = f"vulnerability:{vuln_name}:{url}" if url else f"vulnerability:{vuln_name}"
-     ```
-     This prevents duplicate vulnerability nodes when both `mission.evidence` and `mission.vulnerabilities` are present on a mission.
-
-4. Run all test suites:
-   - `python -m pytest tests/auth/ tests/collectors/ tests/analyzers/ tests/runtime/ -v`
-   - `python -m pytest tests/ --ignore=tests/workspace -x -q` (all 745+ tests passing, 0 regressions)
-
-5. Update handoff reports:
-   - `/home/varun/argus/.agents/sprint6_idor/handoff.md`
-   - `/home/varun/argus/.agents/worker_remediation/handoff.md`
-
-Send a completion message to the orchestrator when finished.
+Write your handoff report to `/home/varun/argus/.agents/worker_remediation/handoff.md`.
+Update `/home/varun/argus/.agents/worker_remediation/progress.md` with your status.
+When finished, send a message to parent with summary, test results, and file path.

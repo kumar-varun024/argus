@@ -1,0 +1,191 @@
+{
+  "report_id": "424c3e00-60a2-45b1-a892-430373c0a3e2",
+  "mission_id": "0bbdf997-6f19-47de-97cd-a8e25cf66d6c",
+  "target": "api.service.io",
+  "generated_at": "2026-08-30T17:31:19.255627+00:00",
+  "generator_version": "1.0.0",
+  "summary": {
+    "total_findings": 1,
+    "total_evidence_items": 1,
+    "deduplicated_count": 0,
+    "severity_counts": {
+      "critical": 0,
+      "high": 1,
+      "medium": 0,
+      "low": 0,
+      "info": 0
+    },
+    "category_counts": {
+      "ssrf": 1
+    },
+    "host_counts": {
+      "api.service.io": 1
+    }
+  },
+  "findings": [
+    {
+      "id": "4334d349-d2c1-4338-8ff2-c71a5b1b2d2d",
+      "title": "SSRF to Cloud Metadata",
+      "category": "ssrf",
+      "severity": "high",
+      "cvss": {
+        "score": 7.2,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:N",
+        "severity_rating": "High",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "C",
+          "C": "L",
+          "I": "L",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-918",
+        "name": "Server-Side Request Forgery (SSRF)"
+      },
+      "host": "api.service.io",
+      "endpoint": "/fetch_url",
+      "parameter": "url",
+      "parameter_type": null,
+      "payload": "http://169.254.169.254/latest/meta-data/",
+      "description": "During security analysis of `api.service.io`, a Ssrf vulnerability was identified at endpoint `/fetch_url`. The vulnerable input vector is the `url` parameter. The vulnerability was triggered using payload: `http://169.254.169.254/latest/meta-data/`.",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/fetch_url` on host `api.service.io`.",
+        "Inject the security verification payload into the parameter `url`: `http://169.254.169.254/latest/meta-data/`.",
+        "Submit the request and inspect the server response for indications of ssrf."
+      ],
+      "impact": "An attacker could coerce the application server to make unauthorized requests to internal network services, cloud metadata endpoints, or adjacent private infrastructure.",
+      "remediation": "Implement strict allowlisting of permissible destination hosts and protocols. Block requests to private IP ranges (RFC 1918) and cloud metadata services (e.g., 169.254.169.254).",
+      "confidence": 1.0,
+      "status": "UNVERIFIED",
+      "evidence_ids": [
+        "ev-ssrf-1"
+      ],
+      "duplicate_count": 1,
+      "tags": [],
+      "references": [],
+      "metadata": {
+        "host": "api.service.io",
+        "endpoint": "/fetch_url",
+        "parameter": "url",
+        "payload": "http://169.254.169.254/latest/meta-data/"
+      }
+    }
+  ],
+  "grouped_by_category": {
+    "ssrf": [
+      {
+        "id": "4334d349-d2c1-4338-8ff2-c71a5b1b2d2d",
+        "title": "SSRF to Cloud Metadata",
+        "category": "ssrf",
+        "severity": "high",
+        "cvss": {
+          "score": 7.2,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:N",
+          "severity_rating": "High",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "C",
+            "C": "L",
+            "I": "L",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-918",
+          "name": "Server-Side Request Forgery (SSRF)"
+        },
+        "host": "api.service.io",
+        "endpoint": "/fetch_url",
+        "parameter": "url",
+        "parameter_type": null,
+        "payload": "http://169.254.169.254/latest/meta-data/",
+        "description": "During security analysis of `api.service.io`, a Ssrf vulnerability was identified at endpoint `/fetch_url`. The vulnerable input vector is the `url` parameter. The vulnerability was triggered using payload: `http://169.254.169.254/latest/meta-data/`.",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/fetch_url` on host `api.service.io`.",
+          "Inject the security verification payload into the parameter `url`: `http://169.254.169.254/latest/meta-data/`.",
+          "Submit the request and inspect the server response for indications of ssrf."
+        ],
+        "impact": "An attacker could coerce the application server to make unauthorized requests to internal network services, cloud metadata endpoints, or adjacent private infrastructure.",
+        "remediation": "Implement strict allowlisting of permissible destination hosts and protocols. Block requests to private IP ranges (RFC 1918) and cloud metadata services (e.g., 169.254.169.254).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "ev-ssrf-1"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "host": "api.service.io",
+          "endpoint": "/fetch_url",
+          "parameter": "url",
+          "payload": "http://169.254.169.254/latest/meta-data/"
+        }
+      }
+    ]
+  },
+  "grouped_by_host": {
+    "api.service.io": [
+      {
+        "id": "4334d349-d2c1-4338-8ff2-c71a5b1b2d2d",
+        "title": "SSRF to Cloud Metadata",
+        "category": "ssrf",
+        "severity": "high",
+        "cvss": {
+          "score": 7.2,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:L/I:L/A:N",
+          "severity_rating": "High",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "C",
+            "C": "L",
+            "I": "L",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-918",
+          "name": "Server-Side Request Forgery (SSRF)"
+        },
+        "host": "api.service.io",
+        "endpoint": "/fetch_url",
+        "parameter": "url",
+        "parameter_type": null,
+        "payload": "http://169.254.169.254/latest/meta-data/",
+        "description": "During security analysis of `api.service.io`, a Ssrf vulnerability was identified at endpoint `/fetch_url`. The vulnerable input vector is the `url` parameter. The vulnerability was triggered using payload: `http://169.254.169.254/latest/meta-data/`.",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/fetch_url` on host `api.service.io`.",
+          "Inject the security verification payload into the parameter `url`: `http://169.254.169.254/latest/meta-data/`.",
+          "Submit the request and inspect the server response for indications of ssrf."
+        ],
+        "impact": "An attacker could coerce the application server to make unauthorized requests to internal network services, cloud metadata endpoints, or adjacent private infrastructure.",
+        "remediation": "Implement strict allowlisting of permissible destination hosts and protocols. Block requests to private IP ranges (RFC 1918) and cloud metadata services (e.g., 169.254.169.254).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "ev-ssrf-1"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "host": "api.service.io",
+          "endpoint": "/fetch_url",
+          "parameter": "url",
+          "payload": "http://169.254.169.254/latest/meta-data/"
+        }
+      }
+    ]
+  }
+}

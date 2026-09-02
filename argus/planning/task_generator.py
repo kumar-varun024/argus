@@ -155,8 +155,177 @@ _RECON_TEMPLATES = {
         "estimated_duration_minutes": 10,
         "priority": 0.81,
     },
+    "xml_parser_validation": {
+        "title": "Validate XML Parser Security",
+        "goal": "Actively fuzz discovered XML-accepting endpoints and parameters for external entity resolution, parameter entities, and recursive entity expansion misconfigurations using AuthenticatedHttpClient.",
+        "category": TaskCategory.EVIDENCE_CORRELATION,
+        "required_inputs": ["endpoints"],
+        "expected_outputs": ["vulnerabilities", "observations", "evidence"],
+        "dependencies": ["Discover API Endpoints"],
+        "required_specialists": [],
+        "metadata": {"tool_id": "xml_parser_validation"},
+        "estimated_duration_minutes": 10,
+        "priority": 0.81,
+    },
+    "deserialization": {
+        "title": "Validate Insecure Deserialization",
+        "goal": "Actively fuzz discovered endpoint parameters, bodies, headers, and cookies for insecure deserialization across multiple formats (Java, Python pickle, PHP, Ruby, .NET) using AuthenticatedHttpClient.",
+        "category": TaskCategory.EVIDENCE_CORRELATION,
+        "required_inputs": ["endpoints"],
+        "expected_outputs": ["vulnerabilities", "observations", "evidence"],
+        "dependencies": ["Discover API Endpoints"],
+        "required_specialists": [],
+        "metadata": {"tool_id": "deserialization"},
+        "estimated_duration_minutes": 10,
+        "priority": 0.81,
+    },
+    "graphql_security": {
+        "title": "Validate GraphQL Security",
+        "goal": "Actively test discovered GraphQL endpoints for introspection leakage, query depth/complexity DoS, query batching abuse, and field-level authorization bypass using AuthenticatedHttpClient.",
+        "category": TaskCategory.EVIDENCE_CORRELATION,
+        "required_inputs": ["endpoints"],
+        "expected_outputs": ["vulnerabilities", "observations", "evidence"],
+        "dependencies": ["Discover API Endpoints"],
+        "required_specialists": [],
+        "metadata": {"tool_id": "graphql_security"},
+        "estimated_duration_minutes": 10,
+        "priority": 0.81,
+    },
+    "websocket_security": {
+        "title": "Validate WebSocket Security",
+        "goal": "Actively test discovered WebSocket endpoints for Cross-Site WebSocket Hijacking (CSWSH), unauthenticated handshakes, message frame injection, and WebSocket DoS/rate-limiting resilience using AuthenticatedHttpClient and WebSocket handshake probers.",
+        "category": TaskCategory.EVIDENCE_CORRELATION,
+        "required_inputs": ["endpoints"],
+        "expected_outputs": ["vulnerabilities", "observations", "evidence"],
+        "dependencies": ["Discover API Endpoints"],
+        "required_specialists": [],
+        "metadata": {"tool_id": "websocket_security"},
+        "estimated_duration_minutes": 10,
+        "priority": 0.81,
+    },
+    "request_smuggling": {
+        "title": "Validate HTTP Request Smuggling",
+        "goal": "Actively test discovered endpoints and upstream frontends for HTTP request smuggling (CL.TE, TE.CL, TE.TE, HTTP/2 downgrading) and boundary desynchronization.",
+        "category": TaskCategory.EVIDENCE_CORRELATION,
+        "required_inputs": ["endpoints"],
+        "expected_outputs": ["vulnerabilities", "observations", "evidence"],
+        "dependencies": ["Discover API Endpoints"],
+        "required_specialists": [],
+        "metadata": {"tool_id": "request_smuggling"},
+        "estimated_duration_minutes": 10,
+        "priority": 0.81,
+    },
+    "race_conditions": {
+        "title": "Validate Race Conditions & Concurrency",
+        "goal": "Actively test discovered endpoints and state-changing workflows for race conditions, limit overruns, TOCTOU desynchronization, session concurrency, and partial state vulnerabilities using AuthenticatedHttpClient and concurrent multi-request synchronization probers.",
+        "category": TaskCategory.EVIDENCE_CORRELATION,
+        "required_inputs": ["endpoints"],
+        "expected_outputs": ["vulnerabilities", "observations", "evidence"],
+        "dependencies": ["Discover API Endpoints"],
+        "required_specialists": [],
+        "metadata": {"tool_id": "race_conditions"},
+        "estimated_duration_minutes": 10,
+        "priority": 0.81,
+    },
+    "business_logic": {
+        "title": "Validate Business Logic & State Machine Security",
+        "goal": "Actively test discovered endpoints and multi-step workflows for price/quantity tampering, state transition skips, mass assignment, and coupon/voucher stacking using AuthenticatedHttpClient and stateful probers.",
+        "category": TaskCategory.EVIDENCE_CORRELATION,
+        "required_inputs": ["endpoints"],
+        "expected_outputs": ["vulnerabilities", "observations", "evidence"],
+        "dependencies": ["Discover API Endpoints"],
+        "required_specialists": [],
+        "metadata": {"tool_id": "business_logic"},
+        "estimated_duration_minutes": 10,
+        "priority": 0.81,
+    },
+    "ssti": {
+        "title": "Validate Server-Side Template Injection (SSTI)",
+        "goal": "Actively test discovered endpoints and parameters for server-side template injection across Jinja2, Twig, Freemarker, Velocity, Mako, SpEL, ERB, and other template engines using AuthenticatedHttpClient and polyglot probers.",
+        "category": TaskCategory.EVIDENCE_CORRELATION,
+        "required_inputs": ["endpoints"],
+        "expected_outputs": ["vulnerabilities", "observations", "evidence"],
+        "dependencies": ["Discover API Endpoints"],
+        "required_specialists": [],
+        "metadata": {"tool_id": "ssti"},
+        "estimated_duration_minutes": 10,
+        "priority": 0.81,
+    },
+    "cache_security": {
+        "title": "Validate Web Cache Security & Cache Deception",
+        "goal": "Actively probe discovered endpoints for Web Cache Poisoning (unkeyed headers/parameters, parameter cloaking, FAT GETs, method overrides) and Web Cache Deception using AuthenticatedHttpClient and differential probers.",
+        "category": TaskCategory.EVIDENCE_CORRELATION,
+        "required_inputs": ["endpoints"],
+        "expected_outputs": ["vulnerabilities", "observations", "evidence"],
+        "dependencies": ["Discover API Endpoints"],
+        "required_specialists": [],
+        "metadata": {"tool_id": "cache_security"},
+        "estimated_duration_minutes": 10,
+        "priority": 0.82,
+    },
+    "cors_security": {
+        "title": "Validate CORS Configuration & HTTP Security Headers",
+        "goal": "Probe discovered endpoints for CORS misconfigurations and audit HTTP security headers.",
+        "category": TaskCategory.EVIDENCE_CORRELATION,
+        "required_inputs": ["endpoints"],
+        "expected_outputs": ["vulnerabilities", "observations", "evidence"],
+        "dependencies": ["Discover API Endpoints"],
+        "required_specialists": [],
+        "metadata": {"tool_id": "cors_security"},
+        "estimated_duration_minutes": 8,
+        "priority": 0.83,
+    },
+    "file_upload": {
+        "title": "Validate File Upload Security",
+        "goal": "Actively test discovered endpoints for unrestricted executable uploads, MIME type bypasses, double extensions, polyglots, and path traversal in filenames using AuthenticatedHttpClient.",
+        "category": TaskCategory.EVIDENCE_CORRELATION,
+        "required_inputs": ["endpoints"],
+        "expected_outputs": ["vulnerabilities", "observations", "evidence"],
+        "dependencies": ["Discover API Endpoints"],
+        "required_specialists": [],
+        "metadata": {"tool_id": "file_upload"},
+        "estimated_duration_minutes": 10,
+        "priority": 0.81,
+    },
+    "api_security": {
+        "title": "Validate REST & gRPC API Security",
+        "goal": "Actively test discovered API endpoints for parameter tampering, mass assignment, rate limiting bypass, BOLA/IDOR, excessive data exposure, and method tampering using AuthenticatedHttpClient.",
+        "category": TaskCategory.EVIDENCE_CORRELATION,
+        "required_inputs": ["endpoints"],
+        "expected_outputs": ["vulnerabilities", "observations", "evidence"],
+        "dependencies": ["Discover API Endpoints"],
+        "required_specialists": [],
+        "metadata": {"tool_id": "api_security"},
+        "estimated_duration_minutes": 10,
+        "priority": 0.81,
+    },
+    "auth_bypass": {
+        "title": "Validate Authentication Bypass & Credential Attacks",
+        "goal": "Actively test discovered endpoints and authentication portals for brute force, account lockout, password reset abuse, MFA bypass, session fixation, JWT manipulation, and default credentials using AuthenticatedHttpClient.",
+        "category": TaskCategory.AUTHENTICATION_ANALYSIS,
+        "required_inputs": ["endpoints"],
+        "expected_outputs": ["vulnerabilities", "observations", "evidence"],
+        "dependencies": ["Discover API Endpoints"],
+        "required_specialists": [],
+        "metadata": {"tool_id": "auth_bypass"},
+        "estimated_duration_minutes": 10,
+        "priority": 0.81,
+    },
+    "prototype_pollution": {
+        "title": "Validate Prototype Pollution & Client-Side Attacks",
+        "goal": "Actively test discovered endpoints for server-side/client-side prototype pollution, DOM clobbering, open redirect chains, and clickjacking vulnerabilities using AuthenticatedHttpClient.",
+        "category": TaskCategory.EVIDENCE_CORRELATION,
+        "required_inputs": ["endpoints"],
+        "expected_outputs": ["vulnerabilities", "observations", "evidence"],
+        "dependencies": ["Discover API Endpoints"],
+        "required_specialists": [],
+        "metadata": {"tool_id": "prototype_pollution"},
+        "estimated_duration_minutes": 10,
+        "priority": 0.81,
+    },
 }
 
+_TOOL_TEMPLATES = _RECON_TEMPLATES
 
 
 # Specialist and fallback templates
@@ -414,6 +583,91 @@ class TaskGenerator:
         if area_lower in ("oauth", "oidc", "oauth2", "oauth_oidc", "openid", "jwt", "token validation", "token", "session fixation", "session management", "oauth authentication", "oidc token"):
             return _RECON_TEMPLATES["oauth"]
 
+        if area_lower in ("xml parser", "xml_parser", "xml parser validation", "xxe", "xml external entity", "xml_external_entity", "xml injection", "xml"):
+            return _RECON_TEMPLATES["xml_parser_validation"]
+
+        if area_lower in (
+            "insecure deserialization",
+            "deserialization",
+            "unsafe deserialization",
+            "pickle",
+            "python pickle",
+            "java deserialization",
+            "php unserialize",
+            "unserialize",
+            "viewstate",
+            "ruby marshal",
+            "objectinputstream",
+            "object injection",
+            "binary formatter",
+            "binary_formatter",
+        ):
+            return _RECON_TEMPLATES["deserialization"]
+
+        if area_lower in (
+            "graphql security",
+            "graphql vulnerability",
+            "graphql injection",
+            "graphql dos",
+            "graphql introspection",
+            "graphql batching",
+            "graphql query depth",
+            "graphql validation",
+        ):
+            return _RECON_TEMPLATES["graphql_security"]
+
+        if area_lower in (
+            "websocket security",
+            "websocket",
+            "cswsh",
+            "cross-site websocket hijacking",
+            "websocket injection",
+            "websocket dos",
+            "websocket authentication",
+            "ws",
+            "wss",
+            "socket.io",
+        ):
+            return _RECON_TEMPLATES["websocket_security"]
+
+        if area_lower in (
+            "request smuggling",
+            "http request smuggling",
+            "request_smuggling",
+            "cl.te",
+            "te.cl",
+            "te.te",
+            "cl_te",
+            "te_cl",
+            "te_te",
+            "h2 smuggling",
+            "http2 smuggling",
+            "h2.cl",
+            "h2.te",
+            "http desync",
+            "smuggling",
+            "desync",
+        ):
+            return _RECON_TEMPLATES["request_smuggling"]
+
+        if area_lower in (
+            "race conditions",
+            "race condition",
+            "race_conditions",
+            "race_condition",
+            "concurrency",
+            "limit overrun",
+            "limit_overrun",
+            "toctou",
+            "time-of-check to time-of-use",
+            "multi-redemption",
+            "race window",
+            "single-packet attack",
+            "single packet attack",
+            "concurrency vulnerabilities",
+        ):
+            return _RECON_TEMPLATES["race_conditions"]
+
         if area_lower == "technologies":
             subdomains = list(getattr(self.mission, 'subdomains', []) or [])
             live_hosts = list(getattr(self.mission, 'live_hosts', []) or [])
@@ -434,15 +688,181 @@ class TaskGenerator:
         if area_lower in ("authentication workflows", "authentication"):
             if "oauth" in gap_desc_lower or "oidc" in gap_desc_lower or "jwt" in gap_desc_lower or "token" in gap_desc_lower or "session" in gap_desc_lower:
                 return _RECON_TEMPLATES["oauth"]
+            if "websocket" in gap_desc_lower or "cswsh" in gap_desc_lower:
+                return _RECON_TEMPLATES["websocket_security"]
             return _SPECIALIST_TEMPLATES[TaskCategory.AUTHENTICATION_ANALYSIS]
 
         if area_lower in ("authorization", "authorization graph"):
             if "oauth" in gap_desc_lower or "oidc" in gap_desc_lower or "jwt" in gap_desc_lower or "token" in gap_desc_lower:
                 return _RECON_TEMPLATES["oauth"]
+            if "websocket" in gap_desc_lower or "cswsh" in gap_desc_lower:
+                return _RECON_TEMPLATES["websocket_security"]
             return _SPECIALIST_TEMPLATES[TaskCategory.AUTHORIZATION_ANALYSIS]
 
-        if area_lower in ("business logic", "business logic workflows"):
-            return _SPECIALIST_TEMPLATES[TaskCategory.BUSINESS_LOGIC_ANALYSIS]
+        if area_lower in ("business logic", "business logic workflows", "business logic flaws", "state machine", "workflow bypass", "price tampering", "quantity tampering", "mass assignment", "coupon stacking"):
+            if any(kw in gap_desc_lower for kw in ("race", "concurrency", "toctou", "limit overrun", "multi-redemption", "overdraft")):
+                return _RECON_TEMPLATES["race_conditions"]
+            if any(kw in gap_desc_lower for kw in ("tamper", "price", "quantity", "amount", "workflow", "step", "state machine", "mass assignment", "coupon", "voucher", "idempotency", "differential", "flaw", "skip", "bypass", "logic")):
+                return _RECON_TEMPLATES["business_logic"]
+            return _RECON_TEMPLATES["business_logic"]
+
+        if area_lower in (
+            "ssti",
+            "ssti detection",
+            "server-side template injection",
+            "server side template injection",
+            "template injection",
+            "template injection detection",
+            "jinja2",
+            "jinja",
+            "twig",
+            "freemarker",
+            "velocity",
+            "mako",
+            "spel",
+            "spring expression language",
+            "thymeleaf",
+            "erb",
+            "smarty",
+            "pug",
+            "ejs",
+        ):
+            return _RECON_TEMPLATES["ssti"]
+
+        if area_lower in (
+            "cache security",
+            "cache poisoning",
+            "web cache poisoning",
+            "cache deception",
+            "web cache deception",
+            "unkeyed headers",
+            "unkeyed query parameters",
+            "unkeyed parameters",
+            "cache key normalization",
+            "cache fingerprinting",
+            "fat get",
+            "path confusion",
+            "wcd",
+        ):
+            return _RECON_TEMPLATES["cache_security"]
+
+        if area_lower in (
+            "cors",
+            "cors security",
+            "cors misconfiguration",
+            "security headers",
+            "http security headers",
+            "csp",
+            "content security policy",
+            "hsts",
+            "strict transport security",
+            "x-frame-options",
+            "cors_security",
+        ):
+            return _RECON_TEMPLATES["cors_security"]
+
+        if area_lower in (
+            "file upload",
+            "file_upload",
+            "file upload security",
+            "upload security",
+            "unrestricted file upload",
+            "unrestricted upload",
+            "arbitrary file upload",
+            "mime type bypass",
+            "double extension bypass",
+            "polyglot upload",
+            "web shell detection",
+            "file upload vulnerabilities",
+        ):
+            return _RECON_TEMPLATES["file_upload"]
+
+        if area_lower in (
+            "api security",
+            "api_security",
+            "rest api security",
+            "rest api",
+            "grpc security",
+            "grpc",
+            "parameter tampering",
+            "parameter_tampering",
+            "mass assignment",
+            "mass_assignment",
+            "rate limiting",
+            "rate_limiting",
+            "rate limiting bypass",
+            "rate_limit_bypass",
+            "rate limit",
+            "rate_limit",
+            "bola",
+            "idor",
+            "broken object level authorization",
+            "broken_object_level_authorization",
+            "excessive data exposure",
+            "excessive_data_exposure",
+            "method tampering",
+            "method_tampering",
+            "api vulnerabilities",
+            "api security testing",
+        ):
+            return _RECON_TEMPLATES["api_security"]
+
+        if area_lower in (
+            "auth bypass",
+            "auth_bypass",
+            "authentication bypass",
+            "authentication_bypass",
+            "credential attack",
+            "credential_attack",
+            "credential attacks",
+            "brute force",
+            "brute_force",
+            "account lockout",
+            "password reset",
+            "password_reset",
+            "mfa bypass",
+            "mfa_bypass",
+            "2fa bypass",
+            "session fixation",
+            "session_fixation",
+            "jwt manipulation",
+            "jwt_manipulation",
+            "default credentials",
+            "default_credentials",
+            "session token analysis",
+            "credential stuffing",
+        ):
+            return _RECON_TEMPLATES["auth_bypass"]
+
+        if area_lower in (
+            "prototype pollution",
+            "prototype_pollution",
+            "proto pollution",
+            "proto_pollution",
+            "client-side prototype pollution",
+            "client_side_prototype_pollution",
+            "server-side prototype pollution",
+            "server_side_prototype_pollution",
+            "dom clobbering",
+            "dom_clobbering",
+            "html clobbering",
+            "open redirect",
+            "open_redirect",
+            "open redirect chain",
+            "open_redirect_chain",
+            "redirect chain",
+            "clickjacking",
+            "ui redressing",
+            "ui_redressing",
+            "frame busting",
+            "frame_busting",
+            "client-side attacks",
+            "client_side_attacks",
+            "client side attacks",
+            "gadget chain",
+            "prototype pollution gadgets",
+        ):
+            return _RECON_TEMPLATES["prototype_pollution"]
 
         if area_lower in ("javascript analysis", "javascript"):
             return _SPECIALIST_TEMPLATES[TaskCategory.JAVASCRIPT_ANALYSIS]
@@ -463,20 +883,54 @@ class TaskGenerator:
             return _SPECIALIST_TEMPLATES[TaskCategory.API_DISCOVERY]
 
         if gap.category == TaskCategory.AUTHENTICATION_ANALYSIS:
-            if "oauth" in gap_desc_lower or "oidc" in gap_desc_lower or "jwt" in gap_desc_lower or "token" in gap_desc_lower or "session" in gap_desc_lower:
+            if "oauth" in gap_desc_lower or "oidc" in gap_desc_lower:
                 return _RECON_TEMPLATES["oauth"]
-            return _SPECIALIST_TEMPLATES[TaskCategory.AUTHENTICATION_ANALYSIS]
+            if any(kw in gap_desc_lower for kw in ("auth", "login", "jwt", "session", "mfa", "credential", "brute force", "password reset", "session fixation", "default credential", "token")):
+                return _RECON_TEMPLATES["auth_bypass"]
+            if "websocket" in gap_desc_lower or "cswsh" in gap_desc_lower:
+                return _RECON_TEMPLATES["websocket_security"]
+            return _RECON_TEMPLATES.get("auth_bypass", _SPECIALIST_TEMPLATES[TaskCategory.AUTHENTICATION_ANALYSIS])
 
         if gap.category == TaskCategory.AUTHORIZATION_ANALYSIS:
             if "oauth" in gap_desc_lower or "oidc" in gap_desc_lower or "jwt" in gap_desc_lower or "token" in gap_desc_lower:
                 return _RECON_TEMPLATES["oauth"]
             if "idor" in gap_desc_lower or "access control" in gap_desc_lower or "escalation" in gap_desc_lower or "bypass" in gap_desc_lower:
                 return _RECON_TEMPLATES["access_control"]
+            if "websocket" in gap_desc_lower or "cswsh" in gap_desc_lower:
+                return _RECON_TEMPLATES["websocket_security"]
             return _SPECIALIST_TEMPLATES[TaskCategory.AUTHORIZATION_ANALYSIS]
 
         if gap.category == TaskCategory.EVIDENCE_CORRELATION:
             if "oauth" in gap_desc_lower or "oidc" in gap_desc_lower or "jwt" in gap_desc_lower or "token" in gap_desc_lower:
                 return _RECON_TEMPLATES["oauth"]
+            if any(kw in gap_desc_lower for kw in ("auth bypass", "authentication bypass", "credential attack", "brute force", "mfa bypass", "session fixation", "jwt manipulation", "default credential", "password reset")):
+                return _RECON_TEMPLATES["auth_bypass"]
+            if any(kw in gap_desc_lower for kw in ("prototype pollution", "prototype", "proto pollution", "proto", "dom clobbering", "clobbering", "open redirect", "redirect chain", "clickjacking", "ui redressing", "frame busting", "gadget chain", "client-side attacks", "client side")):
+                return _RECON_TEMPLATES["prototype_pollution"]
+            if any(kw in gap_desc_lower for kw in ("api security", "rest api", "grpc", "parameter tamper", "mass assignment", "rate limit", "rate limiting", "bola", "idor", "excessive data", "method tamper")):
+                return _RECON_TEMPLATES["api_security"]
+            if any(kw in gap_desc_lower for kw in ("file upload", "upload security", "unrestricted upload", "arbitrary upload", "mime type bypass", "double extension", "polyglot", "web shell", "file upload vulnerability")):
+                return _RECON_TEMPLATES["file_upload"]
+            if any(kw in gap_desc_lower for kw in ("race", "concurrency", "toctou", "limit overrun", "multi-redemption", "overdraft", "single-packet", "single packet")):
+                return _RECON_TEMPLATES["race_conditions"]
+            if any(kw in gap_desc_lower for kw in ("business logic", "state machine", "price tamper", "quantity tamper", "step skip", "workflow skip", "workflow bypass", "mass assignment", "coupon stack", "idempotency abuse", "parameter tamper")):
+                return _RECON_TEMPLATES["business_logic"]
+            if any(kw in gap_desc_lower for kw in ("ssti", "template injection", "server-side template", "jinja", "twig", "freemarker", "velocity", "mako", "spel", "thymeleaf", "erb", "smarty")):
+                return _RECON_TEMPLATES["ssti"]
+            if any(kw in gap_desc_lower for kw in ("cache security", "cache poison", "cache deception", "web cache", "unkeyed header", "unkeyed param", "fat get", "cache key", "parameter cloaking", "wcd")):
+                return _RECON_TEMPLATES["cache_security"]
+            if any(kw in gap_desc_lower for kw in ("cors", "cross-origin", "origin reflection", "null origin", "security header", "csp", "content-security-policy", "hsts", "strict-transport-security", "x-frame-options", "clickjacking", "nosniff", "referrer-policy", "permissions-policy")):
+                return _RECON_TEMPLATES["cors_security"]
+            if any(kw in gap_desc_lower for kw in ("smuggl", "cl.te", "te.cl", "te.te", "cl_te", "te_cl", "te_te", "h2.cl", "h2.te", "h2_cl", "h2_te", "desync", "request smuggling")):
+                return _RECON_TEMPLATES["request_smuggling"]
+            if any(kw in gap_desc_lower for kw in ("websocket", "cswsh", "socket.io", "ws://", "wss://", "upgrade")):
+                return _RECON_TEMPLATES["websocket_security"]
+            if any(kw in gap_desc_lower for kw in ("deserializ", "pickle", "unserialize", "marshal", "viewstate", "objectinputstream", "object injection")):
+                return _RECON_TEMPLATES["deserialization"]
+            if "graphql" in gap_desc_lower or "introspection" in gap_desc_lower:
+                return _RECON_TEMPLATES["graphql_security"]
+            if "xml" in gap_desc_lower or "xxe" in gap_desc_lower or "entity" in gap_desc_lower or "external entity" in gap_desc_lower:
+                return _RECON_TEMPLATES["xml_parser_validation"]
             if "command" in gap_desc_lower or "cmdi" in gap_desc_lower or "rce" in gap_desc_lower or "os injection" in gap_desc_lower or "shell" in gap_desc_lower:
                 return _RECON_TEMPLATES["command_injection"]
             if "ssrf" in gap_desc_lower or "request forgery" in gap_desc_lower or "metadata" in gap_desc_lower or "server-side" in gap_desc_lower:
@@ -523,8 +977,9 @@ class TaskGenerator:
                     inputs = [target] if target else ["target"]
                 elif tool_id == "httpx":
                     inputs = [str(s) for s in subdomains[:10] if s is not None] if subdomains else ([target] if target else ["subdomains"])
-                elif tool_id in ("katana_crawler", "nuclei", "info_disclosure", "access_control", "path_traversal", "sql_injection", "xss", "command_injection", "ssrf", "oauth"):
+                elif tool_id in ("katana_crawler", "nuclei", "info_disclosure", "access_control", "path_traversal", "sql_injection", "xss", "command_injection", "ssrf", "oauth", "xml_parser_validation", "deserialization", "graphql_security", "websocket_security", "request_smuggling", "race_conditions", "business_logic", "ssti", "cache_security", "cors_security", "file_upload", "api_security", "auth_bypass", "prototype_pollution"):
                     inputs = [str(e.get('url', e)) if isinstance(e, dict) else str(e) for e in endpoints[:10] if e is not None] if endpoints else ([str(h.get('url', h)) if isinstance(h, dict) else str(h) for h in live_hosts[:10] if h is not None] if live_hosts else ([target] if target else ["endpoints"]))
+
                 elif endpoints:
                     inputs = [str(e.get('url', e)) if isinstance(e, dict) else str(e) for e in endpoints[:10] if e is not None]
                 else:

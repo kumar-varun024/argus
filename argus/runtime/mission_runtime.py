@@ -227,6 +227,15 @@ class AutonomousMissionRuntime:
                 action = self.checkpointer.evaluate_checkpoint("pre_completion", mission)
                 if action == CheckpointAction.APPROVE:
                     self.state_machine.transition_to(MissionState.COMPLETED, "Mission complete")
+                    try:
+                        from argus.reporting.generator import ReportGenerator
+                        generator = ReportGenerator()
+                        report_paths = generator.generate_and_save(mission)
+                        for path in report_paths:
+                            if path not in mission.reports:
+                                mission.reports.append(path)
+                    except Exception as e:
+                        logger.warning(f"Report generation failed on mission complete: {e}")
                     from argus.runtime.events import EventBus, RuntimeEventType
                     EventBus().publish(RuntimeEventType.MISSION_COMPLETED, mission.id)
                 elif action == CheckpointAction.MODIFY_PLAN:

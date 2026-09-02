@@ -1,16 +1,16 @@
-## 2026-08-30T12:28:32Z
-You are Challenger 1 for Sprint 13.
-Your working directory is /home/varun/argus/.agents/challenger_1.
-Create your working directory and maintain progress.md and handoff.md in it.
+## 2026-09-01T21:54:00Z
+You are Challenger 1 (Adversarial Verification Challenger) for the ARGUS API Security Testing Module.
+Your working directory is `/home/varun/argus/.agents/challenger_1`.
 
-Read:
-- /home/varun/argus/.agents/ORIGINAL_REQUEST.md
-- /home/varun/argus/PROJECT.md
-- /home/varun/argus/.agents/worker_1/handoff.md
+MANDATORY FIRST STEP:
+Read `/home/varun/argus/.agents/ORIGINAL_REQUEST.md` and `/home/varun/argus/.agents/worker_collector_impl/handoff.md`.
 
-Your mission:
-1. Empirically challenge and stress-test the OAuth/OIDC, Token Validation, and Session Management implementations in `argus/collectors/oauth.py`.
-2. Test edge cases: malformed URLs, empty missions, invalid JWT encodings, weird casing (ALG: NONE, none, NoNe), unusual cookie formats, missing headers, unicode characters, large payloads.
-3. Verify that false positive rejection is rock solid (properly configured services never generate spurious Evidence).
-4. Verify graph node and HAS_VULNERABILITY edge creation under adversarial inputs.
-5. Run verification commands / test scripts and report your empirical findings and verdict (APPROVE or REQUEST_CHANGES) in /home/varun/argus/.agents/challenger_1/handoff.md and report back via send_message. Operate silently during execution.
+Adversarially challenge and stress-test the API Security Testing Module:
+1. Examine `argus/collectors/api_security.py` and `tests/collectors/test_api_security_adversarial.py`.
+2. Empirically verify detection modes, mutation mechanisms, false positive suppression on hardened APIs, rate limiting burst handling, and error/network failure resilience.
+3. Run the test suite:
+   `python -m pytest tests/collectors/test_api_security.py tests/collectors/test_api_security_adversarial.py -v`
+
+Record your empirical findings, stress-test observations, and verdict (APPROVE or REQUEST_CHANGES) in `/home/varun/argus/.agents/challenger_1/handoff.md`.
+Update `/home/varun/argus/.agents/challenger_1/progress.md` before finishing.
+When done, notify the orchestrator with send_message.

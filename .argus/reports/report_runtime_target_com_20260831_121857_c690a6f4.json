@@ -1,0 +1,191 @@
+{
+  "report_id": "c690a6f4-2dda-4cda-9f6b-14ca1d5b3884",
+  "mission_id": "2394673e-0ff2-44e6-b7fe-0a04f1de7806",
+  "target": "runtime.target.com",
+  "generated_at": "2026-08-31T12:18:57.994235+00:00",
+  "generator_version": "1.0.0",
+  "summary": {
+    "total_findings": 1,
+    "total_evidence_items": 1,
+    "deduplicated_count": 0,
+    "severity_counts": {
+      "critical": 0,
+      "high": 0,
+      "medium": 1,
+      "low": 0,
+      "info": 0
+    },
+    "category_counts": {
+      "reflected_xss": 1
+    },
+    "host_counts": {
+      "runtime.target.com": 1
+    }
+  },
+  "findings": [
+    {
+      "id": "ef92174b-3b23-4eb6-bb2f-a3608d7d9c00",
+      "title": "Reflected XSS in Comments",
+      "category": "reflected_xss",
+      "severity": "medium",
+      "cvss": {
+        "score": 6.1,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+        "severity_rating": "Medium",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "R",
+          "S": "C",
+          "C": "L",
+          "I": "L",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-79",
+        "name": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+      },
+      "host": "runtime.target.com",
+      "endpoint": "/comments",
+      "parameter": "msg",
+      "parameter_type": null,
+      "payload": "<svg onload=alert(1)>",
+      "description": "During security analysis of `runtime.target.com`, a Reflected Xss vulnerability was identified at endpoint `/comments`. The vulnerable input vector is the `msg` parameter. The vulnerability was triggered using payload: `<svg onload=alert(1)>`.",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/comments` on host `runtime.target.com`.",
+        "Inject the security verification payload into the parameter `msg`: `<svg onload=alert(1)>`.",
+        "Submit the request and inspect the server response for indications of reflected xss."
+      ],
+      "impact": "An attacker could execute malicious scripts in the context of a victim user's browser session, leading to session hijacking, credential theft, or sensitive action execution.",
+      "remediation": "Contextually encode all user-supplied output before rendering it in web pages, and implement a robust Content Security Policy (CSP).",
+      "confidence": 1.0,
+      "status": "UNVERIFIED",
+      "evidence_ids": [
+        "ev-rt-1"
+      ],
+      "duplicate_count": 1,
+      "tags": [],
+      "references": [],
+      "metadata": {
+        "host": "runtime.target.com",
+        "endpoint": "/comments",
+        "parameter": "msg",
+        "payload": "<svg onload=alert(1)>"
+      }
+    }
+  ],
+  "grouped_by_category": {
+    "reflected_xss": [
+      {
+        "id": "ef92174b-3b23-4eb6-bb2f-a3608d7d9c00",
+        "title": "Reflected XSS in Comments",
+        "category": "reflected_xss",
+        "severity": "medium",
+        "cvss": {
+          "score": 6.1,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+          "severity_rating": "Medium",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "R",
+            "S": "C",
+            "C": "L",
+            "I": "L",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-79",
+          "name": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+        },
+        "host": "runtime.target.com",
+        "endpoint": "/comments",
+        "parameter": "msg",
+        "parameter_type": null,
+        "payload": "<svg onload=alert(1)>",
+        "description": "During security analysis of `runtime.target.com`, a Reflected Xss vulnerability was identified at endpoint `/comments`. The vulnerable input vector is the `msg` parameter. The vulnerability was triggered using payload: `<svg onload=alert(1)>`.",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/comments` on host `runtime.target.com`.",
+          "Inject the security verification payload into the parameter `msg`: `<svg onload=alert(1)>`.",
+          "Submit the request and inspect the server response for indications of reflected xss."
+        ],
+        "impact": "An attacker could execute malicious scripts in the context of a victim user's browser session, leading to session hijacking, credential theft, or sensitive action execution.",
+        "remediation": "Contextually encode all user-supplied output before rendering it in web pages, and implement a robust Content Security Policy (CSP).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "ev-rt-1"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "host": "runtime.target.com",
+          "endpoint": "/comments",
+          "parameter": "msg",
+          "payload": "<svg onload=alert(1)>"
+        }
+      }
+    ]
+  },
+  "grouped_by_host": {
+    "runtime.target.com": [
+      {
+        "id": "ef92174b-3b23-4eb6-bb2f-a3608d7d9c00",
+        "title": "Reflected XSS in Comments",
+        "category": "reflected_xss",
+        "severity": "medium",
+        "cvss": {
+          "score": 6.1,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N",
+          "severity_rating": "Medium",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "R",
+            "S": "C",
+            "C": "L",
+            "I": "L",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-79",
+          "name": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+        },
+        "host": "runtime.target.com",
+        "endpoint": "/comments",
+        "parameter": "msg",
+        "parameter_type": null,
+        "payload": "<svg onload=alert(1)>",
+        "description": "During security analysis of `runtime.target.com`, a Reflected Xss vulnerability was identified at endpoint `/comments`. The vulnerable input vector is the `msg` parameter. The vulnerability was triggered using payload: `<svg onload=alert(1)>`.",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/comments` on host `runtime.target.com`.",
+          "Inject the security verification payload into the parameter `msg`: `<svg onload=alert(1)>`.",
+          "Submit the request and inspect the server response for indications of reflected xss."
+        ],
+        "impact": "An attacker could execute malicious scripts in the context of a victim user's browser session, leading to session hijacking, credential theft, or sensitive action execution.",
+        "remediation": "Contextually encode all user-supplied output before rendering it in web pages, and implement a robust Content Security Policy (CSP).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "ev-rt-1"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "host": "runtime.target.com",
+          "endpoint": "/comments",
+          "parameter": "msg",
+          "payload": "<svg onload=alert(1)>"
+        }
+      }
+    ]
+  }
+}

@@ -1,83 +1,35 @@
-# Project: ARGUS Sprint 4
+# Project: ARGUS API Security Testing Module (REST/gRPC)
 
 ## Architecture
-ARGUS Sprint 4 delivers autonomous DNS resolution, CNAME subdomain takeover detection, a comprehensive 26-service fingerprint database, attack surface graph vulnerability integration, TestIdentity security model, and a persistent AuthenticatedHttpClient.
-
-```
-+---------------------------------------------------------------------------------------------------+
-|                                      ARGUS SPRINT 4 ARCHITECTURE                                  |
-+---------------------------------------------------------------------------------------------------+
-|                                                                                                   |
-|  1. DNSX Tool Wrapper (`argus/tools/dnsx.py`) & Registry (`argus/runtime/registry.py`)            |
-|     - Wraps CLI binary (`dnsx` with `-cname -resp -json -omit-raw -silent -rl -t`)                |
-|     - Registered in `ToolRegistry` with capability="dns_resolver"                                 |
-|     - Parser: `ReconParser.parse_dnsx` in `argus/runtime/parser.py`                               |
-|                                                                                                   |
-|  2. Subdomain Takeover Detection & Fingerprint DB                                                 |
-|     - Fingerprint DB: 26 signatures in `argus/recon/takeover_fingerprints.py`                      |
-|     - Collector: `SubdomainTakeoverCollector` in `argus/collectors/takeover.py`                   |
-|     - Generates: `Evidence(category="subdomain_takeover", severity="critical", ...)`              |
-|     - Graph Integration: `AttackSurfaceGraphBuilder` generates `HAS_VULNERABILITY` edges:          |
-|       `subdomain:<host>` -> `HAS_VULNERABILITY` -> `vulnerability:subdomain_takeover:...`         |
-|                                                                                                   |
-|  3. `TestIdentity` Model (`argus/models/test_identity.py`) & `Mission.test_identities`            |
-|     - Dataclass `TestIdentity` with `AuthType` enum, token, credentials, headers, cookies,        |
-|       login configuration (`login_url`, `login_payload`, `login_type`), serialization            |
-|     - Attached to `Mission.test_identities: list[TestIdentity]` in `argus/runtime/mission.py`     |
-|     - Mission helper methods: `add_test_identity()`, `get_active_identity()`, etc.               |
-|                                                                                                   |
-|  4. Persistent `AuthenticatedHttpClient` (`argus/http/client.py`)                                 |
-|     - Extends `AuthorizedHttpClient` for 100% backward compatibility                              |
-|     - Persistent `httpx.Client` session with automatic cookie jar management                      |
-|     - Strict scope gating before credential transmission (zero token leakage)                     |
-|     - Identity injection from active `TestIdentity` (headers, cookies, tokens)                    |
-|     - Automated `login()` method supporting JSON and Form authentication flows                    |
-|     - Proxy support (`proxy`) and retry policies with backoff                                     |
-|                                                                                                   |
-|  5. Test Suite & Verification                                                                     |
-|     - Zero regression on existing 578 tests                                                       |
-|     - 68 new tests covering DNSX, Takeover DB, TestIdentity, and AuthenticatedHttpClient          |
-|     - Total 646 tests passing                                                                     |
-+---------------------------------------------------------------------------------------------------+
-```
+- **Tripartite Active Collector Pattern**: `APISecurityCollector` (inheriting from `BaseCollector`), `APISecurityPayloadGenerator`, `APISecurityProber` (using `AuthenticatedHttpClient`), and `APISecurityAnalyzer`.
+- **Quadruple State Publishing**: State emitted across `raw_mission.evidence`, `raw_mission.vulnerabilities`, `raw_mission.attack_surface_graph`, and `ControlledMission.publish_finding`.
+- **Pipeline Connectivity**: Integrated with `TaskGenerator` DAG (dependent on `Discover API Endpoints`), `ToolRegistry` with alias mapping, `PluginExecutorAdapter` fallback resolution, `AttackSurfaceGraphBuilder` Section 27 graph expansion (`HAS_VULNERABILITY` edges), and `CVSSCalculator` (CWE-639, CWE-915, CWE-770).
 
 ## Feature Inventory
 | # | Feature | Description | Milestone | Source |
 |---|---------|-------------|-----------|--------|
-| 1 | `DNSXTool` wrapper & parser | CLI wrapper for `dnsx` + `ReconParser.parse_dnsx` + tool registry | M1 | survey |
-| 2 | Subdomain Takeover DB (26 signatures) | Structured signatures with CNAME regex, body fingerprints, status codes, NXDOMAIN flags | M1 | survey |
-| 3 | Subdomain Takeover Collector & Evidence | `SubdomainTakeoverCollector` producing `Evidence(category="subdomain_takeover", severity="critical")` | M1 | survey |
-| 4 | Graph Vulnerability Edges | `AttackSurfaceGraphBuilder` creates vulnerability nodes and `HAS_VULNERABILITY` edges | M1 | survey |
-| 5 | `TestIdentity` Model | Dataclass model with `AuthType`, credentials, tokens, cookies, serialization, clone | M2 | survey |
-| 6 | `Mission.test_identities` Integration | `Mission` fields + helper methods (`add_test_identity`, `get_active_identity`, etc.) + pickle safety | M2 | survey |
-| 7 | Persistent `AuthenticatedHttpClient` | Session cookie jar, scope gating, identity injection, automated `login()` for JSON/Form, proxy & retries | M2 | survey |
-| 8 | Comprehensive Unit & Integration Tests | 68 new tests verifying DNSX, Takeover DB, Graph edges, TestIdentity, and AuthenticatedHttpClient | M3 | survey |
-| 9 | Full Regression Victory Audit | 100% pass on all 646 tests with zero regressions | M3 | survey |
+| 1 | API Collector & Prober (R1) | Active collector inheriting from BaseCollector using AuthenticatedHttpClient | M1 | ORIGINAL_REQUEST §R1 |
+| 2 | Multi-Vector Detection Modes (R2) | 6 modes: Parameter Tampering, Mass Assignment, Rate Limiting Bypass, BOLA/IDOR, Excessive Data Exposure, Method Tampering | M1 | ORIGINAL_REQUEST §R2 |
+| 3 | API Response Analysis (R3) | Schema violations, authorization boundaries, rate limit headers, error disclosure, pagination bypass, false positive rejection | M1 | ORIGINAL_REQUEST §R3 |
+| 4 | Mutation & Evasion Strategies (R4) | 5 strategies: Content-Type Switching, Parameter Pollution, Header-Based Auth Bypass, Version Downgrade, Encoding Variations | M1 | ORIGINAL_REQUEST §R4 |
+| 5 | Pipeline Connectivity (R5) | DAG scheduling in task_generator.py, tool registration in registry.py, plugin fallback in plugins.py, graph expansion in attack_surface.py, CWE-639/915/770 in cvss.py | M2 | ORIGINAL_REQUEST §R5 |
+| 6 | Zero Regression & E2E Validation (R6) | 1,828+ baseline passing, >=25 new unit & adversarial tests in tests/collectors/, sprint handoff in .agents/sprint27_api_security/handoff.md | M3, M4 | ORIGINAL_REQUEST §R6 |
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| 1 | Subdomain Takeover & DNSX Engine | `argus/tools/dnsx.py`, `argus/recon/takeover_fingerprints.py`, `argus/collectors/takeover.py`, `argus/runtime/parser.py`, `argus/runtime/registry.py`, `argus/graph/attack_surface.py` | none | DONE |
-| 2 | TestIdentity Model & Authenticated HTTP Client | `argus/models/test_identity.py`, `argus/models/__init__.py`, `argus/models/identity.py`, `argus/runtime/mission.py`, `argus/http/client.py`, `argus/http/__init__.py` | none | DONE |
-| 3 | Test Suite Expansion & Victory Audit | `tests/test_dnsx.py`, `tests/test_subdomain_takeover.py`, `tests/test_test_identity.py`, `tests/http/test_authenticated_http_client.py`, `tests/graph/test_takeover_graph.py`, `tests/http/test_sprint4_empirical_stress.py` | M1, M2 | DONE |
+| 1 | Core Collector & Tripartite Models | Implement `argus/collectors/api_security.py` with enums, dataclasses, PayloadGenerator, Prober, Analyzer, and Collector | none | PLANNED |
+| 2 | Pipeline Connectivity & Reporting | Wire `task_generator.py`, `registry.py`, `plugins.py`, `attack_surface.py`, `cvss.py` | M1 | PLANNED |
+| 3 | Test Suite Implementation & Verification | Create `tests/collectors/test_api_security.py` and `tests/collectors/test_api_security_adversarial.py`, verify >=1,853 tests pass | M1, M2 | PLANNED |
+| 4 | Review, Challenger, Forensic Audit & Handoff | Multi-agent verification (Reviewers, Challengers, Auditor) and write `.agents/sprint27_api_security/handoff.md` | M3 | PLANNED |
 
 ## Code Layout
-- `argus/tools/__init__.py`: Exports `DNSXTool`, `DNSResult`
-- `argus/tools/dnsx.py`: DNSX CLI wrapper
-- `argus/recon/takeover_fingerprints.py` & `argus/collectors/takeover_signatures.py`: 26 service signatures
-- `argus/collectors/takeover.py`: Subdomain takeover collector
-- `argus/collectors/__init__.py`: Exports `SubdomainTakeoverCollector`
-- `argus/runtime/parser.py`: `ReconParser.parse_dnsx`
-- `argus/runtime/registry.py`: `dnsx` tool registration
-- `argus/graph/attack_surface.py`: `subdomain_takeover` node and edge generation
-- `argus/models/test_identity.py`: `TestIdentity` dataclass & `AuthType` enum
-- `argus/models/__init__.py` & `argus/models/identity.py`: Exports `TestIdentity`, `AuthType`
-- `argus/runtime/mission.py`: `Mission.test_identities` and helpers
-- `argus/http/client.py`: `AuthenticatedHttpClient`
-- `argus/http/__init__.py`: Exports `AuthenticatedHttpClient`
-- `tests/test_dnsx.py`: Tests for `DNSXTool` and parser
-- `tests/test_subdomain_takeover.py`: Tests for Subdomain Takeover Collector & Signatures
-- `tests/test_test_identity.py`: Tests for `TestIdentity` and `Mission` integration
-- `tests/http/test_authenticated_http_client.py`: Tests for `AuthenticatedHttpClient`
-- `tests/graph/test_takeover_graph.py`: Tests for takeover graph nodes and edges
-- `tests/http/test_sprint4_empirical_stress.py`: Comprehensive stress test suite
+- `argus/collectors/api_security.py`: Core collector, prober, analyzer, payload generator
+- `argus/planning/task_generator.py`: DAG templates & gap resolution
+- `argus/runtime/registry.py`: Tool registry & aliases
+- `argus/runtime/plugins.py`: Plugin adapter fallback
+- `argus/graph/attack_surface.py`: Section 27 graph expansion
+- `argus/reporting/cvss.py`: CWE database & preset vectors
+- `tests/collectors/test_api_security.py`: Unit & integration tests
+- `tests/collectors/test_api_security_adversarial.py`: Adversarial & resilience tests
+- `.agents/sprint27_api_security/handoff.md`: Sprint handoff report

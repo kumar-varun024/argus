@@ -1,37 +1,16 @@
-## 2026-08-30T06:39:14Z
+## 2026-09-02T13:43:25Z
+You are an Explorer subagent for ARGUS Sprint 29 (Prototype Pollution & Client-Side Attack Detection Module).
+Working directory: /home/varun/argus
+Agent metadata folder: /home/varun/argus/.agents/survey_explorer_3
 
-User Request:
-You are a Test & Mission Workflow Explorer for ARGUS Sprint 9 (Database Query Safety Validation Engine).
+Your task is to investigate the Test Infrastructure, Test Fixtures, Mocking Patterns, and current baseline test suite for ARGUS.
+Read /home/varun/argus/.agents/ORIGINAL_REQUEST.md.
 
-Your working directory is: /home/varun/argus/.agents/survey_explorer_3/
-You MUST read /home/varun/argus/.agents/ORIGINAL_REQUEST.md before starting work.
-Project root: /home/varun/argus
+Investigate:
+1. Run/inspect pytest test suites across `tests/` (excluding `tests/workspace`). Note current test counts and how tests are structured.
+2. Locate test fixtures, HTTP mocking utilities (responses, aioresponses, unittest.mock, custom test clients), mock endpoints, and fixture conventions.
+3. Examine existing collector test files (e.g. `tests/test_auth_bypass.py`, `tests/test_file_upload.py`, `tests/test_cors.py`, etc.) for test patterns: unit tests, false positive rejection tests, mutation/evasion tests, DAG integration tests, graph edge tests.
+4. Formulate the testing requirements and test matrix needed to satisfy R6 (>=25 new tests, zero regressions).
 
-Objective:
-Investigate the existing test suite, testing infrastructure, mock servers/fixtures, and mission loop execution in ARGUS.
-
-Key areas to investigate:
-1. Current Test Suite:
-   - Run or inspect how tests are run (`python -m pytest tests/ --ignore=tests/workspace -x -q`).
-   - How many tests currently pass (baseline ~861+)?
-   - How are existing collector tests structured (e.g. tests for Sprint 5, 6, 8)?
-2. Mocking & Fixtures:
-   - How are HTTP requests, mock responses, and database error/delay responses mocked in tests (e.g. httpx mocks, respx, unittest.mock, custom test servers)?
-3. E2E Mission Workflow:
-   - How do mission tests verify that collectors execute during the full mission loop?
-   - How are graph assertions made in tests?
-4. Sprint 9 Test Plan:
-   - Outline the 20+ required new tests covering:
-     * Error-based detection for MySQL, PostgreSQL, Oracle, SQLite
-     * Boolean differential analysis
-     * Time-based differential measurement (>4s)
-     * False positive prevention
-     * 5+ input mutation strategies
-     * Graph edge (HAS_VULNERABILITY) creation
-     * Pipeline / TaskGenerator integration
-     * E2E mission workflow integration
-
-Rules:
-- You are read-only. Do not modify any source code files.
-- Write your complete findings and test plan recommendations to /home/varun/argus/.agents/survey_explorer_3/handoff.md.
-- Send a completion message via send_message when done.
+Write your comprehensive findings and recommendations to /home/varun/argus/.agents/survey_explorer_3/handoff.md.
+When finished, send a brief message with the handoff path.

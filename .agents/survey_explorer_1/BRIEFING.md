@@ -1,48 +1,31 @@
-# BRIEFING — 2026-08-30T06:42:00Z
+# BRIEFING — 2026-09-02T13:48:00Z
 
 ## Mission
-Investigate ARGUS codebase architecture for collectors, TaskGenerator DAG, tool registry, attack surface graph models, and HTTP client interactions in preparation for Sprint 9 Database Query Safety Validation Engine.
+Investigate Collector Architecture across ARGUS codebase for Sprint 29 Prototype Pollution & Client-Side Attack Detection Module.
 
 ## 🔒 My Identity
 - Archetype: explorer
-- Roles: Codebase Architecture Explorer
+- Roles: survey_explorer
 - Working directory: /home/varun/argus/.agents/survey_explorer_1
-- Original parent: a2f8a122-53cc-45fd-b09d-db82598f4d8b
-- Milestone: Sprint 9 Architectural Exploration
+- Original parent: fb9f4bf5-d477-46cc-92cb-88bfb6bf8997
+- Milestone: Sprint 29 Collector Architecture Survey
 
 ## 🔒 Key Constraints
-- Read-only investigation — do NOT implement or modify project source files
-- Follow ARGUS architecture and conventions (Sprint 5, 6, 8 precedents)
-- Synthesize all findings into 5-component handoff report
+- Read-only investigation — do NOT implement
+- Investigate Collector Architecture, BaseCollector, AuthenticatedHttpClient, existing active collectors (auth_bypass, file_upload, cors, xss, sqli, etc.), tripartite pattern, Quadruple State Publishing pattern, and required classes/dataclasses/methods/configurations for Prototype Pollution & Client-Side Attack Detection.
+- Write findings to /home/varun/argus/.agents/survey_explorer_1/handoff.md.
 
 ## Current Parent
-- Conversation ID: a2f8a122-53cc-45fd-b09d-db82598f4d8b
-- Updated: not yet
+- Conversation ID: fb9f4bf5-d477-46cc-92cb-88bfb6bf8997
+- Updated: 2026-09-02T13:48:00Z
 
 ## Investigation State
-- **Explored paths**:
-  - `argus/collectors/base.py` (BaseCollector interface)
-  - `argus/collectors/information_disclosure.py` (Sprint 5)
-  - `argus/collectors/access_control.py` (Sprint 6)
-  - `argus/collectors/path_traversal.py` (Sprint 8)
-  - `argus/collectors/sql_injection.py` (Sprint 9 Collector & Engines)
-  - `argus/http/client.py` (AuthenticatedHttpClient & HttpResponse)
-  - `argus/planning/task_generator.py` (TaskGenerator DAG & _RECON_TEMPLATES)
-  - `argus/runtime/registry.py` (ToolRegistry & Tool registration)
-  - `argus/runtime/plugins.py` (PluginExecutorAdapter & fallback instantiation)
-  - `argus/plugins/interfaces.py` (ControlledMission)
-  - `argus/evidence/model.py` & `argus/evidence/store.py` (Evidence & EvidenceStore)
-  - `argus/graph/node.py`, `argus/graph/edge.py`, `argus/graph/graph.py` (KnowledgeGraph)
-  - `argus/graph/attack_surface.py` (AttackSurfaceGraphBuilder)
-- **Key findings**:
-  - Identified complete architecture for collectors, payload generators, analyzers, DAG scheduling, tool registry, and attack surface graph integration.
-  - Documented exact patterns for HTTP client mocking and `ControlledMission` unwrapping.
-- **Unexplored areas**: None for architectural survey scope.
+- **Explored paths**: `argus/collectors/base.py`, `argus/http/client.py`, `argus/collectors/auth_bypass.py`, `argus/collectors/api_security.py`, `argus/collectors/file_upload.py`, `argus/collectors/cors_headers.py`, `argus/collectors/xss.py`, `argus/collectors/__init__.py`, `argus/planning/task_generator.py`, `argus/runtime/registry.py`, `argus/runtime/plugins.py`, `argus/scanning/dag.py`, `argus/scanning/engine.py`, `argus/graph/attack_surface.py`, `argus/reporting/cvss.py`, `tests/collectors/`.
+- **Key findings**: Complete Tripartite Pattern + Prober architecture documented; Quadruple State Publishing pattern documented; 7 pipeline integration touchpoints identified; full technical specification for `PrototypePollutionCollector` created. Baseline test suite verified at 1,929 passing tests (0 failures).
+- **Unexplored areas**: None for collector architecture survey.
 
 ## Key Decisions Made
-- Completed read-only investigation and compiled full 5-component report in `handoff.md`.
+- Fully specified `PrototypePollutionCollector`, `PrototypePollutionPayloadGenerator`, `PrototypePollutionProber`, `PrototypePollutionAnalyzer`, enums, dataclasses, and 7-touchpoint integration architecture in `handoff.md`.
 
 ## Artifact Index
-- /home/varun/argus/.agents/survey_explorer_1/handoff.md — Complete architectural survey and mapping report
-- /home/varun/argus/.agents/survey_explorer_1/progress.md — Execution progress log
-- /home/varun/argus/.agents/survey_explorer_1/DISPATCH.md — Initial dispatch log
+- /home/varun/argus/.agents/survey_explorer_1/handoff.md — Comprehensive architectural survey & Sprint 29 specification report.

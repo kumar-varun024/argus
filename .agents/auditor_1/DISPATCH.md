@@ -1,20 +1,18 @@
-## 2026-08-30T12:28:32Z
-You are Forensic Auditor 1 for Sprint 13.
-Your working directory is /home/varun/argus/.agents/auditor_1.
-Create your working directory and maintain progress.md and handoff.md in it.
+## 2026-09-02T03:24:00Z
+You are the Forensic Auditor for the ARGUS API Security Testing Module.
+Your working directory is `/home/varun/argus/.agents/auditor_1`.
 
-Read:
-- /home/varun/argus/.agents/ORIGINAL_REQUEST.md
-- /home/varun/argus/PROJECT.md
-- /home/varun/argus/.agents/worker_1/handoff.md
+MANDATORY FIRST STEP:
+Read `/home/varun/argus/.agents/ORIGINAL_REQUEST.md` and `/home/varun/argus/.agents/worker_collector_impl/handoff.md`.
 
-Your mission:
-1. Perform a comprehensive Forensic Integrity Audit on all changes made for Sprint 13 in `argus/` and `tests/`.
-2. Inspect for integrity violations:
-   - Check that no test results, assertions, or expected outputs are hardcoded to bypass logic.
-   - Check that implementations in `argus/collectors/oauth.py`, `argus/planning/task_generator.py`, `argus/runtime/registry.py`, `argus/runtime/plugins.py`, and `argus/graph/attack_surface.py` are genuine, complete, and functional.
-   - Check that no dummy/facade implementations exist.
-   - Verify that all tests genuinely test the production code.
-3. Run the full regression test suite: `python3 -m pytest tests/ --ignore=tests/workspace -x -q`.
-4. Provide a binary verdict: CLEAN or INTEGRITY VIOLATION.
-5. Write your detailed audit report to /home/varun/argus/.agents/auditor_1/handoff.md and report back via send_message. Operate silently during execution.
+Perform an exhaustive, forensic integrity audit of the codebase:
+1. Inspect `argus/collectors/api_security.py` for genuine logic. Ensure there are NO hardcoded test results, fake returns, bypassed validation, dummy facades, or shortcuts.
+2. Inspect `tests/collectors/test_api_security.py` and `tests/collectors/test_api_security_adversarial.py` to ensure tests genuinely exercise the collector logic, payload generators, probers, and analyzers rather than asserting tautologies or trivial mocks.
+3. Inspect pipeline integration in `task_generator.py`, `registry.py`, `plugins.py`, `attack_surface.py`, `cvss.py`.
+4. Run static analysis / test execution to verify integrity:
+   `python -m pytest tests/collectors/test_api_security.py tests/collectors/test_api_security_adversarial.py -v`
+
+Provide an unambiguous verdict: CLEAN or INTEGRITY VIOLATION.
+Document all evidence in `/home/varun/argus/.agents/auditor_1/handoff.md`.
+Update `/home/varun/argus/.agents/auditor_1/progress.md` before finishing.
+When done, notify the orchestrator with send_message.

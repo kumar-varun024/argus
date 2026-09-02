@@ -1,18 +1,18 @@
-# Progress — Challenger 2
+# Progress — Challenger 2 (Pipeline & Graph Integration)
 
-**Last visited**: 2026-08-30T12:30:00Z
-**Status**: Initializing and reading background materials
+Last visited: 2026-09-02T03:30:00+05:30
+Status: Complete
 
-## Steps
-- [x] Create workspace files (DISPATCH.md, BRIEFING.md, progress.md)
-- [ ] Read context: ORIGINAL_REQUEST.md, PROJECT.md, worker_1/handoff.md
-- [ ] Inspect source code under review
-- [ ] Run test suite / baseline verification
-- [ ] Design and execute empirical stress tests:
-  - DAG scheduling with TaskGenerator across various gap scenarios
-  - Tool resolution with all aliases (oauth, oauth_collector, oidc, oidc_collector, oauth_oidc)
-  - PluginExecutorAdapter fallback with corrupted and valid configs
-  - AttackSurfaceGraphBuilder.build_from_evidence & build(mission) graph completeness & connectivity (HAS_ENDPOINT, HAS_VULNERABILITY)
-  - Pipeline integration & end-to-end flow
-- [ ] Document findings, logic chains, caveats, and conclusion
-- [ ] Write handoff.md and send verdict to orchestrator
+## Tasks
+- [x] Workspace initialization and BRIEFING setup
+- [x] Read ORIGINAL_REQUEST.md and worker handoff.md
+- [x] Inspect DAG template scheduling and gap resolution in `argus/planning/task_generator.py`
+- [x] Inspect tool registry lookups & aliases in `argus/runtime/registry.py`
+- [x] Inspect fallback instantiation & plugin shadowing in `argus/runtime/plugins.py`
+- [x] Inspect Graph node/edge generation in `argus/graph/attack_surface.py`
+- [x] Inspect CVSS mappings & vectors in `argus/reporting/cvss.py`
+- [x] Run pytest integration test suite `python -m pytest tests/collectors/test_api_security.py -v` (22 passed)
+- [x] Run adversarial unit test suite `python -m pytest tests/collectors/test_api_security_adversarial.py -v` (12 passed)
+- [x] Write empirical verification stress tests / harnesses to challenge edge cases (All 6 layers verified)
+- [x] Run full repository regression test suite `python -m pytest tests/ --ignore=tests/workspace -q` (1,862 passed, 0 failed)
+- [x] Generate `handoff.md` and report verdict to parent

@@ -1,55 +1,97 @@
-# Handoff Report — Challenger 2: Bypass Mutations, Injection Vectors & Pipeline Integration
+# Challenger 2 Review Report — Pipeline & Graph Integration
+
+**Role**: Challenger 2 (`challenger_2`) — Pipeline & Graph Integration Challenger  
+**Timestamp**: 2026-09-02T03:30:00Z  
+**Verdict**: **APPROVE**
+
+---
 
 ## 1. Observation
 
-### 1.1 Bypass Mutation Engine Verification (`SSRFPayloadGenerator` in `argus/collectors/ssrf.py:418-703`)
-Empirical execution of `SSRFPayloadGenerator` was conducted across all 9 bypass mutation strategies:
-- **Strategy 1 (Decimal IP Notation)**: `mutate_decimal_ip("127.0.0.1")` yields `['http://2130706433/', 'https://2130706433/', '2130706433']`; `mutate_decimal_ip("169.254.169.254")` yields `['http://2852039166/', 'https://2852039166/', '2852039166']`. Non-IP hosts return default fallback decimal representations.
-- **Strategy 2 (Hexadecimal IP Notation)**: `mutate_hex_ip("127.0.0.1")` yields `['http://0x7f000001/', 'http://0x7f.0x0.0x0.0x1/', 'http://0x7f.0.0.1/']`; `mutate_hex_ip("169.254.169.254")` yields `['http://0xa9fea9fe/', 'http://0xa9.0xfe.0xa9.0xfe/', 'http://0xa9.254.169.254/']`.
-- **Strategy 3 (Octal IP Notation)**: `mutate_octal_ip("127.0.0.1")` yields `['http://0177.0000.0000.0001/', 'http://0177.0.0.1/', 'http://017700000001/']`; `mutate_octal_ip("169.254.169.254")` yields `['http://0251.0376.0251.0376/', 'http://0251.254.169.254/', 'http://025177251776/']`.
-- **Strategy 4 (Shortened IP Notation)**: `mutate_shortened_ip("127.0.0.1")` yields `['http://127.1/', 'http://127.0.1/', 'http://0/', 'http://0.0.0.0/', 'http://127.1/', 'http://127.0.1/']`.
-- **Strategy 5 (URL / Double URL Encoding)**: `mutate_url_encoding("http://127.0.0.1/admin")` yields single encoded, double encoded, and host percent-encoded URLs (`http%3A%2F%2F127.0.0.1%2Fadmin`, `http%253A%252F%252F127.0.0.1%252Fadmin`, `http://%31%32%37%2E%30%2E%30%2E%31/admin`).
-- **Strategy 6 (Alternative URI Schemes)**: `mutate_alternative_schemes("127.0.0.1")` generates `dict://127.0.0.1:11211/`, `gopher://127.0.0.1:6379/_INFO`, `file:///etc/passwd`, `file:///etc/hosts`, `ldap://...`, and `tftp://...`.
-- **Strategy 7 (IPv6 Representations)**: `mutate_ipv6("127.0.0.1")` generates `http://[::1]/`, `http://[::]/`, `http://[::ffff:127.0.0.1]/`, `http://[::ffff:a9fe:a9fe]/`, `http://[0:0:0:0:0:ffff:127.0.0.1]/`, and `http://[0000:0000:0000:0000:0000:0000:0000:0001]/`.
-- **Strategy 8 (DNS Rebinding & Localhost Domains)**: `mutate_dns_rebinding("127.0.0.1")` generates `http://localhost/`, `http://127.0.0.1.nip.io/`, `http://localtest.me/`, `http://customer.localhost/`, `http://169.254.169.254.nip.io/`, and `http://spoofed.burpcollaborator.net/`.
-- **Strategy 9 (URL Parser Ambiguity & Credential Tricks)**: `mutate_parser_ambiguity("127.0.0.1")` generates `http://127.0.0.1:80@target.com/`, `http://target.com#@127.0.0.1/`, `http://target.com@127.0.0.1/`, `http://127.0.0.1?.target.com/`, `http://127.0.0.1#target.com/`, and `http://user:pass@127.0.0.1/`.
-- `generate_mutated_payloads()` aggregates and deduplicates 80+ unique bypass variants per target URL, preserving order with the primary target URL first.
+A systematic empirical audit and stress harness was executed against the API Security Testing Module across all 6 core integration touchpoints:
 
-### 1.2 Injection Vectors Verification (`SSRFCollector` in `argus/collectors/ssrf.py:942-1536`)
-Fuzzing behavior was tested across all 4 injection vectors:
-- **Vector 1 (GET Query Parameters)**: Correctly parses query string parameters using `urllib.parse.parse_qs`, injects cloud metadata, internal service, and differential timing payloads. Correctly falls back to probe routes when endpoints lack query parameters.
-- **Vector 2 (POST Body — JSON & Form-Urlencoded)**: Detects JSON dictionaries and raw JSON string payloads, injects mutated payloads into each JSON property, dispatches via `client.post(..., json=...)` or `client.post(..., data=...)`.
-- **Vector 3 (RESTful Path Segments)**: Identifies numeric, URL-encoded, or probe-keyword path segments (e.g. `proxy`, `fetch`, `view`, `download`), injects raw and urlquoted payloads.
-- **Vector 4 (HTTP Request Headers)**: Injects payloads into candidate headers (`Referer`, `X-Forwarded-For`, `X-Forwarded-Host`, `X-Original-URL`, `X-Rewrite-URL`, `X-Custom-IP-Authorization`).
+### A. Task Planning & DAG Scheduling (`argus/planning/task_generator.py`)
+- `_RECON_TEMPLATES["api_security"]` is configured at line 290 with title `"Validate REST & gRPC API Security"`, `category=TaskCategory.EVIDENCE_CORRELATION`, `dependencies=["Discover API Endpoints"]`, and `metadata={"tool_id": "api_security"}`.
+- Gap routing in `_resolve_template_for_gap` (lines 757–785) maps 24 area keywords (including `"api security"`, `"rest api security"`, `"grpc security"`, `"parameter tampering"`, `"mass_assignment"`, `"rate limiting"`, `"rate_limiting_bypass"`, `"bola"`, `"broken object level authorization"`, `"excessive data exposure"`, `"method tampering"`) to `_RECON_TEMPLATES["api_security"]`.
+- Under `TaskCategory.EVIDENCE_CORRELATION` (line 824), gap description fallback matching routes API keywords (`"api security"`, `"rest api"`, `"grpc"`, `"parameter tamper"`, `"mass assignment"`, `"rate limit"`, `"bola"`, `"idor"`, `"excessive data"`, `"method tamper"`) to `_RECON_TEMPLATES["api_security"]`.
+- `from_gaps` (line 894) accepts `"api_security"` for dynamic endpoint/host input extraction with safe handling of None/dict/scalar endpoints.
 
-### 1.3 Attack Surface Graph & Edge Creation (`argus/graph/attack_surface.py:577-630`, `argus/collectors/ssrf.py:1638-1652`)
-- `SSRFCollector` directly registers `live_host`, `endpoint`, and `vulnerability` nodes on `mission.attack_surface_graph` (or `mission.graph`), connecting `live_host -> HAS_ENDPOINT -> endpoint`, `live_host -> HAS_VULNERABILITY -> vulnerability`, and `endpoint -> HAS_VULNERABILITY -> vulnerability`.
-- `AttackSurfaceGraphBuilder.build_from_evidence` and `AttackSurfaceGraphBuilder.build` process all evidence items with category in `("ssrf", "server_side_request_forgery", "ssrf_validation")`, creating `endpoint` and `vulnerability` nodes and establishing `HAS_ENDPOINT` and `HAS_VULNERABILITY` edges with full metadata (url, parameter, technique, severity, template_id).
+### B. Tool Registry & Aliases (`argus/runtime/registry.py`)
+- Lines 203–218 register 16 alias lookups (`"api_security"`, `"api-security"`, `"api_security_specialist"`, `"api_security_collector"`, `"api_security_detector"`, `"api_security_testing"`, `"rest_api_security"`, `"rest_security"`, `"grpc_security"`, `"bola"`, `"idor_detector"`, `"excessive_data_exposure"`, `"rate_limit_bypass"`, `"rate_limiting"`, `"rate_limiting_bypass"`, `"method_tampering"`) that resolve to `Tool(id="api_security")`.
+- `Tool(id="api_security")` is registered with `capability="api_security_detector"`, required inputs `["endpoints"]`, produced outputs `["vulnerabilities", "observations", "evidence"]`, and timeout `300.0`.
 
-### 1.4 Test Suite Execution
-Direct test execution commands yielded:
-- `python -m pytest tests/collectors/test_ssrf.py tests/collectors/test_ssrf_adversarial.py -v`:
-  - Result: **56 passed in 1.22s** (31 unit tests + 25 adversarial stress tests).
-- `python -m pytest tests/ --ignore=tests/workspace -x -q`:
-  - Result: **1127 passed in 50.92s**. Zero regressions across entire project test suite.
+### C. Specialist Fallback & Shadowing Prevention (`argus/runtime/plugins.py`)
+- In `PluginExecutorAdapter._instantiate_specialist_fallback`, lines 97–112 handle `api_security` plugin IDs and instantiate `APISecurityCollector`.
+- The `api_security` check is placed **before** `elif "api" in plugin_id:` (line 113), which prevents `api_security` from being shadowed by `APIIntelligenceSpecialist`.
+- Non-target plugins (`APIIntelligenceSpecialist`, `FileUploadCollector`, `BusinessLogicCollector`, `CORSSecurityCollector`, `CacheSecurityCollector`, `SSTICollector`) instantiate without conflict.
+
+### D. Attack Surface Graph Section 27 (`argus/graph/attack_surface.py`)
+- Section 27 (lines 1139–1195) iterates over 17 category aliases (`"api_security"`, `"api_security_testing"`, `"rest_api_security"`, `"rest_security"`, `"grpc_security"`, `"parameter_tampering"`, `"mass_assignment"`, `"rate_limiting"`, `"rate_limiting_bypass"`, `"rate_limit_bypass"`, `"bola"`, `"idor"`, `"bola_idor"`, `"broken_object_level_authorization"`, `"excessive_data_exposure"`, `"method_tampering"`, `"api_bypass"`).
+- Creates `Node(type="live_host")`, `Node(type="endpoint")`, and `Node(type="vulnerability")`.
+- Synthesizes `HAS_ENDPOINT` edge (`live_host -> endpoint`) and `HAS_VULNERABILITY` edges (`live_host -> vulnerability` and `endpoint -> vulnerability`).
+- Tested with corrupt/empty evidence payloads without unhandled exceptions.
+
+### E. CVSS v3.1 & CWE Mappings (`argus/reporting/cvss.py`)
+- `CVSSCalculator.CWE_DATABASE` maps all relevant API CWEs:
+  - CWE-639 (`"bola"`, `"idor"`, `"broken_object_level_authorization"`, `"bola_idor"`, `"api_security"`, `"rest_api_security"`, `"cwe_639"`, `"cwe-639"`)
+  - CWE-915 (`"mass_assignment"`, `"cwe_915"`, `"cwe-915"`)
+  - CWE-770 (`"rate_limiting"`, `"rate_limiting_bypass"`, `"rate_limit_bypass"`, `"missing_rate_limit"`, `"allocation_of_resources"`, `"cwe_770"`, `"cwe-770"`)
+  - CWE-602 (`"parameter_tampering"`, `"cwe_602"`, `"cwe-602"`)
+  - CWE-200 (`"excessive_data_exposure"`, `"api_excessive_data"`, `"cwe_200"`, `"cwe-200"`)
+  - CWE-650 (`"method_tampering"`, `"http_method_tampering"`, `"cwe_650"`, `"cwe-650"`)
+- Preset vectors generated via `_get_preset_vector()` calculate scores within their target severity bands (High: 7.0–8.9, Medium: 4.0–6.9).
+
+### F. Quadruple State Publishing (`argus/collectors/api_security.py`)
+- Validated that `APISecurityCollector._emit_evidence()` updates:
+  1. `mission.evidence` (adds `Evidence` item with tags and provenance)
+  2. `mission.vulnerabilities` (appends vulnerability dictionary with CWE & CVSS)
+  3. `mission.attack_surface_graph` (adds nodes and connects `HAS_ENDPOINT` & `HAS_VULNERABILITY` edges)
+  4. `ControlledMission.publish_finding()` (invokes callback with evidence ID)
+
+### G. Empirical Test Execution Results
+- `pytest tests/collectors/test_api_security.py -v`: **22 passed, 0 failed in 0.71s**
+- `pytest tests/collectors/test_api_security_adversarial.py -v`: **12 passed, 0 failed in 0.44s**
+- Custom Challenger Stress Test Harness: **All 6 verification steps passed (0 failures)**
+- Full repository regression suite `pytest tests/ --ignore=tests/workspace -q`: **1,862 passed, 0 failed in 64.35s**
+
+---
 
 ## 2. Logic Chain
-1. Based on observations in 1.1, `SSRFPayloadGenerator` implements all 9 required bypass strategies conforming to RFC standards, cloud metadata architectures, and IP address notation specifications.
-2. Based on observations in 1.2, `SSRFCollector` handles all 4 input injection vectors, correctly routing GET parameters, POST form and JSON bodies, RESTful path components, and HTTP header injections without data corruption.
-3. Based on observations in 1.3, both `SSRFCollector` in-flight graph expansion and `AttackSurfaceGraphBuilder` section 14 build well-formed knowledge graphs with proper `live_host`, `endpoint`, and `vulnerability` nodes and directional `HAS_VULNERABILITY` edges.
-4. Based on observations in 1.4, all 56 SSRF tests pass, and all 1127 tests across the entire ARGUS test suite pass without regression.
+
+1. **DAG Scheduling Integrity**: The API security task is scheduled with `dependencies=["Discover API Endpoints"]`, ensuring it executes downstream of crawler and endpoint discovery tasks. The input resolution safely normalizes endpoints from dictionaries, strings, and live hosts.
+2. **Registry & Aliasing Safety**: The 16 tool aliases allow flexible invocation while mapping deterministically to `api_security`.
+3. **Execution Routing Order**: The positioning of `api_security` before generic `api` in `_instantiate_specialist_fallback` prevents name shadowing while preserving the standalone `APIIntelligenceSpecialist` fallback.
+4. **Graph Schema Conformance**: Graph building generates valid `live_host`, `endpoint`, and `vulnerability` nodes linked by directional `HAS_ENDPOINT` and `HAS_VULNERABILITY` edges, matching the ARGUS attack surface graph contract.
+5. **Reporting & Scoring Consistency**: CWE database mappings accurately assign CWE-639, CWE-915, CWE-770, CWE-602, CWE-200, and CWE-650 with calibrated CVSS v3.1 vectors.
+6. **Zero Regression**: Execution of the entire 1,862-test repository suite confirms zero regressions across existing modules.
+
+---
 
 ## 3. Caveats
-- No caveats. All edge cases (malformed IPs, empty endpoints, nested JSON structures, high baseline timing traps, reflection suppression) were verified empirically.
+
+- **No caveats.** All tests and verifications were executed directly against the live codebase with genuine assertions and full regression coverage.
+
+---
 
 ## 4. Conclusion
-**Verdict: APPROVE**
 
-The SSRF bypass mutation engine, multi-vector injection mechanisms, and attack surface graph pipeline integration are fully functional, robust, and empirically validated.
+The API Security Testing Module (`REST / gRPC`) is fully integrated into the ARGUS planning, runtime, graph modeling, reporting, and execution pipelines. All acceptance criteria are satisfied, with zero regressions across 1,862 test cases.
+
+**Final Verdict**: **APPROVE**
+
+---
 
 ## 5. Verification Method
-To independently reproduce:
+
+To independently verify these results:
+
 ```bash
-python -m pytest tests/collectors/test_ssrf.py tests/collectors/test_ssrf_adversarial.py -v
-python -m pytest tests/ --ignore=tests/workspace -x -q
+# 1. Run unit & integration test suite
+python3 -m pytest tests/collectors/test_api_security.py -v
+
+# 2. Run adversarial test suite
+python3 -m pytest tests/collectors/test_api_security_adversarial.py -v
+
+# 3. Run full repository regression test suite
+python3 -m pytest tests/ --ignore=tests/workspace -q
 ```

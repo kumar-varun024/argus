@@ -1,276 +1,139 @@
-# Test Suite, Graph Architecture & Pipeline Integration Investigation Report
-**Sprint 12: SSRF Validation Collector**
-**Author**: `explorer_2` (Test & Pipeline Investigator / Spec Miner)
-**Date**: 2026-08-30
+# Exploration Report: DAG Scheduling, Tool Registry, Context Flow & Collector Configuration
+
+**Target Location**: `/home/varun/argus/.agents/explorer_2/handoff.md`  
+**Explorer**: `explorer_2`  
+**Date**: 2026-09-01T22:31:30+05:30  
+**Target Module**: CORS Misconfiguration & HTTP Security Header Audit Module (`Sprint 25`)
 
 ---
 
 ## 1. Observation
 
-### 1.1 Test Suite Status & Execution Baseline
-- **Execution Command**: `python -m pytest tests/ --ignore=tests/workspace -x -q`
-- **Result**: `1071 passed, 24122 warnings in 41.90s` (Exit code: `0`)
-- **Suite Layout & Organization**:
-  - `tests/collectors/`: Unit & adversarial tests for vulnerability collectors:
-    - `test_access_control.py`, `test_challenger2_access_control_adversarial.py`
-    - `test_information_disclosure.py`, `test_information_disclosure_adversarial.py`, `test_challenger2_adversarial_info_disclosure.py`
-    - `test_path_traversal.py`, `test_path_traversal_adversarial.py`
-    - `test_sql_injection.py`, `test_sql_injection_adversarial.py`
-    - `test_xss.py`, `test_xss_adversarial.py`
-    - `test_command_injection.py`, `test_command_injection_adversarial.py`
-  - `tests/pipeline/`: Pipeline integration tests:
-    - `test_cmdi_pipeline.py`, `test_cmdi_adversarial_challenge.py`
-  - `tests/runtime/`: Runtime orchestrator & end-to-end integration tests:
-    - `test_e2e_access_control.py`, `test_e2e_info_disclosure.py`, `test_e2e_mission.py`, `test_e2e_path_traversal.py`, `test_e2e_sql_injection.py`, `test_e2e_xss.py`, `test_e2e_xss_stress.py`, `test_runtime_orchestrator.py`, `test_scheduler.py`
-  - `tests/graph/`: `test_attack_surface_builder.py`, `test_adversarial_graph_reasoning.py`, `test_graph_root.py`
-  - `tests/http/`: `test_authenticated_http_client.py`, `test_authorized_http_client.py`, `test_sprint4_empirical_stress.py`
-  - `tests/planning/`: `test_research_planner.py`
-  - `tests/workspace/`: Contains standalone context/persistence tests (excluded by `--ignore=tests/workspace`).
+### 1.1 TaskGenerator & DAG Scheduling Architecture
+- **Task Templates**: `argus/planning/task_generator.py` defines `_RECON_TEMPLATES` (lines 13–266) containing task definitions for recon tools and active vulnerability scanners.
+  - Reconnaissance tools: `subfinder` (priority 0.95), `httpx` (priority 0.90, depends on `Discover Subdomains`), `katana_crawler` (priority 0.85, depends on `Fingerprint Live Hosts`), `nuclei` (priority 0.80, depends on `Fingerprint Live Hosts`), `info_disclosure` (priority 0.82, depends on `Fingerprint Live Hosts`).
+  - Active vulnerability tools: `access_control`, `path_traversal`, `sql_injection`, `xss`, `command_injection`, `ssrf`, `oauth`, `xml_parser_validation`, `deserialization`, `graphql_security`, `websocket_security`, `request_smuggling`, `race_conditions`, `business_logic`, `ssti`, `cache_security` (all have priority 0.81–0.82, depend on `["Discover API Endpoints"]`, take `required_inputs=["endpoints"]`, and produce `["vulnerabilities", "observations", "evidence"]`).
+- **Gap Resolution**: `TaskGenerator._resolve_template_for_gap` (lines 484–763) matches `CoverageGap.area` and `CoverageGap.description` strings to corresponding templates in `_RECON_TEMPLATES`.
+- **Input Resolution**: `TaskGenerator.from_gaps` (lines 787–800) checks `tool_id in (...)` and automatically extracts input strings from `mission.endpoints` (first 10 items), falling back to `mission.live_hosts` and `mission.target`.
+- **ScanDAG Topological Scheduling**: `argus/scanning/dag.py` (lines 54–86) dynamically imports `_RECON_TEMPLATES` from `argus.planning.task_generator`, instantiates `ScanTask` instances, classifies phases (`phase="recon"` for recon tools, `phase="vulnerability"` for others), and uses Kahn's algorithm in `ScanDAG.get_execution_order()` (lines 120–191) to compute deterministic topological ordering with priority descending.
+- **Scan Engine Invocation**: `argus/scanning/engine.py` (lines 53–136, 198–350) runs tasks in topological order, dynamically resolving collector instances via `collector_factory`, `PluginExecutorAdapter._instantiate_specialist_fallback`, `collector_class_map` (lines 76–106), and `ToolRegistry`.
 
-### 1.2 Mocking Harnesses and Test Patterns
-The codebase standardizes on dedicated class-based Mock HTTP clients implementing the `AuthenticatedHttpClient` / `HttpResponse` interface:
-- **`HttpResponse` Model** (`argus/http/client.py:72-85`):
-  ```python
-  @dataclass
-  class HttpResponse:
-      success: bool
-      status_code: Optional[int] = None
-      headers: Dict[str, str] = field(default_factory=dict)
-      request_headers: Dict[str, str] = field(default_factory=dict)
-      body: Optional[str] = None
-      raw_body: Optional[str] = None
-      url: str = ""
-      method: str = ""
-      elapsed: float = 0.0
-      error: Optional[str] = None
-      scope_decision: Optional[ScopeDecision] = None
-      authorization_decision: Optional[AuthDecision] = None
-  ```
-- **Mock Client Pattern** (as observed in `tests/collectors/test_command_injection.py`, `tests/collectors/test_sql_injection.py`, `tests/collectors/test_path_traversal.py`):
-  - Injected via collector constructor: `collector = SSRFCollector(http_client=mock_client)`.
-  - Supports route registration: `mock_client.set_route(url_or_key, status_code, body, elapsed=0.05)`.
-  - Implements `.get(mission_or_url, url=None, **kwargs)` and `.post(mission_or_url, url=None, **kwargs)`.
-  - Handles URL unquoting (`urllib.parse.unquote_plus`), header matching (`header:{name}:{value}`), parameter extraction, and differential timing (`elapsed >= 4.0`).
+### 1.2 Tool Registry & Plugin Infrastructure
+- **ToolRegistry Definition**: `argus/runtime/registry.py` (lines 5–201) defines `ToolRegistry` and instantiates the global singleton `registry` (line 204).
+- **Tool Model**: `argus/runtime/models.py` (lines 141–166) defines `Tool` with fields:
+  - `id: str`: unique identifier (e.g. `"cors_headers"` or `"cors_security"`)
+  - `name: str`: display title
+  - `version: str`: semver string (e.g. `"1.0.0"`)
+  - `capability: str`: primary capability tag
+  - `description: str`: full functional summary
+  - `supported_tasks: List[str]`: task category / task name strings for capability matching
+  - `required_inputs: List[str]`: input types expected (e.g. `["endpoints"]`)
+  - `produced_outputs: List[str]`: output types produced (e.g. `["vulnerabilities", "observations", "evidence"]`)
+  - `capabilities: List[str]`: array of capability tags / aliases
+  - `safety_requirements: Dict[str, Any]`: e.g. `{"type": "internal", "permissions": ["network", "db_read", "db_write"]}`
+  - `timeout: float`: tool execution timeout (default 300.0s)
+  - `priority: int`: registry match priority (default 95 for vulnerability collectors, 100 for recon)
+- **Alias Lookup**: `ToolRegistry.get(key)` (lines 15–187) contains a comprehensive alias dictionary mapping ~170 tool nicknames, synonyms, and variants to their canonical tool IDs.
+- **Plugin Dynamic Loading**: `argus/runtime/plugins.py` (`PluginExecutorAdapter`, lines 10–213) handles plugin execution and provides `_instantiate_specialist_fallback(plugin_id)` (lines 65–211), dynamically importing and instantiating collector classes from `argus.collectors`.
+- **Dispatcher & Orchestrator**: `argus/runtime/dispatcher.py` (lines 10–92) and `argus/runtime/orchestrator.py` (lines 22–130) resolve `ResearchTask` to `Tool`, perform safety checks via `SafetyValidator`, wrap context into `ToolExecutionContext`, and dispatch via `InternalPluginExecutor` (`argus/runtime/executor.py`, lines 155–190).
 
-### 1.3 Knowledge Graph Models & Edge Relations
-- **Core Models**:
-  - `Node` (`argus/graph/node.py:5-18`): `id: str`, `type: str`, `value: str`, `metadata: dict[str, Any]`
-  - `Edge` (`argus/graph/edge.py:5-18`): `source: str`, `target: str`, `type: str`, `metadata: dict[str, Any]`
-  - `KnowledgeGraph` (`argus/graph/graph.py:6-95`): `nodes: dict[str, Node]`, `edges: list[Edge]`, methods: `add(node)`, `get(node_id)`, `connect(source, target, edge_type, metadata)`, `nodes_by_type(node_type)`, `node_count()`, `edge_count()`.
-- **Attack Surface Graph Topology for Vulnerability Collectors**:
-  - **Node ID Conventions**:
-    - Live Host: `live_host:{base_url}` (e.g. `live_host:https://example.com`) with `type="live_host"`
-    - Endpoint: `endpoint:{target_url}` (e.g. `endpoint:https://example.com/api/fetch?url=...`) with `type="endpoint"`
-    - Vulnerability: `vulnerability:{template_id}:{target_url}:{param}` (or `vulnerability:{template_id}:{target_url}`) with `type="vulnerability"`
-  - **Edge Topology (Triad)**:
-    1. `graph.connect(lh_id, ep_id, edge_type="HAS_ENDPOINT")` (host -> endpoint)
-    2. `graph.connect(lh_id, vuln_id, edge_type="HAS_VULNERABILITY")` (host -> vulnerability)
-    3. `graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")` (endpoint -> vulnerability)
-- **Collector State Updates**:
-  When a vulnerability is confirmed during fuzzing:
-  1. `Evidence` is instantiated:
-     ```python
-     ev = Evidence(
-         mission_id=getattr(raw_mission, "id", ""),
-         source_type="LOG",
-         created_by="SYSTEM_GENERATED",
-         title=f"SSRF: {param} on {target_url}",
-         description=description,
-         category="ssrf",  # or "server_side_request_forgery"
-         value=target_url,
-         source=target_url,
-         status="CONFIRMED",
-         confidence=confidence,  # 0.95 (or 0.90 for timing)
-         severity=severity,      # "critical" for cloud metadata/internal admin, "high" for services
-         provenance=ProvenanceData(step_id="ssrf_collector"),
-         tags=["ssrf", "server_side_request_forgery", technique, template_id],
-         metadata={
-             "url": target_url,
-             "host": base_url,
-             "path": url_path,
-             "parameter": param,
-             "parameter_type": param_type,
-             "payload": payload,
-             "category": "ssrf",
-             "severity": severity,
-             "technique": technique,
-             "template_id": template_id,
-             "service": service_type,
-             "status_code": status_code,
-             "evidence_snippet": snippet[:250],
-         },
-     )
-     ```
-  2. Appended to `mission.evidence.add(ev)` (or `mission.evidence.append(ev)`).
-  3. Appended to `mission.vulnerabilities.append({...})`.
-  4. Expanded directly on `mission.attack_surface_graph` with `live_host`, `endpoint`, `vulnerability` nodes and `HAS_ENDPOINT`, `HAS_VULNERABILITY` edges.
-  5. Safely published to `ControlledMission` wrapper via `mission.publish_finding(ev.id, ev)`.
-- **`AttackSurfaceGraphBuilder` Reconstruction** (`argus/graph/attack_surface.py`):
-  - Ingests `EvidenceStore` records by category.
-  - Section 1-13 exist for: subdomains, live hosts, technologies, endpoints, generic vulnerabilities, subdomain takeover, information disclosure, broken access control, path traversal, SQL injection, XSS, and command injection.
-  - **Section 14 required for SSRF**:
-    ```python
-    # 14. Server-Side Request Forgery (SSRF) Vulnerabilities
-    for ev in evidence_items:
-        if getattr(ev, "category", None) in ("ssrf", "server_side_request_forgery", "ssrf_vulnerability"):
-            # build nodes & connect HAS_ENDPOINT and HAS_VULNERABILITY
-    ```
+### 1.3 Context Passing & Data Flow
+- **Collector Invocation Interface**: Collectors inherit from `BaseCollector` (`argus/collectors/base.py`) and implement:
+  - `collect(self, mission: Any) -> List[Evidence]`
+  - `execute(self, mission: Any) -> List[Evidence]` (alias for `collect`)
+- **Target Discovery**: Established pattern (observed in `argus/collectors/cache_security.py:1334-1382`, `argus/collectors/ssti.py:1550-1598`, `argus/collectors/business_logic.py:1440-1490`):
+  1. Unwraps raw mission: `raw_mission = getattr(mission, "_raw_mission", getattr(mission, "_mission", mission))`
+  2. Ingests `raw_mission.endpoints` (extracting `ep.get("url")` or `ep.get("path")` or `str(ep)`)
+  3. Ingests `raw_mission.live_hosts` (extracting `lh.get("url")` or `str(lh)`)
+  4. Ingests `raw_mission.target` (ensures `https://` prefix if missing)
+  5. Ingests URLs from `raw_mission.evidence` metadata
+- **HTTP Dispatch & Probing**: Collectors use `AuthenticatedHttpClient` (`argus/http/client.py:300-508`), which enforces `ScopeResolver` boundary checks and `authorization_gate` checks, injects session headers/cookies from `TestIdentity`, executes retry backoff, sanitizes sensitive data, and creates request/response evidence. Prober classes (e.g. `CORSProber` / `HeaderAuditor`) accept optional `AuthenticatedHttpClient` or `http_client` instances for unit-test mockability.
+- **Quadruple State Mutation on Confirmed Findings**:
+  1. `mission.evidence.add(ev)`: Creates `Evidence` with `category="cors"` or `"security_headers"`, `status="CONFIRMED"`, `confidence`, `severity`, provenance data, tags, and detailed metadata (`url`, `host`, `technique`, `cwe_id`, `cvss_score`, etc.).
+  2. `mission.vulnerabilities.append({...})`: Appends structured vulnerability record to `mission.vulnerabilities`.
+  3. `mission.attack_surface_graph`: Adds nodes (`live_host`, `endpoint`, `vulnerability`) and connects them via `HAS_ENDPOINT` and `HAS_VULNERABILITY` edges (handled in collector and synchronized by `AttackSurfaceGraphBuilder` in `argus/graph/attack_surface.py:1208-1260`).
+  4. `ControlledMission.publish_finding(...)`: Notifies mission wrapper if present.
 
-### 1.4 TaskGenerator & DAG Scheduling
-- **File**: `argus/planning/task_generator.py`
-- **Recon Templates (`_RECON_TEMPLATES`)**:
-  - `subfinder` -> `httpx` (depends on `Discover Subdomains`) -> `katana_crawler` (depends on `Fingerprint Live Hosts`) -> `nuclei` (depends on `Fingerprint Live Hosts`) -> `info_disclosure` (depends on `Fingerprint Live Hosts`).
-  - Active fuzzing collectors (`access_control`, `path_traversal`, `sql_injection`, `xss`, `command_injection`) depend on `Discover API Endpoints` (`katana_crawler`).
-  - **SSRF Template required**:
-    ```python
-    "ssrf": {
-        "title": "Validate Server-Side Request Forgery (SSRF)",
-        "goal": "Actively fuzz discovered endpoint parameters, POST bodies, and headers for SSRF vulnerabilities and cloud metadata disclosure using AuthenticatedHttpClient.",
-        "category": TaskCategory.EVIDENCE_CORRELATION,
-        "required_inputs": ["endpoints"],
-        "expected_outputs": ["vulnerabilities", "observations", "evidence"],
-        "dependencies": ["Discover API Endpoints"],
-        "required_specialists": [],
-        "metadata": {"tool_id": "ssrf"},
-        "estimated_duration_minutes": 10,
-        "priority": 0.81,
-    }
-    ```
-- **Gap Resolution (`_resolve_template_for_gap`)**:
-  - Maps string matching on `gap.area` and `gap.description` (e.g. `ssrf`, `server side request forgery`, `cloud metadata`, `metadata disclosure`, `imds`).
-- **Gap Transformation (`from_gaps`)**:
-  - Resolves inputs from `endpoints` when `tool_id == "ssrf"`.
-
-### 1.5 ToolRegistry & Plugin Execution Pipeline
-- **`ToolRegistry`** (`argus/runtime/registry.py:5-350`):
-  - Registers `Tool` instances by `id`.
-  - Tool definition required for `ssrf`:
-    ```python
-    registry.register(
-        Tool(
-            id="ssrf",
-            name="SSRF Validation Collector",
-            capability="ssrf_detector",
-            description="Actively fuzzes endpoint parameters, POST bodies, and HTTP headers for server-side request forgery (SSRF) and cloud metadata access using AuthenticatedHttpClient.",
-            supported_tasks=["SSRF Validation", "SSRF Detection", "Server-Side Request Forgery", "Vulnerability Scanning", "Evidence Correlation", "API Discovery"],
-            required_inputs=["endpoints"],
-            produced_outputs=["vulnerabilities", "observations", "evidence"],
-            capabilities=["ssrf_detector", "ssrf_collector", "ssrf_validator"],
-            safety_requirements={"type": "internal", "permissions": ["network", "db_read", "db_write"]},
-            timeout=300.0,
-            priority=95,
-        )
-    )
-    ```
-  - Alias lookup in `ToolRegistry.get()`: Add aliases `ssrf_validator`, `server_side_request_forgery`.
-- **`PluginExecutorAdapter`** (`argus/runtime/plugins.py:65-110`):
-  - In `_instantiate_specialist_fallback(self, plugin_id)`:
-    ```python
-    elif "ssrf" in plugin_id or "server_side_request_forgery" in plugin_id:
-        from argus.collectors.ssrf import SSRFCollector
-        return SSRFCollector()
-    ```
-- **`argus/collectors/__init__.py`**:
-  - Export `SSRFCollector`, `SSRFAnalyzer`, `SSRFPayloadGenerator`, etc.
+### 1.4 Configuration, Settings, CVSS/CWE Mappings & CLI Flags
+- **CLI Commands**: `argus/cli/tools_cli.py` exposes:
+  - `argus tools list`: lists all registered tools, supported tasks, capabilities, and safety types.
+  - `argus tools run <tool_id> <task_id> --mission-id <id>`: runs a tool on a task.
+  - `argus tools status <run_id>` and `argus tools history`: inspects execution telemetry in `.argus/tool_history.json`.
+- **Collector Construction Parameters**:
+  - `prober: Optional[CORSProber] = None`
+  - `timeout: float = 10.0` (per-HTTP-request timeout)
+  - `http_client: Optional[AuthenticatedHttpClient] = None`
+- **CVSS & CWE Mappings (`argus/reporting/cvss.py`)**:
+  - `CWE_DATABASE` currently maps `"cors"` to `CWEInfo("CWE-942", "Permissive Cross-origin Resource Sharing Policy")` (line 114).
+  - Missing in `CWE_DATABASE`: `CWE-693` ("Protection Mechanism Failure") and `CWE-1021` ("Improper Restriction of Rendered UI Layers or Frames ('Clickjacking')") for security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy).
+  - Preset CVSS vector mapping (`_get_preset_vector`, lines 372–444) has calibrated severity bands: Critical (9.0–10.0), High (7.0–8.9), Medium (4.0–6.9), Low (0.1–3.9). Severity mapping needs to include `"cors"` in High/Critical bands (reflected with credentials = High 8.2, wildcard with credentials = Critical 9.8) and security headers in Medium/Low bands (missing CSP = Medium 5.3, missing X-Content-Type-Options / Referrer-Policy = Low 2.7).
 
 ---
 
 ## 2. Logic Chain
 
-1. **Vulnerability Detection Pattern Alignment**:
-   - All 5 existing vulnerability collectors (`SQLInjectionCollector`, `XSSCollector`, `PathTraversalCollector`, `AccessControlCollector`, `CommandInjectionCollector`) adhere to the standard multi-class architecture:
-     - `<Vuln>PayloadGenerator`: Generates payloads, bypass mutations, and targets.
-     - `<Vuln>Analyzer`: Matches response signatures (cloud metadata, internal service banners, admin titles) and differential timing latencies.
-     - `<Vuln>Collector(BaseCollector)`: Coordinates candidate extraction from `mission.endpoints` (GET query params, POST form/JSON body fields, headers `Referer` / `X-Forwarded-For`), executes requests via `AuthenticatedHttpClient`, emits `Evidence`, updates `mission.vulnerabilities`, and expands `mission.attack_surface_graph`.
-     - Adapter methods: `.execute(mission)` calling `.collect(mission)`.
-2. **SSRF Specifications from ORIGINAL_REQUEST.md**:
-   - **R1 Injection Targets**: GET query strings, POST JSON & form fields, headers (`Referer`, `X-Forwarded-For`). Probing internal IPs (`127.0.0.1`, `localhost`, RFC 1918 `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`) and Cloud metadata endpoints (`169.254.169.254` AWS IMDSv1/v2, GCP `metadata.google.internal`, Azure `169.254.169.254/metadata/instance`).
-   - **R2 Detection Techniques**:
-     1. Cloud Metadata Response Detection (AWS IAM role names, GCP instance IDs, Azure VM metadata JSON).
-     2. Internal Service Response Detection (Redis `+PONG`, MySQL/Postgres handshake banners, internal admin HTML titles).
-     3. Differential Timing (latency >= 4.0s vs baseline).
-   - **R3 Bypass Mutations**: At least 6 distinct bypass strategies (decimal IP `2130706433`, hex IP `0x7f000001`, octal IP `0177.0.0.1`, shortened IP `127.1`, URL encoding/double encoding, URI schemes `dict://`, `gopher://`, `file://`, IPv6 `[::1]`, `[::ffff:127.0.0.1]`, DNS rebinding).
-3. **Pipeline Invariance**:
-   - `TaskGenerator` places SSRF task after endpoint crawling (`dependencies: ["Discover API Endpoints"]`).
-   - `ToolRegistry` makes it discoverable by `tool_id="ssrf"`, `capability="ssrf_detector"`.
-   - `AttackSurfaceGraphBuilder` section 14 guarantees graph isomorphism whether built live or reconstructed from `EvidenceStore`.
-4. **Test Suite Invariance (Zero Regressions + >20 New Tests)**:
-   - Full baseline currently stands at 1071 passing tests.
-   - Comprehensive new tests should be created in:
-     - `tests/collectors/test_ssrf.py` (Unit tests for collector, payload generator, analyzer, graph wiring, mutations)
-     - `tests/collectors/test_ssrf_adversarial.py` (Adversarial stress: false positives, boundary latencies, non-metadata JSON, nested payloads)
-     - `tests/pipeline/test_ssrf_pipeline.py` or `tests/runtime/test_e2e_ssrf.py` (E2E mission lifecycle, ToolRegistry, PluginExecutorAdapter fallback, AttackSurfaceGraphBuilder reconstruction).
+1. **Scheduling Chain**:
+   - `_RECON_TEMPLATES` in `argus/planning/task_generator.py` is the single source of truth for task templates.
+   - `ScanDAG` in `argus/scanning/dag.py` automatically reads `_RECON_TEMPLATES`. Adding `"cors_headers"` (or `"cors_security"`) to `_RECON_TEMPLATES` with `dependencies: ["Discover API Endpoints"]` guarantees it will execute immediately after Katana crawling in both `ScanDAG` and `ResearchPlanner`.
+   - `TaskGenerator._resolve_template_for_gap` must map `"cors"`, `"cors security"`, `"cors misconfiguration"`, `"security headers"`, `"http security headers"`, `"csp"`, `"hsts"` to the new template.
+   - `TaskGenerator.from_gaps` must include `"cors_headers"` in the `tool_id in (...)` tuple on line 792 to automatically supply endpoint inputs from `mission.endpoints`.
+
+2. **Registration Chain**:
+   - `argus/runtime/registry.py` must register `Tool(id="cors_headers", ...)` with `supported_tasks`, `capabilities`, `safety_requirements={"type": "internal", "permissions": ["network", "db_read", "db_write"]}`.
+   - Aliases such as `"cors"`, `"cors_security"`, `"cors_collector"`, `"cors_detector"`, `"security_headers"`, `"http_headers"`, `"header_audit"` must map to `"cors_headers"`.
+   - `argus/runtime/plugins.py` (`_instantiate_specialist_fallback`) must add conditional matching for `"cors"` and `"security_header"` returning `CORSSecurityCollector()`.
+   - `argus/scanning/engine.py` must add `"cors_headers": "CORSSecurityCollector"` (and aliases) to `collector_class_map`.
+
+3. **Context & Execution Chain**:
+   - `CORSSecurityCollector` inheriting `BaseCollector` must expose both `collect(mission)` and `execute(mission)`.
+   - Candidate endpoints must be harvested from `mission.endpoints`, `mission.live_hosts`, `mission.target`, and `mission.evidence`.
+   - Probing must utilize `AuthenticatedHttpClient` with custom `Origin`, `Access-Control-Request-Method`, and `Access-Control-Request-Headers` headers and `OPTIONS`/`GET` methods.
+   - Confirmed findings must perform Quadruple State Mutation: updating `mission.evidence`, `mission.vulnerabilities`, `mission.attack_surface_graph` (creating `live_host`, `endpoint`, `vulnerability` nodes and connecting `HAS_ENDPOINT` + `HAS_VULNERABILITY` edges), and invoking `ControlledMission.publish_finding`.
+
+4. **Reporting & CVSS Chain**:
+   - `argus/reporting/cvss.py` must update `CWE_DATABASE` with `CWE-693` (for general security headers / CSP / HSTS / nosniff) and `CWE-1021` (for X-Frame-Options / frame-ancestors / clickjacking).
+   - `_get_preset_vector` must support CORS and Security Header categories across Critical, High, Medium, and Low severity bands.
 
 ---
 
-## 3. Discovered Features & Edge Cases
+## 3. Caveats
 
-### Features Discovered
-
-| # | Category | Feature | Description | Inputs | Outputs | Error Behavior | Discovered Via |
-|---|----------|---------|-------------|--------|---------|----------------|----------------|
-| 1 | Collector | `SSRFCollector` | Defensive validation module to detect SSRF misconfigurations across endpoints | `mission: Mission` | `List[Evidence]` | Handles network errors/timeouts gracefully; logs and skips invalid endpoints | `argus/collectors/command_injection.py`, `sql_injection.py` |
-| 2 | Payloads | `SSRFPayloadGenerator` | Generates cloud metadata, internal service, and loopback probe payloads with bypass mutations | Target URLs, parameter names, bypass schemes | `List[str]`, `List[Tuple[str, str, Dict]]` | Returns default payload list if no custom options provided | `argus/collectors/path_traversal.py`, `xss.py` |
-| 3 | Analyzer | `SSRFAnalyzer` | Analyzes responses for cloud metadata, internal banners, HTML titles, and differential timing | `HttpResponse`, baseline elapsed time, technique config | `Optional[Dict[str, Any]]` analysis result | Returns None if no matching signature or threshold not met | `argus/collectors/command_injection.py` |
-| 4 | Graph Models | `KnowledgeGraph` Node/Edge Creation | Creates `live_host`, `endpoint`, `vulnerability` nodes with `HAS_ENDPOINT` and `HAS_VULNERABILITY` edges | Node IDs, types, metadata | Boolean success (prevents duplicate edges) | Returns False if node missing or edge already exists | `argus/graph/graph.py`, `argus/collectors/sql_injection.py` |
-| 5 | Graph Builder | `AttackSurfaceGraphBuilder` Sec 14 | Ingests `ssrf` evidence from `EvidenceStore` and reconstructs graph topology | `EvidenceStore`, `target` | Populated `KnowledgeGraph` | Tolerates missing metadata or partial URLs | `argus/graph/attack_surface.py:520-577` |
-| 6 | Planning | `TaskGenerator` SSRF Task | Generates `ResearchTask` for SSRF validation dependent on `Discover API Endpoints` | `Mission`, `CoverageGap` | `ResearchTask` | Fallback to default inputs if endpoints empty | `argus/planning/task_generator.py:12-134` |
-| 7 | Runtime | `ToolRegistry` SSRF Registration | Registers `ssrf` tool with capabilities and aliases in global registry | Tool ID, name, capabilities | `Tool` object | Resolves by primary ID, alias, or capability name | `argus/runtime/registry.py:5-50` |
-| 8 | Runtime | `PluginExecutorAdapter` Fallback | Instantiates `SSRFCollector` for internal plugin execution | `plugin_id` | Instantiated `SSRFCollector` | Logs error and returns None if unknown | `argus/runtime/plugins.py:65-110` |
-
-### Edge Cases
-
-| # | Feature | Input | Observed Behavior |
-|---|---------|-------|-------------------|
-| 1 | Differential Timing | Response latency 3.9s (threshold >= 4.0s) | Must NOT trigger timing-based SSRF confirmation; must meet exact `>= 4.0s` differential. |
-| 2 | High Baseline Latency | Server has 5.0s baseline latency, probe takes 5.5s (delta = 0.5s) | Must calculate delta `elapsed - baseline`; delta < 4.0s must NOT flag vulnerability. |
-| 3 | False Positive Metadata | HTML or JSON containing string "aws" or "gcp" without matching IAM/token/project signatures | Analyzer must use strict regex matching for IAM role credentials, GCP instance ID/attributes, Azure VM compute JSON. |
-| 4 | Non-URL Parameters | Parameter named `search` or `q` without URL structure | Collector must test both generic parameters and high-probability URL/webhook/dest/uri parameters. |
-| 5 | Header Injection | `Referer` and `X-Forwarded-For` injection points | Collector must inject into HTTP headers and test server response / out-of-band behavior. |
-| 6 | ControlledMission Wrapper | `ControlledMission(mission)` wrapper during plugin execution | Collector must unwrap `_mission = getattr(mission, "_mission", mission)` and call `mission.publish_finding(ev.id, ev)`. |
+- **No Caveats on Architecture**: The architecture across `TaskGenerator`, `ScanDAG`, `ToolRegistry`, `PluginExecutorAdapter`, `AuthenticatedHttpClient`, `AttackSurfaceGraphBuilder`, and `CVSSCalculator` is uniform and consistent across all 20+ existing collectors in the repository.
+- **Benchmark Integrity Mode**: Implementation must avoid introducing any external third-party scanning libraries (must use standard Python library + existing project modules like `httpx`, `urllib.parse`, `json`, `uuid`, etc.).
+- **Read-Only Scope**: This report is purely an exploratory investigation and makes 0 modifications to production files.
 
 ---
 
-## 4. Caveats
+## 4. Conclusion & Recommended Implementation Plan
 
-1. **Read-Only Scope**: This investigation did not modify any source code or test files in the project.
-2. **Deprecation Warnings**: Running pytest outputs deprecation warnings regarding `datetime.utcnow()`. These are legacy warnings across older modules and do not impact test suite execution or pass rates.
-3. **Workspace Directory**: The directory `tests/workspace/` is intentionally excluded from the primary test run via `--ignore=tests/workspace` as designed by the project test runner.
+To build Sprint 25's CORS Misconfiguration & HTTP Security Header Audit Module with full pipeline connectivity, the implementation should touch the following 9 integration points:
 
----
-
-## 5. Conclusion
-
-The ARGUS codebase has a highly consistent, decoupled, and extensible architecture for vulnerability collectors:
-- **Implementation Targets**:
-  - `argus/collectors/ssrf.py` (New): `SSRFCollector`, `SSRFPayloadGenerator`, `SSRFAnalyzer`, `SSRFResult`, `SSRFTechnique`.
-  - `argus/collectors/__init__.py` (Modify): Export SSRF classes and update `__all__`.
-  - `argus/graph/attack_surface.py` (Modify): Add Section 14 for `category in ("ssrf", "server_side_request_forgery")` in `AttackSurfaceGraphBuilder`.
-  - `argus/planning/task_generator.py` (Modify): Add `"ssrf"` to `_RECON_TEMPLATES`, update `_resolve_template_for_gap` and `from_gaps`.
-  - `argus/runtime/registry.py` (Modify): Register `Tool(id="ssrf", ...)` and add aliases in `ToolRegistry.get()`.
-  - `argus/runtime/plugins.py` (Modify): Add `ssrf` handler in `PluginExecutorAdapter._instantiate_specialist_fallback`.
-- **Test Targets**:
-  - `tests/collectors/test_ssrf.py` (New unit tests)
-  - `tests/collectors/test_ssrf_adversarial.py` (New adversarial & boundary tests)
-  - `tests/runtime/test_e2e_ssrf.py` (New E2E mission lifecycle & graph reconstruction tests)
-
-All 1071 current tests are confirmed passing. The implementation of Sprint 12 will seamlessly fit into existing graph, planning, and execution contracts with zero regressions.
+| Integration Point | Target File | Key Additions Required |
+|---|---|---|
+| **1. Collector Module** | `argus/collectors/cors_headers.py` (new) | `CORSSecurityCollector(BaseCollector)`, `CORSProber`, `CORSAnalyzer`, `HeaderAuditor`, `CORSMutationStrategy`, `CORSVulnerabilityType` |
+| **2. Collectors Init** | `argus/collectors/__init__.py` | Import & export `CORSSecurityCollector`, `CORSProber`, `HeaderAuditor`, etc. |
+| **3. Tool Registry** | `argus/runtime/registry.py` | Register `Tool(id="cors_headers", ...)` with full metadata, priority 95, and aliases |
+| **4. Plugin Adapter** | `argus/runtime/plugins.py` | Add `"cors"` / `"security_header"` fallback branch in `_instantiate_specialist_fallback` |
+| **5. Task Generator** | `argus/planning/task_generator.py` | Add `"cors_headers"` to `_RECON_TEMPLATES`, `_resolve_template_for_gap`, and `from_gaps` |
+| **6. Gap Analysis** | `argus/planning/gap_analysis.py` | (Optional/recommended) Add gap detection for CORS and header coverage |
+| **7. Scan Engine** | `argus/scanning/engine.py` | Add `"cors_headers"` and aliases to `collector_class_map` |
+| **8. Graph Builder** | `argus/graph/attack_surface.py` | Ingest evidence categories `"cors"`, `"cors_misconfiguration"`, `"security_headers"`, `"missing_security_headers"` into graph nodes/edges |
+| **9. CVSS & CWE** | `argus/reporting/cvss.py` | Add `CWE-693`, `CWE-1021`, and map severity calibrations in `_get_preset_vector` |
 
 ---
 
-## 6. Verification Method
+## 5. Verification Method
 
-To verify these findings independently:
-1. **Run full pytest suite**:
+To independently verify the architecture and readiness:
+1. **Inspect existing pipeline integration**:
    ```bash
-   python -m pytest tests/ --ignore=tests/workspace -x -q
+   python3 -c "from argus.planning.task_generator import _RECON_TEMPLATES; from argus.scanning.dag import ScanDAG; dag = ScanDAG(); print([t.key for t in dag.get_execution_order()])"
    ```
-   *Expected*: 1071 passed, 0 failures.
-2. **Inspect existing collector graph & DAG integration**:
+2. **Inspect tool registry**:
    ```bash
-   grep -n "HAS_VULNERABILITY" argus/collectors/command_injection.py
-   grep -n "HAS_VULNERABILITY" argus/graph/attack_surface.py
-   grep -n "command_injection" argus/planning/task_generator.py
-   grep -n "command_injection" argus/runtime/registry.py
-   grep -n "command_injection" argus/runtime/plugins.py
+   python3 -c "from argus.runtime.registry import registry; print(len(registry.list()), [t.id for t in registry.list()])"
+   ```
+3. **Verify full test suite baseline**:
+   ```bash
+   python3 -m pytest tests/ --ignore=tests/workspace -x -q
    ```

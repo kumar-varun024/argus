@@ -1,334 +1,402 @@
-# Investigation & Architecture Survey Handoff Report — ARGUS Collector Subsystem & Command Injection Engine
+# Comprehensive Architecture Survey Report: ARGUS Vulnerability Collectors & Pipeline Integration
 
-**Author**: Explorer Subagent (`explorer_survey_collectors`)  
-**Target Repository**: `/home/varun/argus`  
+**Author**: Survey Explorer 1 (Collector Architecture Researcher)  
+**Sprint**: Sprint 17 — GraphQL Security Detection Module  
 **Working Directory**: `/home/varun/argus/.agents/explorer_survey_collectors/`  
-**Milestone**: Sprint 11 Architecture Survey & Technical Specification  
-**Timestamp**: 2026-08-30T11:15:00Z  
+**Target Reference**: `/home/varun/argus/.agents/ORIGINAL_REQUEST.md`
 
 ---
 
-## 1. Observation
+## Executive Summary
 
-A detailed investigation was conducted into the existing ARGUS collector architecture, testing mechanisms, and pipeline wiring across `/home/varun/argus`.
+This survey report provides an exhaustive architectural decomposition of vulnerability collectors in the ARGUS defensive security platform. The investigation audited existing high-maturity collectors (`argus/collectors/deserialization.py`, `xml_parser.py`, `ssrf.py`, `access_control.py`, `oauth.py`), the HTTP execution layer (`argus/http/client.py`), data models (`argus/evidence/model.py`, `argus/models/attack_surface.py`, `test_identity.py`), runtime registration (`argus/runtime/registry.py`, `argus/runtime/plugins.py`), DAG task planning (`argus/planning/task_generator.py`), attack surface graph builder (`argus/graph/attack_surface.py`), and CVSS/CWE heuristics (`argus/reporting/cvss.py`).
 
-### 1.1 Base Collector Interface & Conventions (`argus/collectors/base.py`)
-- **File Path**: `argus/collectors/base.py:1-10`
-- **Class**: `BaseCollector(abc.ABC)`
-- **Interface**:
-  ```python
-  from abc import ABC, abstractmethod
-
-  class BaseCollector(ABC):
-      @abstractmethod
-      def collect(self, mission: Any) -> List[Evidence]:
-          """Collect information and update the mission."""
-          pass
-  ```
-- **Specialist / Plugin Adapter Convention**:
-  All recent collectors (`SQLInjectionCollector`, `XSSCollector`, `AccessControlCollector`) implement:
-  ```python
-  def execute(self, mission: Any) -> List[Evidence]:
-      """Plugin / Specialist adapter interface."""
-      return self.collect(mission)
-  ```
-- **ControlledMission Unpacking**:
-  When invoked via plugin adapters, `mission` is often wrapped in `ControlledMission` (`argus/plugins/interfaces.py`). Collectors must access `raw_mission = getattr(mission, "_mission", mission)` to access and mutate `.endpoints`, `.live_hosts`, `.evidence`, `.vulnerabilities`, and `.attack_surface_graph`.
+The findings establish clear, reusable architectural blueprints for designing and implementing the Sprint 17 **GraphQL Security Collector** (`argus/collectors/graphql.py` / `argus/collectors/graphql_security.py`).
 
 ---
 
-### 1.2 Existing Collector Implementations Surveyed
+## 1. Collector Architecture & The Modular Triad Pattern
 
-#### 1. SQL Injection (`argus/collectors/sql_injection.py`)
-- **Class**: `SQLInjectionCollector(BaseCollector)`
-- **Companion Classes**:
-  - `SQLInjectionPayloadGenerator`: Implements base error, boolean pairs, and time delay templates (`SLEEP({delay})`, `pg_sleep({delay})`, `WAITFOR DELAY '0:0:{delay}'`, `dbms_pipe.receive_message('RDS', {delay})`). Implements 5 distinct WAF bypass mutation strategies:
-    1. Case Alternation (`mutate_case_alternation`: regex-based keyword case toggling)
-    2. Comment Insertion (`mutate_comment_insertion`: inserting `/**/` into keywords)
-    3. URL Percent Encoding (`mutate_url_encoding`: `urllib.parse.quote`)
-    4. Double URL Percent Encoding (`mutate_double_url_encoding`: double quote)
-    5. Whitespace Substitution (`mutate_whitespace_substitution`: replacing `' '` with `%09`, `/**/`, `%0a`, `+`)
-  - `SQLInjectionAnalyzer`:
-    - Multi-DBMS error catalog: `DBMS_ERROR_SIGNATURES` for MySQL, PostgreSQL, MSSQL, Oracle, SQLite.
-    - `analyze_error_based(response, baseline, payload)`: Regex matching with baseline differential check and reflection guard.
-    - `analyze_boolean_blind(true_resp, false_resp, baseline, true_payload, false_payload)`: Checks status code differentials (200 vs 4xx/5xx) and body content length differentials ($\ge 25$ bytes).
-    - `analyze_time_blind(injected_resp, baseline_elapsed, threshold=4.0)`: Checks if injected latency differential $\ge 4.0$s and total elapsed $\ge 4.0$s.
-    - `is_false_positive(response, payload)`: Suppresses generic HTTP error pages and verbatim reflected query strings.
+ARGUS active vulnerability collectors follow a standardized **Three-Tier Modular Architecture**:
 
-#### 2. Path Traversal (`argus/collectors/path_traversal.py`)
-- **Class**: `PathTraversalCollector(BaseCollector)`
-- **Companion Classes**:
-  - `PathTraversalPayloadGenerator`: Dot-dot-slash variations, nested evasion (`....//`), single/double URL encoding, overlong UTF-8, null byte bypasses.
-  - `PathTraversalAnalyzer`: Matches target OS file contents (`/etc/passwd`, `/etc/shadow`, `/proc/self/environ`, `/etc/hosts`, `c:\windows\win.ini`, `c:\boot.ini`) with baseline comparison and reflection guard.
+```
++-------------------------------------------------------------------------+
+|                          <Vulnerability>Collector                       |
+|  - Inherits from BaseCollector (argus/collectors/base.py)               |
+|  - Implements collect(mission) -> List[Evidence] and execute(mission)   |
+|  - Manages target/endpoint extraction & parameter fuzzing loops         |
+|  - Dispatches HTTP requests via polymorphic _execute_request()          |
+|  - Handles mission state updates & KnowledgeGraph attack surface edges  |
++------------------------------------+------------------------------------+
+                                     |
+           +-------------------------+-------------------------+
+           |                                                   |
+           v                                                   v
++-----------------------------------+   +-----------------------------------+
+|     <Vulnerability>PayloadGenerator |   |      <Vulnerability>Analyzer      |
+| - Generates base probes           |   | - Compiles signature regexes      |
+| - Generates mutation strategies   |   | - Executes baseline subtraction   |
+| - Implements encoding/bypasses    |   | - Applies echo guards/reflection  |
+| - Returns structured probe dicts  |   | - Measures differential timing    |
++-----------------------------------+   | - Returns <Vuln>Result / None     |
+                                        +-----------------------------------+
+```
 
-#### 3. Cross-Site Scripting (`argus/collectors/xss.py`)
-- **Class**: `XSSCollector(BaseCollector)`
-- **Companion Classes**:
-  - `XSSContext(Enum)`: 10 syntactic contexts (`HTML_BODY`, `ATTRIBUTE_DOUBLE`, `ATTRIBUTE_SINGLE`, `ATTRIBUTE_UNQUOTED`, `SCRIPT_STRING_DOUBLE`, `SCRIPT_STRING_SINGLE`, `SCRIPT_BLOCK`, `URL_ATTRIBUTE`, `COMMENT`, `UNKNOWN`).
-  - `XSSPayloadGenerator`: Unique UUID-based canary generation (`argusxss...`), context-specific breakout sequences, default test suites, and stored XSS payloads.
-  - `_HTMLContextDetectorParser(HTMLParser)`: State machine for tag/attribute/quote context extraction.
-  - `XSSAnalyzer`: Strict HTML entity-encoding false positive suppression (`&lt;`, `&gt;`, `&quot;`, `&#39;`, `&#x27;`, `&amp;`), context detection, and POST-then-GET stored persistence verification.
-
----
-
-### 1.3 Parameter Injection Points & Dispatch Mechanism
-Existing collectors systematically iterate through four injection vectors:
-
-1. **Vector 1: GET Query Parameters**:
-   - Parse URL with `urllib.parse.urlparse` and query with `urllib.parse.parse_qs(..., keep_blank_values=True)`.
-   - Iterate over each parameter key, mutate parameter value with payload, encode with `urllib.parse.urlencode(..., doseq=True)`, rebuild target URL with `urllib.parse.urlunparse`, and dispatch GET request.
-2. **Vector 2: POST Body (JSON & Form-Urlencoded)**:
-   - Identify body fields from `candidate.get("body")` (dict or JSON string) or `raw_params` when `method == "POST"`.
-   - For JSON bodies: dispatch POST with `json_data=mutated_body`.
-   - For form bodies: dispatch POST with `data=mutated_body`.
-3. **Vector 3: RESTful Path Segments**:
-   - Extract path segments `[s for s in parsed_url.path.strip("/").split("/") if s]`.
-   - Identify candidate resource/numeric segments (`segment.isdigit() or len(segment) > 15`).
-   - Append/replace payload into segment, rebuild path, and dispatch request.
-4. **Vector 4: HTTP Request Headers**:
-   - Target headers: `User-Agent`, `Referer`, `X-Forwarded-For`, `Cookie`, `Client-IP`, `X-Remote-IP`.
-   - Inject payload into header values and dispatch request.
-
----
-
-### 1.4 Evidence, Finding, and Graph Construction Conventions
-
-#### 1. Evidence Model (`argus/evidence/model.py:26-56`)
+### 1.1 Base Collector Contract
+Defined in `argus/collectors/base.py:1-10`:
 ```python
-from argus.evidence.model import Evidence, ProvenanceData
+from abc import ABC, abstractmethod
 
+class BaseCollector(ABC):
+    @abstractmethod
+    def collect(self, mission):
+        """Collect information and update the mission."""
+        pass
+```
+
+### 1.2 Plugin & Specialist Interface Compatibility
+Every collector also implements an `execute(mission)` adapter method for compatibility with `PluginExecutorAdapter` (`argus/runtime/plugins.py:49-50`):
+```python
+def execute(self, mission: Any) -> List[Evidence]:
+    """Plugin / Specialist adapter interface."""
+    return self.collect(mission)
+```
+
+---
+
+## 2. Target & Mission Asset Extraction Patterns
+
+Collectors must robustly handle heterogeneous mission representations, including raw `Mission` objects and `ControlledMission` wrappers.
+
+### 2.1 Extraction and Fallback Synthesis
+Examined in `argus/collectors/deserialization.py:1007-1024`:
+```python
+raw_mission = getattr(mission, "_mission", mission)
+endpoints = list(getattr(raw_mission, "endpoints", []) or [])
+live_hosts = list(getattr(raw_mission, "live_hosts", []) or [])
+target = str(getattr(raw_mission, "target", "") or "")
+
+# Fallback target synthesis if endpoints is empty
+if not endpoints:
+    if live_hosts:
+        for lh in live_hosts:
+            url = lh.get("url", lh) if isinstance(lh, dict) else str(lh)
+            if url:
+                endpoints.append({"url": url, "method": "GET"})
+    elif target:
+        endpoints.append({"url": target if target.startswith("http") else f"http://{target}", "method": "GET"})
+```
+
+### 2.2 Endpoint Dictionary vs String Normalization
+Endpoints in ARGUS may be strings or structured dictionaries (`argus/collectors/deserialization.py:1032-1046`):
+```python
+if isinstance(ep, dict):
+    target_url = ep.get("url") or ""
+    ep_method = (ep.get("method") or "GET").upper()
+    body = ep.get("body")
+    headers = ep.get("headers") or {}
+    cookies = ep.get("cookies") or {}
+    query_params = ep.get("params") or {}
+else:
+    target_url = str(ep)
+    ep_method = "GET"
+    body = None
+    headers = {}
+    cookies = {}
+    query_params = {}
+```
+
+### 2.3 GraphQL Discovery Integration
+In addition to general endpoints, `AttackSurface` (`argus/models/attack_surface.py:19`) defines `graphql: list[dict] = field(default_factory=list)`, and `GraphQLDiscovery` (`argus/plugins/graphql/discovery.py:14-17`) enumerates candidate paths:
+- `/graphql`, `/api/graphql`, `/v1/graphql`, `/v2/graphql`, `/query`, `/gql`, `/graphql/`
+
+The GraphQL collector should probe discovered `graphql` endpoints, general `endpoints` matching GraphQL paths, and probe standard default GraphQL paths against `live_hosts`.
+
+---
+
+## 3. HTTP Client Layer & Request Dispatching
+
+### 3.1 `AuthenticatedHttpClient` Capabilities (`argus/http/client.py`)
+- Inherits from `AuthorizedHttpClient` and uses `httpx.Client`.
+- Enforces strict **Scope Checks** (`ScopeResolver.check_scope()`) before transmitting credentials (`argus/http/client.py:377-389`).
+- Enforces **Authorization Gate** checks (`authorization_gate.can_execute_action()`) (`argus/http/client.py:392-406`).
+- Injects identity headers and cookies from `TestIdentity` (`argus/http/client.py:408-421`).
+- Provides exponential backoff retries on `httpx.TimeoutException` and `httpx.RequestError` (`argus/http/client.py:433-497`).
+- Redacts sensitive parameters and headers (`Authorization`, `Cookie`, `X-API-Key`, `token`) in logs via `sanitize_headers()` and `sanitize_url()`.
+- Automatically captures and syncs session cookies into `active_identity.update_session()` (`argus/http/client.py:450`).
+- Returns structured `HttpResponse` containing `success`, `status_code`, `headers`, `request_headers`, `body`, `raw_body`, `url`, `method`, `elapsed`, and `error`.
+
+### 3.2 Polymorphic Request Dispatcher Pattern
+To support both production execution with `AuthenticatedHttpClient` and fast unit testing with mock clients, all modern ARGUS collectors implement a polymorphic execution helper (`argus/collectors/deserialization.py:907-1001`):
+```python
+def _execute_request(
+    self,
+    mission: Any,
+    method: str,
+    url: str,
+    params: Optional[Dict[str, Any]] = None,
+    data: Optional[Union[str, bytes, Dict[str, Any]]] = None,
+    json_data: Optional[Dict[str, Any]] = None,
+    headers: Optional[Dict[str, str]] = None,
+    cookies: Optional[Dict[str, str]] = None,
+) -> Optional[HttpResponse]:
+    method = method.upper()
+    req_headers = dict(headers or {})
+    req_cookies = dict(cookies or {})
+
+    try:
+        if self.http_client is not None:
+            client = self.http_client
+            # 1. client.get(...) / client.post(...)
+            if method == "GET" and hasattr(client, "get"):
+                try:
+                    return client.get(mission, url, params=params, headers=req_headers, cookies=req_cookies, timeout=self.timeout)
+                except TypeError:
+                    return client.get(url, params=params, headers=req_headers, cookies=req_cookies)
+            if method == "POST" and hasattr(client, "post"):
+                kwargs = {"headers": req_headers, "cookies": req_cookies}
+                if params: kwargs["params"] = params
+                if json_data is not None: kwargs["json"] = json_data
+                if data is not None: kwargs["data"] = data
+                try:
+                    return client.post(mission, url, timeout=self.timeout, **kwargs)
+                except TypeError:
+                    return client.post(url, **kwargs)
+            if hasattr(client, "request"):
+                try:
+                    return client.request(mission, method=method, url=url, params=params, data=data, json=json_data, headers=req_headers, cookies=req_cookies, timeout=self.timeout)
+                except TypeError:
+                    return client.request(method=method, url=url, params=params, data=data, json=json_data, headers=req_headers, cookies=req_cookies)
+            if callable(client):
+                return client(method=method, url=url, params=params, data=data, json=json_data, headers=req_headers, cookies=req_cookies)
+
+        # Fallback to AuthenticatedHttpClient context manager
+        with AuthenticatedHttpClient(timeout=self.timeout, max_retries=1) as client:
+            if method == "GET":
+                return client.get(mission, url, params=params, headers=req_headers, cookies=req_cookies, timeout=self.timeout)
+            elif method == "POST":
+                return client.post(mission, url, data=data, json=json_data, headers=req_headers, cookies=req_cookies, timeout=self.timeout)
+            else:
+                return client.request(mission, method, url, params=params, data=data, json=json_data, headers=req_headers, cookies=req_cookies, timeout=self.timeout)
+    except Exception as e:
+        logger.debug(f"HTTP request to {url} failed: {e}")
+    return None
+```
+
+---
+
+## 4. Detection Routines, Mutation Engines & Vulnerability Categories
+
+### 4.1 Mutation / Bypass Strategies
+Sprint 17 Requirement R3 requires at least 5 distinct GraphQL bypass/mutation strategies. Looking at how `deserialization.py` (6 strategies) and `xml_parser.py` (6 strategies) organize them:
+
+| Strategy Enum | Description in GraphQL Context |
+|---|---|
+| `METHOD_SWAPPING` | Swapping `POST` to `GET` (query string parameters `?query=...`) or `PUT` |
+| `CONTENT_TYPE_MANIPULATION` | Switching between `application/json`, `application/graphql`, `application/x-www-form-urlencoded`, `multipart/form-data` |
+| `QUERY_OBFUSCATION` | Whitespace randomization, comment injection (`# comment\n`), tab/newline manipulation, unicode escapes |
+| `ALIAS_MULTIPLEXING` | Alias pollution (`q1: field, q2: field`) to bypass query batch limits or rate limiting |
+| `OPERATION_NAME_TAMPERING` | Multi-operation payloads with custom or omitted `operationName` |
+| `FRAGMENT_CYCLE_MUTATION` | Recursive fragment spread definitions (`fragment F on User { ...F }`) |
+
+### 4.2 Detection Result Dataclass Pattern
+Every collector defines a specific `<Vuln>Result` dataclass to encapsulate probe outcomes:
+```python
+@dataclass
+class GraphQLSecurityResult:
+    vulnerability_type: str  # introspection, suggestion_leak, depth_dos, batching_abuse, field_auth_bypass
+    mutation_strategy: str
+    severity: str
+    confidence: float
+    payload: str
+    matched_signature: str
+    evidence_snippet: str
+    endpoint_url: str
+    status_code: int = 200
+    delay_delta: float = 0.0
+    baseline_elapsed: float = 0.0
+    injected_elapsed: float = 0.0
+    is_valid_finding: bool = True
+    template_id: str = "graphql-security"
+```
+
+---
+
+## 5. False Positive Suppression & Baseline Subtraction
+
+ARGUS mandates zero tolerance for false positives. Collectors use three primary suppression layers:
+
+### 5.1 Baseline Subtraction
+1. Send a clean baseline probe before testing injections (e.g. `{ __typename }` or benign query).
+2. Record baseline status code, response body, and elapsed duration (`baseline_elapsed`).
+3. If an injected probe response is identical to baseline, discard.
+4. If an error signature was already present in the baseline response body, discard.
+
+### 5.2 Echo Guard / Verbatim Reflection Check
+If the server merely echoes the request payload verbatim in an error page or search result without executing GraphQL:
+```python
+if payload_str and payload_str in body:
+    cleaned_body = body.replace(payload_str, "")
+    is_real_error = any(pattern.search(cleaned_body) for pattern in signatures.values())
+    if not is_real_error:
+        return None  # Suppress reflection
+```
+
+### 5.3 Hardened Endpoint Rejection
+When an endpoint responds with:
+- Introspection disabled: `{"errors":[{"message":"GraphQL introspection is not allowed"}]}` or `{"errors":[{"message":"Cannot query field '__schema' on type 'Query'."}]}`
+- Query depth limit enforced: `{"errors":[{"message":"Query depth exceeded maximum allowed depth"}]}`
+- Complexity limits enforced: `{"errors":[{"message":"Query complexity limit exceeded"}]}`
+
+These responses indicate **proper defense-in-depth security** and must NOT produce confirmed vulnerability findings.
+
+---
+
+## 6. Evidence Creation & Attack Surface Graph Wiring
+
+### 6.1 `Evidence` Object Creation Contract (`argus/evidence/model.py`)
+```python
 ev = Evidence(
     mission_id=getattr(raw_mission, "id", ""),
     source_type="LOG",
     created_by="SYSTEM_GENERATED",
-    title=f"Command Injection: {param} on {target_url}",
-    description=f"OS Command Injection ({tech_label}) confirmed on endpoint {target_url} via {param_type} parameter '{param}' using payload '{payload}'. Evidence: {snippet[:200]}",
-    category="command_injection",  # Category identifier
+    title=title,
+    description=description,
+    category="graphql_security",  # or "graphql"
     value=target_url,
     source=target_url,
     status="CONFIRMED",
-    confidence=0.95,
-    severity="critical",  # CRITICAL for RCE / Command Injection
-    provenance=ProvenanceData(step_id="command_injection_collector"),
-    tags=["command_injection", "cmdi", "rce", technique, template_id],
+    confidence=confidence,
+    severity=severity,
+    provenance=ProvenanceData(step_id="graphql_security_collector"),
+    tags=["graphql", "graphql_security", vuln_type, mutation_strategy, template_id],
     metadata={
         "url": target_url,
         "host": base_url,
-        "path": url_path,
-        "parameter": param,
-        "parameter_type": param_type,
-        "payload": payload,
-        "category": "command_injection",
-        "severity": "critical",
-        "technique": technique,
+        "category": "graphql_security",
+        "severity": severity,
+        "confidence": confidence,
+        "vulnerability_type": vuln_type,
+        "mutation_strategy": mutation_strategy,
+        "matched_signature": result.matched_signature,
         "template_id": template_id,
         "status_code": status_code,
         "evidence_snippet": snippet[:250],
+        "cwe_id": cwe_id,
+        "cvss_score": cvss_score,
     },
 )
 ```
 
-#### 2. Mission State Updates
+### 6.2 Quadruple State Update
+When a finding is confirmed, the collector updates 4 state targets:
+1. **`raw_mission.evidence`**: Appends `ev` via `.add(ev)` or `.append(ev)`.
+2. **`raw_mission.vulnerabilities`**: Appends finding dict to list.
+3. **`raw_mission.attack_surface_graph` / `raw_mission.graph`**:
+   - Adds `Node(id="live_host:<host>", type="live_host", ...)`
+   - Adds `Node(id="endpoint:<url>", type="endpoint", ...)`
+   - Adds `Node(id="vulnerability:<template_id>:<url>", type="vulnerability", ...)`
+   - Connects `lh -> ep` with `HAS_ENDPOINT`
+   - Connects `lh -> vuln` with `HAS_VULNERABILITY`
+   - Connects `ep -> vuln` with `HAS_VULNERABILITY`
+4. **`ControlledMission.publish_finding()`**: Safely calls wrapper method if available.
+
+### 6.3 Attack Surface Graph Builder Support (`argus/graph/attack_surface.py`)
+The `AttackSurfaceGraphBuilder.build_from_evidence()` method must have a designated section processing category `"graphql_security"` / `"graphql"` to parse evidence items and construct the corresponding nodes and `HAS_VULNERABILITY` edges.
+
+---
+
+## 7. Pipeline Wiring, Registry & DAG Integration
+
+### 7.1 Tool Registry (`argus/runtime/registry.py`)
+Collectors must be registered in `ToolRegistry` with:
+- `id="graphql_security"` (with aliases like `"graphql_collector"`, `"graphql_scanner"`, `"graphql_vulnerability"`)
+- `supported_tasks=["GraphQL Security Validation", "GraphQL Analysis", "Vulnerability Scanning", "Evidence Correlation", "API Discovery"]`
+- `required_inputs=["endpoints"]`
+- `produced_outputs=["vulnerabilities", "observations", "evidence"]`
+- `capabilities=["graphql_security_validator", "graphql_security_collector"]`
+- `priority=95`
+
+### 7.2 Task Generator DAG (`argus/planning/task_generator.py`)
+In `_RECON_TEMPLATES`:
 ```python
-# 1. Evidence store / list
-if hasattr(raw_mission, "evidence") and raw_mission.evidence is not None:
-    if hasattr(raw_mission.evidence, "add"):
-        raw_mission.evidence.add(ev)
-    elif isinstance(raw_mission.evidence, list):
-        raw_mission.evidence.append(ev)
-
-# 2. Vulnerability dict list
-if hasattr(raw_mission, "vulnerabilities") and isinstance(raw_mission.vulnerabilities, list):
-    raw_mission.vulnerabilities.append({
-        "name": f"Command Injection ({tech_label})",
-        "template_id": template_id,
-        "severity": severity,
-        "host": base_url,
-        "url": target_url,
-        "description": description,
-        "parameter": param,
-        "parameter_type": param_type,
-        "payload": payload,
-        "technique": technique,
-    })
-```
-
-#### 3. Attack Surface Graph Node & Edge Expansion
-```python
-graph = getattr(raw_mission, "attack_surface_graph", None) or getattr(raw_mission, "graph", None)
-if graph is not None and hasattr(graph, "add") and hasattr(graph, "connect"):
-    lh_id = f"live_host:{base_url}"
-    ep_id = f"endpoint:{target_url}"
-    vuln_id = f"vulnerability:{template_id}:{target_url}:{param}"
-
-    graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url}))
-    graph.add(Node(id=ep_id, type="endpoint", value=target_url, metadata={"url": target_url, "status_code": status_code}))
-    graph.add(Node(id=vuln_id, type="vulnerability", value=f"Command Injection ({tech_label})", metadata=ev.metadata))
-
-    graph.connect(lh_id, ep_id, edge_type="HAS_ENDPOINT")
-    graph.connect(lh_id, vuln_id, edge_type="HAS_VULNERABILITY")
-    graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
-```
-
----
-
-### 1.5 Pipeline Integration Architecture
-
-1. **`argus/collectors/__init__.py`**:
-   - Exposes `CommandInjectionCollector`, `CommandInjectionAnalyzer`, `CommandInjectionPayloadGenerator`.
-2. **`argus/planning/task_generator.py`**:
-   - `_RECON_TEMPLATES["command_injection"]`:
-     ```python
-     "command_injection": {
-         "title": "Fuzz Command Injection (RCE)",
-         "goal": "Actively fuzz discovered endpoint parameters and headers for result-based, time-based blind, and error-based OS command injection using AuthenticatedHttpClient.",
-         "category": TaskCategory.EVIDENCE_CORRELATION,
-         "required_inputs": ["endpoints"],
-         "expected_outputs": ["vulnerabilities", "observations", "evidence"],
-         "dependencies": ["Discover API Endpoints"],
-         "required_specialists": [],
-         "metadata": {"tool_id": "command_injection"},
-         "estimated_duration_minutes": 10,
-         "priority": 0.81,
-     }
-     ```
-   - Gap resolution mapping in `_resolve_template_for_gap`: maps `"command injection"`, `"cmdi"`, `"rce"`, `"remote code execution"`, `"os command injection"` to `_RECON_TEMPLATES["command_injection"]`.
-3. **`argus/runtime/registry.py`**:
-   - Registers `Tool(id="command_injection", name="Command Injection Collector", capability="command_injection_detector", capabilities=["command_injection_detector", "command_injection_collector"], priority=95, supported_tasks=["Command Injection Detection", "OS Command Injection", "Remote Code Execution", "Vulnerability Scanning", "Evidence Correlation", "API Discovery"])`.
-   - Adds aliases in `ToolRegistry.get()`: `"cmdi": "command_injection"`, `"rce": "command_injection"`, `"os_command_injection": "command_injection"`.
-4. **`argus/runtime/plugins.py`**:
-   - In `PluginExecutorAdapter._instantiate_specialist_fallback`:
-     ```python
-     elif "command_injection" in plugin_id or "cmdi" in plugin_id or "rce" in plugin_id:
-         from argus.collectors.command_injection import CommandInjectionCollector
-         return CommandInjectionCollector()
-     ```
-5. **`argus/graph/attack_surface.py`**:
-   - In `AttackSurfaceGraphBuilder.build_from_evidence()`: handle `category in ("command_injection", "cmdi", "rce")` to generate `endpoint`, `vulnerability`, `HAS_ENDPOINT`, and `HAS_VULNERABILITY` edges.
-
----
-
-## 2. Logic Chain
-
-1. **Sprint 11 Requirements Alignment (ORIGINAL_REQUEST.md ## 2026-08-30T11:08:07Z)**:
-   - **R1 (Command Injection Collector)**: Requires testing query parameters, POST body fields (form and JSON), path segments, and HTTP headers using `AuthenticatedHttpClient`.
-   - **R2 (Multi-Technique Detection)**:
-     - *Result-Based*: Injects commands yielding identifiable output (e.g. `id`, `whoami`, `cat /etc/passwd`, `ipconfig`, math evaluation).
-     - *Time-Based Blind*: Injects delay commands (`sleep 5`, `ping -c 5 127.0.0.1`, `timeout 5`). Measures latency differential against baseline ($\Delta T \ge 4.0$s).
-     - *Error-Based*: Injects malformed commands/syntax triggering shell error messages (`syntax error near unexpected token`, `command not found`, `not recognized as an internal or external command`).
-   - **R3 (Separator & Bypass Mutations)**:
-     - Minimum 5 distinct strategies: (1) Semicolons `;`, (2) Pipes `|` and `||`, (3) Ampersands `&` and `&&`, (4) Command substitution `` `cmd` `` and `$(cmd)`, (5) Newlines `%0a` and whitespace substitution (`${IFS}`, `$IFS$9`, `<`). Also URL and double-URL encoded variants.
-   - **R4 (Pipeline Connectivity)**: Wire into TaskGenerator DAG, ToolRegistry, PluginExecutorAdapter, and AttackSurfaceGraphBuilder.
-   - **R5 (Zero Regression & E2E Validation)**: Ensure all 996 current passing tests pass without regression, plus add at least 20 new tests.
-
-2. **Design Blueprint for `CommandInjectionCollector`**:
-   - Replicating the robust, field-tested architecture of `SQLInjectionCollector` (`argus/collectors/sql_injection.py`) and `XSSCollector` (`argus/collectors/xss.py`):
-     - Separate concerns into three clean classes:
-       1. `CommandInjectionPayloadGenerator`: Encapsulates base command templates and 5+ mutation strategies.
-       2. `CommandInjectionAnalyzer`: Encapsulates detection logic (Result-based regex, Time-based latency threshold, Error-based shell signatures, and False Positive / Reflection suppression).
-       3. `CommandInjectionCollector(BaseCollector)`: Orchestrates endpoint discovery, baseline measurement, multi-vector parameter injection, evidence creation, mission state updates, and graph expansion.
-
-3. **False Positive & Reflection Suppression Logic**:
-   - Essential to satisfy Acceptance Criteria: "Normal application responses that coincidentally contain common words do NOT generate false positive evidence."
-   - Verification steps in `CommandInjectionAnalyzer`:
-     - If output matches only the verbatim injected payload (reflection), discard as false positive unless genuine command execution output (e.g. `uid=...` or arithmetic evaluation result) is present outside the reflection span.
-     - Baseline differential check: If the baseline response already contains the shell error or text pattern, discard to avoid flagging pre-existing server errors.
-
----
-
-## 3. Caveats
-
-- **No Caveats**: All collector patterns, data models, graph builders, and test structures across the codebase have been thoroughly inspected and verified against the live test suite (996 passing tests).
-
----
-
-## 4. Conclusion & Technical Recommendations
-
-### 4.1 Recommended File Structure for Sprint 11
-
-```
-argus/
-├── collectors/
-│   ├── command_injection.py   # CommandInjectionCollector, CommandInjectionPayloadGenerator, CommandInjectionAnalyzer
-│   └── __init__.py            # Export new collector and generator/analyzer
-├── planning/
-│   └── task_generator.py      # _RECON_TEMPLATES["command_injection"] & gap analysis mapping
-├── runtime/
-│   ├── registry.py            # Tool registration & alias mapping
-│   └── plugins.py             # PluginExecutorAdapter fallback instantiation
-└── graph/
-    └── attack_surface.py      # AttackSurfaceGraphBuilder category handling for command_injection
-
-tests/
-├── collectors/
-│   ├── test_command_injection.py             # Unit tests for generator, analyzer, collector across vectors
-│   └── test_command_injection_adversarial.py # Edge cases, WAF mutations, false positive suppression, timeouts
-└── runtime/
-    └── test_e2e_command_injection.py         # End-to-end mission loop, DAG scheduling, graph verification
-```
-
-### 4.2 Detailed Specifications for `argus/collectors/command_injection.py`
-
-#### 1. OS Output & Error Signatures
-```python
-# Result-based execution signatures
-OS_RESULT_SIGNATURES: List[Tuple[str, re.Pattern, str]] = [
-    # (sig_name, pattern, os_family)
-    ("unix_id_root", re.compile(r"uid=0\(root\)\s+gid=0\(root\)", re.IGNORECASE), "unix"),
-    ("unix_id_generic", re.compile(r"uid=\d+\([a-zA-Z0-9_\-]+\)\s+gid=\d+\([a-zA-Z0-9_\-]+\)", re.IGNORECASE), "unix"),
-    ("unix_passwd_root", re.compile(r"root:[x*]:0:0:.*?:(?:/root|/bin/(?:bash|sh|zsh|dash|nologin))", re.MULTILINE), "unix"),
-    ("unix_uname", re.compile(r"Linux\s+[a-zA-Z0-9_\-\.]+\s+\d+\.\d+", re.IGNORECASE), "unix"),
-    ("unix_whoami_root", re.compile(r"^(?:root|daemon|bin|nobody|www-data|nginx|apache)$", re.MULTILINE), "unix"),
-    ("windows_ipconfig", re.compile(r"Windows IP Configuration", re.IGNORECASE), "windows"),
-    ("windows_dir", re.compile(r"Volume in drive [A-Z] is|Directory of [A-Z]:\\", re.IGNORECASE), "windows"),
-    ("windows_whoami", re.compile(r"nt authority\\system|[a-zA-Z0-9_\-]+\\administrator", re.IGNORECASE), "windows"),
-    ("windows_ver", re.compile(r"Microsoft Windows \[Version \d+\.\d+", re.IGNORECASE), "windows"),
-]
-
-# Error-based shell signatures
-SHELL_ERROR_SIGNATURES: Dict[str, List[Tuple[str, re.Pattern]]] = {
-    "unix": [
-        ("sh_not_found", re.compile(r"(?:/bin/(?:bash|sh|zsh|dash):|sh:)\s*(?:line \d+:)?\s*.*?: (?:command not found|not found)", re.IGNORECASE)),
-        ("sh_syntax_error", re.compile(r"syntax error near unexpected token", re.IGNORECASE)),
-        ("sh_no_such_file", re.compile(r"(?:/bin/(?:bash|sh|zsh|dash):|sh:)\s*.*?: No such file or directory", re.IGNORECASE)),
-        ("sh_cannot_execute", re.compile(r"cannot execute binary file", re.IGNORECASE)),
-        ("sh_permission_denied", re.compile(r"(?:/bin/(?:bash|sh|zsh|dash):|sh:)\s*.*?: Permission denied", re.IGNORECASE)),
-    ],
-    "windows": [
-        ("cmd_not_recognized", re.compile(r"'(?:[a-zA-Z0-9_\-\.\s]+)' is not recognized as an internal or external command", re.IGNORECASE)),
-        ("cmd_syntax_error", re.compile(r"The syntax of the command is incorrect\.", re.IGNORECASE)),
-        ("cmd_path_not_found", re.compile(r"The system cannot find the (?:path|file) specified\.", re.IGNORECASE)),
-        ("cmd_access_denied", re.compile(r"Access is denied\.", re.IGNORECASE)),
-    ],
+"graphql_security": {
+    "title": "Validate GraphQL Security",
+    "goal": "Actively test discovered GraphQL endpoints for introspection leakage, query depth DoS, batching multiplexing, and authorization bypasses using AuthenticatedHttpClient.",
+    "category": TaskCategory.EVIDENCE_CORRELATION, # or GRAPHQL_ANALYSIS
+    "required_inputs": ["endpoints"],
+    "expected_outputs": ["vulnerabilities", "observations", "evidence"],
+    "dependencies": ["Discover API Endpoints"],
+    "required_specialists": [],
+    "metadata": {"tool_id": "graphql_security"},
+    "estimated_duration_minutes": 10,
+    "priority": 0.81,
 }
 ```
 
-#### 2. Base Command Templates & Mutation Strategies
-- **Base Payloads**:
-  - Result-based: `id`, `whoami`, `cat /etc/passwd`, `uname -a`, `dir`, `ipconfig`, `ver`
-  - Math canary execution: `expr 48192 + 13829` (evaluates to `62021`), `echo $((48192+13829))`
-  - Time-based: `sleep {delay}`, `ping -c {delay} 127.0.0.1`, `timeout {delay}`, `ping -n {delay} 127.0.0.1`
-  - Error-based: `; invalid_argus_cmd_xyz_123;`, `| invalid_argus_cmd_xyz_123`, `\x00`
-- **5 Mutation Strategies**:
-  1. **Semicolon Separator**: `; {cmd}`, `1; {cmd};`, `test; {cmd}`
-  2. **Pipe Separator**: `| {cmd}`, `|| {cmd}`, `1 | {cmd}`
-  3. **Ampersand Separator**: `& {cmd}`, `&& {cmd}`, `1 & {cmd}`
-  4. **Command Substitution**: `` `{cmd}` ``, `$({cmd})`, `" $({cmd}) "`
-  5. **Newline / Whitespace & Redirection**: `%0a{cmd}%0a`, `\n{cmd}\n`, `${IFS}`, `$IFS$9`, `<` (e.g. `cat</etc/passwd`)
-  6. **URL & Double URL Encoding**: `%3B{cmd}`, `%7C{cmd}`, `%26{cmd}`, `%253B{cmd}`, `%257C{cmd}`, `%2526{cmd}`
+### 7.3 Plugin Executor Adapter (`argus/runtime/plugins.py`)
+In `_instantiate_specialist_fallback()`:
+```python
+elif "graphql_security" in plugin_id or "graphql_collector" in plugin_id:
+    from argus.collectors.graphql import GraphQLSecurityCollector
+    return GraphQLSecurityCollector()
+```
+
+### 7.4 CVSS & CWE Mapping (`argus/reporting/cvss.py`)
+- `graphql_introspection` -> `CWE-200` (CVSS 5.3 / 7.5 depending on severity)
+- `graphql_depth_dos` -> `CWE-799` / `CWE-400` (CVSS 7.5)
+- `graphql_batching_bypass` -> `CWE-799` / `CWE-287` (CVSS 7.5 / 8.2)
+- `graphql_access_control` -> `CWE-284` / `CWE-285` (CVSS 8.1 / 9.8)
 
 ---
 
-## 5. Verification Method
+## 8. Test Harness & Mocking Conventions
 
-To verify the collector survey findings and test baseline independently:
+From analyzing `tests/collectors/test_deserialization.py` (649 lines) and `test_xml_parser.py`:
+A standard collector test file contains 8 dedicated test suites:
+1. **Enums and Data Models Tests**: Test all enum strings, default dataclass fields.
+2. **Signature Catalog Verification**: Test compiled regexes against positive and negative sample text.
+3. **Payload Generator Tests**: Verify base payloads and all >= 5 mutation strategies.
+4. **Collector Detection Tests across Channels**:
+   - Introspection detection test
+   - Field suggestion leakage test
+   - Query depth recursion limit DoS test
+   - Batch query / alias multiplexing test
+   - Field-level access control discrepancy test
+5. **False Positive Suppression & Baseline Subtraction Tests**:
+   - Verbatim query reflection rejection test
+   - Baseline error noise subtraction test
+   - Hardened GraphQL response rejection test (properly disabled introspection returns no evidence)
+6. **Mission & ControlledMission Compatibility Tests**: Test with empty mission, raw `Mission`, and `ControlledMission`.
+7. **DAG, Registry & PluginExecutor Integration Tests**: Verify registry lookup, aliases, DAG task generation from coverage gaps, and plugin adapter instantiation.
+8. **AttackSurfaceGraphBuilder & CVSS Verification**: Verify `HAS_VULNERABILITY` graph edges, CVSS score calculation, and CWE ID resolution.
 
-```bash
-# 1. Run full test baseline across the repository (996 passing tests):
-python3 -m pytest tests/ --ignore=tests/workspace -x -q
+---
 
-# 2. Inspect reference collectors:
-# argus/collectors/sql_injection.py
-# argus/collectors/path_traversal.py
-# argus/collectors/xss.py
-```
+## 9. 5-Component Handoff Protocol
+
+### 1. Observation
+- **Existing Collectors**: `argus/collectors/deserialization.py` (1,401 lines), `argus/collectors/xml_parser.py` (1,378 lines), `argus/collectors/ssrf.py` (1,665 lines), `argus/collectors/access_control.py` (397 lines), `argus/collectors/oauth.py` (1,472 lines).
+- **HTTP Client**: `argus/http/client.py` lines 300–587 define `AuthenticatedHttpClient` with `login()`, `request()`, scope verification via `ScopeResolver`, and credential sanitization.
+- **Evidence Model**: `argus/evidence/model.py` lines 25–57 define `Evidence` with slots, UUID generation, `ProvenanceData`, and metadata dictionaries.
+- **Existing GraphQL Plugin**: `argus/plugins/graphql/` currently implements static discovery and schema inference, but lacks active vulnerability fuzzing, multi-vulnerability detection (introspection, depth DoS, batching, field access control), mutation strategies, and attack surface vulnerability edge generation.
+- **Test Suite Baseline**: Verified passing `1352 passed, 27008 warnings in 53.01s` via `pytest tests/ --ignore=tests/workspace -q`.
+
+### 2. Logic Chain
+- ARGUS vulnerability collectors follow a well-established tripartite pattern: Payload Generator + Analyzer + Collector.
+- The Sprint 17 GraphQL Security Collector must be created under `argus/collectors/graphql.py` (or `graphql_security.py`) and exported in `argus/collectors/__init__.py`.
+- To satisfy R1, R2, and R3, the collector must test all 4 core risk categories (Introspection/Suggestions, Query Depth DoS, Batching/Multiplexing, Field-Level Access Control) across at least 5 mutation strategies.
+- To satisfy R4, the collector must be registered in `argus/runtime/registry.py`, wired into `_RECON_TEMPLATES` in `argus/planning/task_generator.py`, wired into `argus/runtime/plugins.py`, and have graph edge creation in `argus/graph/attack_surface.py`.
+- To satisfy R5, at least 20 new tests must be written adhering to the established test patterns, ensuring 0 regressions across the 1,352 baseline tests.
+
+### 3. Caveats
+- No caveats. The collector interfaces, HTTP execution patterns, graph node models, registry structures, and DAG configurations are completely explicit, consistent across all existing modules, and thoroughly verified.
+
+### 4. Conclusion
+The architecture survey is 100% complete. The implementation plan for Sprint 17 can proceed with clear specifications for `GraphQLSecurityCollector`, `GraphQLPayloadGenerator`, `GraphQLSecurityAnalyzer`, `GraphQLSecurityResult`, graph edge construction, DAG task generator templates, tool registry aliases, and test coverage.
+
+### 5. Verification Method
+1. Inspect the handoff file: `view_file /home/varun/argus/.agents/explorer_survey_collectors/handoff.md`
+2. Run baseline tests: `python -m pytest tests/ --ignore=tests/workspace -q` (1,352 passing)
+3. Invalidation condition: Any architectural divergence between the proposed collector structure and `argus/collectors/deserialization.py` or `argus/collectors/xml_parser.py`.
+

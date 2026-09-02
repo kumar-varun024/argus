@@ -37,12 +37,24 @@ class MissionLifecycle:
         mission.updated_at = datetime.utcnow().isoformat()
 
     @staticmethod
-    def complete(mission: Mission):
+    def complete(mission: Mission, output_dir: str | None = None):
         if mission.status != MissionState.RUNNING:
             raise ValueError(f"Cannot complete mission from state {mission.status}")
         mission.status = MissionState.COMPLETED
         mission.phase = "finished"
         mission.updated_at = datetime.utcnow().isoformat()
+
+        # Trigger report generation upon completion
+        try:
+            from argus.reporting.generator import ReportGenerator
+            generator = ReportGenerator(output_dir=output_dir)
+            report_paths = generator.generate_and_save(mission, output_dir=output_dir)
+            for path in report_paths:
+                if path not in mission.reports:
+                    mission.reports.append(path)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Report generation failed during mission completion: {e}")
 
 class TaskLifecycle:
     """Manages strict state machine transitions for a ScheduledTask."""

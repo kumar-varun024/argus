@@ -14,6 +14,7 @@ class KnowledgeGraph:
         """
         self.nodes: dict[str, Node] = {}
         self.edges: list[Edge] = []
+        self._edge_keys: set[tuple[str, str, str]] = set()
 
     def add(self, node: Node) -> bool:
         """
@@ -58,10 +59,11 @@ class KnowledgeGraph:
         if source not in self.nodes or target not in self.nodes:
             return False
 
-        for edge in self.edges:
-            if edge.source == source and edge.target == target and edge.type == edge_type:
-                return False
+        key = (source, target, edge_type)
+        if key in self._edge_keys:
+            return False
 
+        self._edge_keys.add(key)
         new_edge = Edge(source=source, target=target, type=edge_type, metadata=metadata or {})
         self.edges.append(new_edge)
         return True

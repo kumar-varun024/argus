@@ -1,38 +1,40 @@
-# BRIEFING — 2026-08-30T06:41:30Z
+# BRIEFING — 2026-09-02T13:47:30Z
 
 ## Mission
-Investigate test suite infrastructure, mock servers/fixtures, mission loop execution, and draft Sprint 9 Test Plan for ARGUS Database Query Safety Validation Engine.
+Investigate test infrastructure, fixtures, mocking patterns, baseline test suite, and formulate testing requirements & matrix for Sprint 29 (Prototype Pollution & Client-Side Attack Detection Module).
 
 ## 🔒 My Identity
 - Archetype: explorer
-- Roles: Test & Mission Workflow Explorer
-- Working directory: /home/varun/argus/.agents/survey_explorer_3/
-- Original parent: a2f8a122-53cc-45fd-b09d-db82598f4d8b
-- Milestone: Sprint 9 Test & Mission Architecture Survey
+- Roles: Test Infrastructure & Fixture Specialist, Baseline Test Suite Auditor
+- Working directory: /home/varun/argus/.agents/survey_explorer_3
+- Original parent: fb9f4bf5-d477-46cc-92cb-88bfb6bf8997
+- Milestone: Sprint 29 Survey & Test Matrix Formulation
 
 ## 🔒 Key Constraints
-- Read-only investigation — do NOT implement or modify source code
-- Full test suite baseline analysis and structure auditing
-- Generate comprehensive handoff.md with 5 components
-- Handoff report in /home/varun/argus/.agents/survey_explorer_3/handoff.md
+- Read-only investigation — do NOT implement or modify codebase source files
+- Maintain file workspace convention in .agents/survey_explorer_3
+- Silence during execution — only send final handoff message to parent
 
 ## Current Parent
-- Conversation ID: a2f8a122-53cc-45fd-b09d-db82598f4d8b
-- Updated: 2026-08-30T06:41:30Z
+- Conversation ID: fb9f4bf5-d477-46cc-92cb-88bfb6bf8997
+- Updated: 2026-09-02T13:47:30Z
 
 ## Investigation State
-- **Explored paths**: `tests/`, `tests/collectors/`, `tests/runtime/`, `tests/http/`, `argus/collectors/`, `argus/planning/task_generator.py`, `argus/runtime/registry.py`, `argus/runtime/plugins.py`, `argus/graph/attack_surface.py`
-- **Key findings**: 
-  - Baseline test count: 861 passing tests. Total collected: 896 tests.
-  - Sprint 9 inventory: 35 tests across 3 files (`test_sql_injection.py`, `test_sql_injection_adversarial.py`, `test_e2e_sql_injection.py`).
-  - Diagnosed 2 minor bug fixes for implementer in `argus/collectors/sql_injection.py` (reflection discard and ControlledMission unpacking).
-- **Unexplored areas**: None. Full test suite and mission workflow audited.
+- **Explored paths**: `tests/` directory (113 test files, 1,929 tests), `tests/collectors/` (47 files, 1,015 tests), `argus/collectors/` (source collectors), `argus/graph/attack_surface.py`, `argus/planning/task_generator.py`, `argus/runtime/registry.py`, `argus/runtime/plugins.py`, `argus/reporting/cvss.py`.
+- **Key findings**:
+  1. Baseline suite: 1,929 passing tests across 113 test files (0 failures, 63.60s execution time).
+  2. Mocking pattern: Deterministic in-memory `HttpResponse` mocking with route/pattern/callback matchers; zero external network dependencies.
+  3. Structure: 3-file collector test layout (`test_*.py`, `test_*_adversarial.py`, `test_*_pipeline.py`).
+  4. Test matrix: Formulated 50+ test cases across 3 test suites covering all R1-R6 requirements.
+- **Unexplored areas**: None.
 
 ## Key Decisions Made
-- Compiled 35-test comprehensive matrix covering all 8 required categories (Error-based DBMS, Boolean differential, Time delay >4s, False positive prevention, 5+ WAF mutations, HAS_VULNERABILITY graph edges, TaskGenerator DAG wiring, E2E mission workflow).
-- Documented findings in handoff.md.
+- Audited test suite and established baseline invariant (1,929 passing tests).
+- Formulated 50+ test matrix partitioned across unit, adversarial, and pipeline suites to satisfy R6 (>=25 new tests, zero regressions).
+- Generated complete 5-component handoff report.
 
 ## Artifact Index
-- /home/varun/argus/.agents/survey_explorer_3/handoff.md — Final survey and test plan handoff
-- /home/varun/argus/.agents/survey_explorer_3/progress.md — Progress and liveness tracker
-- /home/varun/argus/.agents/survey_explorer_3/DISPATCH.md — Initial dispatch log
+- /home/varun/argus/.agents/survey_explorer_3/DISPATCH.md — Dispatch log
+- /home/varun/argus/.agents/survey_explorer_3/BRIEFING.md — Situational awareness
+- /home/varun/argus/.agents/survey_explorer_3/progress.md — Liveness & progress tracking
+- /home/varun/argus/.agents/survey_explorer_3/handoff.md — Final 5-component handoff report

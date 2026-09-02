@@ -1,12 +1,12 @@
-# Progress Log — explorer_2 (Test & Pipeline Investigator)
+# Progress Log — explorer_2
 
-Last visited: 2026-08-30T17:24:00+05:30
-
-## Status: COMPLETE
-
-### Tasks:
-- [x] 1. Read ORIGINAL_REQUEST.md and understand Sprint 12 context.
-- [x] 2. Investigate Existing Test Suite (structure, test count, pytest run, collector unit & integration tests, mocking harnesses).
-- [x] 3. Investigate Graph Models & Edge Relations (`HAS_VULNERABILITY`, node types, metadata, severity, evidence schema).
-- [x] 4. Investigate TaskGenerator & Tool Registry (DAG generation, task configuration, registration).
-- [x] 5. Compile findings into `handoff.md` and notify parent.
+- **Last visited**: 2026-09-01T17:02:00Z
+- **Current status**: Investigation complete. Report written to `handoff.md`.
+- **Tasks**:
+  1. [x] Find & examine `TaskGenerator` / DAG scheduling logic (`argus/planning/task_generator.py`, `argus/planning/research_planner.py`, `argus/scanning/dag.py`, `argus/scanning/engine.py`).
+  2. [x] Find & examine `registry.py` / tool registry and plugin registration (`argus/runtime/registry.py`, `argus/runtime/models.py`, `argus/runtime/plugins.py`, `argus/runtime/dispatcher.py`, `argus/runtime/executor.py`).
+  3. [x] Find & examine collector context passing (endpoints, hosts, headers, graph context, Quadruple State Mutation).
+  4. [x] Find & examine config/settings/CLI flags for collectors (`argus/cli/tools_cli.py`, constructor params, `AuthenticatedHttpClient`).
+  5. [x] Check existing collectors (`cache_security.py`, `ssti.py`, `business_logic.py`, etc.) for standard patterns.
+  6. [x] Check graph edges (`HAS_VULNERABILITY`, finding creation, CWE mappings in `cvss.py`).
+  7. [x] Write comprehensive report to `handoff.md`.

@@ -17,10 +17,19 @@ class MissionStateMachine:
         
         # Deterministic transition matrix
         self.valid_transitions = {
-            MissionState.CREATED: [MissionState.PLANNING, MissionState.CANCELLED],
-            MissionState.PLANNING: [
+            MissionState.CREATED: [MissionState.PLANNING, MissionState.READY, MissionState.RUNNING, MissionState.CANCELLED],
+            MissionState.READY: [
+                MissionState.RUNNING, MissionState.PLANNING, 
+                MissionState.PAUSED, MissionState.CANCELLED, MissionState.FAILED
+            ],
+            MissionState.RUNNING: [
+                MissionState.COLLECTING_EVIDENCE, MissionState.PLANNING, 
                 MissionState.RESEARCHING, MissionState.PAUSED, 
                 MissionState.CANCELLED, MissionState.FAILED
+            ],
+            MissionState.PLANNING: [
+                MissionState.RESEARCHING, MissionState.READY, MissionState.RUNNING,
+                MissionState.PAUSED, MissionState.CANCELLED, MissionState.FAILED
             ],
             MissionState.RESEARCHING: [
                 MissionState.COLLECTING_EVIDENCE, MissionState.PLANNING,
@@ -32,8 +41,9 @@ class MissionStateMachine:
                 MissionState.PAUSED, MissionState.CANCELLED, MissionState.FAILED
             ],
             MissionState.CORRELATING: [
-                MissionState.BUILDING_INVESTIGATIONS, MissionState.RESEARCHING, 
-                MissionState.PAUSED, MissionState.CANCELLED, MissionState.FAILED
+                MissionState.COMPLETED, MissionState.BUILDING_INVESTIGATIONS, 
+                MissionState.RESEARCHING, MissionState.PAUSED, 
+                MissionState.CANCELLED, MissionState.FAILED
             ],
             MissionState.BUILDING_INVESTIGATIONS: [
                 MissionState.GENERATING_HYPOTHESES, MissionState.RESEARCHING, 
@@ -50,10 +60,10 @@ class MissionStateMachine:
             ],
             MissionState.PAUSED: [MissionState.RECOVERING, MissionState.CANCELLED],
             MissionState.RECOVERING: [
-                MissionState.PLANNING, MissionState.RESEARCHING, 
-                MissionState.COLLECTING_EVIDENCE, MissionState.CORRELATING, 
-                MissionState.BUILDING_INVESTIGATIONS, MissionState.GENERATING_HYPOTHESES, 
-                MissionState.FAILED, MissionState.CANCELLED
+                MissionState.READY, MissionState.RUNNING, MissionState.PLANNING, 
+                MissionState.RESEARCHING, MissionState.COLLECTING_EVIDENCE, 
+                MissionState.CORRELATING, MissionState.BUILDING_INVESTIGATIONS, 
+                MissionState.GENERATING_HYPOTHESES, MissionState.FAILED, MissionState.CANCELLED
             ],
             MissionState.COMPLETED: [],
             MissionState.CANCELLED: [],

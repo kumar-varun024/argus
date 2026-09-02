@@ -1,22 +1,27 @@
-## 2026-08-30T12:28:32Z
-You are Reviewer 1 for Sprint 13.
-Your working directory is /home/varun/argus/.agents/reviewer_1.
-Create your working directory and maintain progress.md and handoff.md in it.
+## 2026-09-02T03:23:56Z
+You are Reviewer 1 (Code Quality & Correctness Reviewer) for the ARGUS API Security Testing Module.
+Your working directory is `/home/varun/argus/.agents/reviewer_1`.
 
-Read:
-- /home/varun/argus/.agents/ORIGINAL_REQUEST.md
-- /home/varun/argus/PROJECT.md
-- /home/varun/argus/.agents/worker_1/handoff.md
+MANDATORY FIRST STEP:
+Read `/home/varun/argus/.agents/ORIGINAL_REQUEST.md` and `/home/varun/argus/.agents/worker_collector_impl/handoff.md`.
 
-Your mission:
-1. Conduct a rigorous code review of the source code changes:
-   - `argus/collectors/oauth.py`
-   - `argus/collectors/__init__.py`
-   - `argus/planning/task_generator.py`
-   - `argus/runtime/registry.py`
-   - `argus/runtime/plugins.py`
-   - `argus/graph/attack_surface.py`
-2. Verify adherence to R1 (redirect_uri, state, referer, code reuse), R2 (alg:none, invalid sig, key confusion, exp/aud/iss/nbf, scope escalation), R3 (session fixation, logout invalidation, cookie flags Secure/HttpOnly/SameSite), R4 (DAG dependency, registry, plugin adapter, graph HAS_VULNERABILITY edges).
-3. Run the test suite: `python3 -m pytest tests/collectors/test_oauth.py tests/collectors/test_oauth_adversarial.py tests/runtime/test_e2e_oauth.py -q` and `python3 -m pytest tests/ --ignore=tests/workspace -x -q`.
-4. Provide a clear verdict in your handoff: APPROVE or REQUEST_CHANGES.
-5. Write your detailed review to /home/varun/argus/.agents/reviewer_1/handoff.md and report back via send_message. Operate silently during execution.
+Review the implementation in:
+- `argus/collectors/api_security.py`
+- `argus/planning/task_generator.py`
+- `argus/runtime/registry.py`
+- `argus/runtime/plugins.py`
+- `argus/graph/attack_surface.py`
+- `argus/reporting/cvss.py`
+- `tests/collectors/test_api_security.py`
+- `tests/collectors/test_api_security_adversarial.py`
+
+Verify:
+1. Architecture correctness (Tripartite pattern, BaseCollector inheritance, AuthenticatedHttpClient usage, Quadruple State Publishing).
+2. Code quality, edge case handling, type safety, and error handling.
+3. Run the tests:
+   `python -m pytest tests/collectors/test_api_security.py tests/collectors/test_api_security_adversarial.py -v`
+   `python -m pytest tests/ --ignore=tests/workspace -x -q`
+
+Record your findings, test results, and clear verdict (APPROVE or REQUEST_CHANGES) in `/home/varun/argus/.agents/reviewer_1/handoff.md`.
+Update `/home/varun/argus/.agents/reviewer_1/progress.md` before finishing.
+When done, notify the orchestrator with send_message.

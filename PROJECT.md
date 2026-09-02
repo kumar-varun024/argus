@@ -1,105 +1,85 @@
-# Project: Sprint 13 — OAuth/OIDC Token Testing & Stateful Auth Validation
+# Project: ARGUS Prototype Pollution & Client-Side Attack Detection Module (Sprint 29)
 
 ## Architecture
-Argus security assessment engine with modular vulnerability collectors (`BaseCollector`), HTTP execution layer (`AuthenticatedHttpClient`, `MultiIdentitySessionCoordinator`), graph representation (`KnowledgeGraph`, `AttackSurfaceGraphBuilder`), and automated mission planning DAG (`TaskGenerator`, `ToolRegistry`, `PluginExecutorAdapter`).
+The Prototype Pollution & Client-Side Attack Detection Module is an active security scanner in ARGUS that discovers, probes, and analyzes client-side and server-side prototype pollution, DOM clobbering, open redirect chains, and clickjacking vulnerabilities across discovered endpoints.
 
-```
-[Target Mission]
-       │
-       ▼
-[TaskGenerator DAG] ──> Dependencies: "Discover API Endpoints"
-       │
-       ▼
-[ToolRegistry / PluginExecutorAdapter] ──> Dispatches "oauth" / "oauth_oidc"
-       │
-       ▼
-[OAuthCollector (BaseCollector)]
-       ├── OAuthPayloadGenerator (Redirect URIs, Tampered JWTs, Insecure Cookies, State Vectors)
-       ├── OAuthAnalyzer (Open Redirect, Subdomain Bypass, Path Traversal, State Missing, Code Reuse)
-       ├── TokenValidationAnalyzer (alg:none, Bad Signatures, Key Confusion, Expired/Aud/Iss/Nbf, Scope Escalation)
-       └── SessionSecurityAnalyzer (Session Fixation, Logout Invalidation, Cookie Flags: Secure/HttpOnly/SameSite)
-       │
-       ▼
-[EvidenceStore & KnowledgeGraph]
-       ├── Node: live_host:<url>, endpoint:<url>, vulnerability:<id>
-       └── Edges: HAS_ENDPOINT, HAS_VULNERABILITY (live_host -> vuln, endpoint -> vuln)
-```
+### Subsystem Components
+1. **Core Collector Module (`argus/collectors/prototype_pollution.py`)**:
+   - `PrototypePollutionCollector` (inheriting from `BaseCollector`)
+   - `PrototypePollutionPayloadGenerator`
+   - `PrototypePollutionProber`
+   - `PrototypePollutionAnalyzer`
+   - Data models & enums (`PrototypePollutionSeverity`, `PrototypePollutionVulnerabilityType`, `PrototypePollutionMutationStrategy`, `GadgetFramework`, `PrototypePollutionProbe`, `PrototypePollutionProbeResponse`, `PrototypePollutionResult`)
+   - Compatibility aliases (`ClientSideAttackCollector`, `DOMClobberingCollector`, `OpenRedirectCollector`, `ClickjackingCollector`)
+2. **Pipeline Connectivity**:
+   - `argus/collectors/__init__.py`: Export all classes, models, and enums in `__all__`.
+   - `argus/planning/task_generator.py`: DAG recon template, gap resolution, endpoint input wiring.
+   - `argus/runtime/registry.py`: Canonical `Tool` registration + 15+ aliases.
+   - `argus/runtime/plugins.py`: Specialist fallback in `PluginExecutorAdapter`.
+   - `argus/scanning/engine.py`: Collector class mapping in `collector_class_map`.
+   - `argus/graph/attack_surface.py`: Section 29 evidence ingestion and `HAS_VULNERABILITY` graph edges.
+   - `argus/reporting/cvss.py`: CWE mappings for CWE-1321, CWE-79, CWE-601, CWE-1021 and CVSS calibration.
+3. **Comprehensive Test Suite**:
+   - `tests/collectors/test_prototype_pollution.py`: Core unit, prober, analyzer, false-positive rejection, and quadruple state publishing tests.
+   - `tests/collectors/test_prototype_pollution_adversarial.py`: 5 mutation strategies, WAF rejection, deep traversal, rate limiting, and network fault tolerance tests.
+   - `tests/collectors/test_prototype_pollution_pipeline.py`: TaskGenerator DAG, registry, graph Section 29, and CVSS calculator tests.
 
 ## Feature Inventory
 | # | Feature | Description | Milestone | Source |
 |---|---------|-------------|-----------|--------|
-| 1 | OAuth Redirect URI Manipulation | Test open redirect, path traversal bypass, subdomain matching bypass on redirect_uri | M1 | ORIGINAL_REQUEST §R1 |
-| 2 | OAuth State Parameter Validation | Detect missing, static, or unvalidated state parameter (CSRF risk) | M1 | ORIGINAL_REQUEST §R1 |
-| 3 | Token Leakage via Referer | Detect token or authorization code leakage in Referer headers | M1 | ORIGINAL_REQUEST §R1 |
-| 4 | Authorization Code Reuse | Detect authorization codes that can be exchanged multiple times | M1 | ORIGINAL_REQUEST §R1 |
-| 5 | JWT Signature Verification & alg:none | Detect acceptance of tokens with alg:none or invalid/tampered signatures | M2 | ORIGINAL_REQUEST §R2 |
-| 6 | JWT Key Confusion (RS256 vs HS256) | Detect acceptance of HMAC signed tokens using public RSA key | M2 | ORIGINAL_REQUEST §R2 |
-| 7 | JWT Claims Validation | Detect missing/improper validation of exp, aud, iss, nbf claims | M2 | ORIGINAL_REQUEST §R2 |
-| 8 | Token Scope Escalation | Detect acceptance of tokens with modified/stripped scopes for privileged actions | M2 | ORIGINAL_REQUEST §R2 |
-| 9 | Session Fixation Detection | Detect pre-login session IDs retained after successful authentication | M3 | ORIGINAL_REQUEST §R3 |
-| 10 | Logout Invalidation Detection | Detect session cookies/tokens remaining active after logout request | M3 | ORIGINAL_REQUEST §R3 |
-| 11 | Cookie Security Flags Validation | Validate Secure, HttpOnly, and SameSite attributes on session cookies | M3 | ORIGINAL_REQUEST §R3 |
-| 12 | Concurrent Session Handling | Analyze concurrent login state and session collisions | M3 | ORIGINAL_REQUEST §R3 |
-| 13 | False Positive Rejection | Ensure properly configured flows, valid JWTs, and secure cookies emit no findings | M1-M3 | ORIGINAL_REQUEST §Acceptance Criteria |
-| 14 | TaskGenerator DAG Integration | Register "oauth" recon template scheduled after "Discover API Endpoints" | M4 | ORIGINAL_REQUEST §R4 |
-| 15 | Tool Registry & Plugin Adapter | Register "oauth" in ToolRegistry with aliases and fallback in PluginExecutorAdapter | M4 | ORIGINAL_REQUEST §R4 |
-| 16 | Attack Surface Graph Connectivity | Generate HAS_ENDPOINT and HAS_VULNERABILITY edges in KnowledgeGraph and AttackSurfaceGraphBuilder | M4 | ORIGINAL_REQUEST §R4 |
-| 17 | Test Suite & Zero Regression | >=20 new tests, 0 regressions on 1127+ existing tests | M5 | ORIGINAL_REQUEST §R5 |
-| 18 | Sprint Handoff Documentation | Detailed handoff written to .agents/sprint13_oauth/handoff.md | M5 | ORIGINAL_REQUEST §R5 |
+| 1 | Active Collector & Prober (R1) | BaseCollector subclass using AuthenticatedHttpClient, candidate discovery, batch probing, and Quadruple State Publishing | M1 | ORIGINAL_REQUEST §R1 |
+| 2 | Server-Side Prototype Pollution (R2.1) | Node.js/Express prototype pollution detection via JSON injection (`__proto__`, `constructor.prototype`) with observable side effects | M1 | ORIGINAL_REQUEST §R2.1 |
+| 3 | Client-Side Prototype Pollution (R2.2) | DOM-based prototype pollution detection via URL fragment/query gadgets (`location.hash`, `URLSearchParams`) modifying Object.prototype | M1 | ORIGINAL_REQUEST §R2.2 |
+| 4 | DOM Clobbering Detection (R2.3) | HTML injection where named elements shadow DOM APIs (`document.cookie`, `document.body`, `document.getElementById`) | M1 | ORIGINAL_REQUEST §R2.3 |
+| 5 | Open Redirect Chain Detection (R2.4) | Unvalidated redirect parameters (`url=`, `next=`, `redirect=`, `return_to=`, `continue=`) with multi-hop chain tracing | M1 | ORIGINAL_REQUEST §R2.4 |
+| 6 | Clickjacking / UI Redressing (R2.5) | Detection of missing `X-Frame-Options` and missing/permissive CSP `frame-ancestors` on sensitive endpoints | M1 | ORIGINAL_REQUEST §R2.5 |
+| 7 | Prototype Pollution Gadget Analysis (R3) | Express, Lodash, jQuery, Handlebars gadgets, DoS via `toString`/`valueOf`, Node.js `child_process.exec` RCE, and traversal depth analysis | M1 | ORIGINAL_REQUEST §R3 |
+| 8 | 5 Mutation & Evasion Strategies (R4) | JSON key encoding, Content-Type manipulation, Redirect URL encoding, DOM clobbering variants, Frame-busting bypass | M1 | ORIGINAL_REQUEST §R4 |
+| 9 | Pipeline DAG & Registry Connectivity (R5) | TaskGenerator DAG, ToolRegistry registration, specialist plugin fallback, engine map | M2 | ORIGINAL_REQUEST §R5 |
+| 10 | Attack Surface Graph & CVSS (R5) | Section 29 evidence ingestion with `HAS_VULNERABILITY` edges, CWE-1321, CWE-79, CWE-601, CWE-1021 mappings | M2 | ORIGINAL_REQUEST §R5 |
+| 11 | Unit, Adversarial & Pipeline Tests (R6) | >=25 (targeting 50+) tests across 3 test files covering all modes, mutations, and pipeline wiring | M3 | ORIGINAL_REQUEST §R6 |
+| 12 | Zero Regression & Victory Audit (R6) | 1,929+ baseline passing tests maintained with 0 regressions, forensic audit, and handoff report | M4 | ORIGINAL_REQUEST §R6 |
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
 |---|------|-------|-------------|--------|
-| M1 | OAuth/OIDC Flow Collector | Implement `OAuthCollector`, `OAuthPayloadGenerator`, `OAuthAnalyzer` (redirect_uri, state, referer leakage, code reuse) in `argus/collectors/oauth.py` | none | DONE |
-| M2 | Token Validation Testing | Implement JWT and token validation (alg:none, invalid signature, key confusion, claims exp/aud/iss/nbf, scope escalation) in `argus/collectors/oauth.py` | M1 | DONE |
-| M3 | Stateful Auth & Session Analysis | Implement session fixation, logout invalidation, cookie flags (Secure/HttpOnly/SameSite) in `argus/collectors/oauth.py` | M2 | DONE |
-| M4 | Pipeline & Graph Connectivity | Integrate with `task_generator.py`, `registry.py`, `plugins.py`, `attack_surface.py`, `argus/collectors/__init__.py` | M3 | DONE |
-| M5 | Comprehensive Tests & Victory Audit | Implement unit, adversarial, and E2E tests (>=20 tests), verify 1127+ baseline tests pass, write handoff to `.agents/sprint13_oauth/handoff.md`, run Forensic Audit | M4 | DONE |
+| 1 | Core Collector & Multi-Vector Engine | `argus/collectors/prototype_pollution.py`, `argus/collectors/__init__.py` | none | PLANNED |
+| 2 | Pipeline Connectivity & Graph Integration | `argus/planning/task_generator.py`, `argus/runtime/registry.py`, `argus/runtime/plugins.py`, `argus/scanning/engine.py`, `argus/graph/attack_surface.py`, `argus/reporting/cvss.py` | M1 | PLANNED |
+| 3 | Test Suite Implementation (Core, Adversarial, Pipeline) | `tests/collectors/test_prototype_pollution.py`, `tests/collectors/test_prototype_pollution_adversarial.py`, `tests/collectors/test_prototype_pollution_pipeline.py` | M1, M2 | PLANNED |
+| 4 | Review, Adversarial Challenge, Forensic Audit & Handoff | Full regression test suite run, reviewer & challenger verification, forensic auditor verification, final handoff | M3 | PLANNED |
 
 ## Interface Contracts
-### Collector Interface
-```python
-class OAuthCollector(BaseCollector):
-    def __init__(
-        self,
-        http_client: Optional[Any] = None,
-        timeout: float = 10.0,
-        payload_generator: Optional[Any] = None,
-        analyzer: Optional[Any] = None,
-    ):
-        ...
-    def collect(self, mission: Any) -> List[Evidence]:
-        ...
-    def execute(self, mission: Any) -> List[Evidence]:
-        return self.collect(mission)
-```
-
-### Graph & Evidence Contract
-```python
-Evidence(
-    category="oauth_misconfiguration", # or "session_management", "token_validation", "oauth"
-    severity="critical" | "high" | "medium" | "low",
-    status="CONFIRMED",
-    confidence=0.95,
-    metadata={
-        "url": target_url,
-        "host": base_url,
-        "misconfiguration_type": str,
-        "parameter": Optional[str],
-        "evidence_snippet": str,
-        "template_id": str,
-    }
-)
-```
+### `argus.collectors.prototype_pollution`
+- `PrototypePollutionCollector(BaseCollector)`:
+  - `collect(mission: Any) -> List[Evidence]`
+  - `execute(mission: Any) -> List[Evidence]`
+  - `_discover_candidate_endpoints(mission: Any) -> List[str]`
+  - `_emit_evidence(mission: Any, result: PrototypePollutionResult, target_url: str, base_url: str) -> Evidence`
+- `PrototypePollutionPayloadGenerator`:
+  - `generate_all_probes(endpoint_url: str) -> List[PrototypePollutionProbe]`
+  - `generate_server_side_pp_probes(endpoint_url: str) -> List[PrototypePollutionProbe]`
+  - `generate_client_side_pp_probes(endpoint_url: str) -> List[PrototypePollutionProbe]`
+  - `generate_dom_clobbering_probes(endpoint_url: str) -> List[PrototypePollutionProbe]`
+  - `generate_open_redirect_probes(endpoint_url: str) -> List[PrototypePollutionProbe]`
+  - `generate_clickjacking_probes(endpoint_url: str) -> List[PrototypePollutionProbe]`
+  - `generate_gadget_chain_probes(endpoint_url: str) -> List[PrototypePollutionProbe]`
+  - `apply_mutation(probe: PrototypePollutionProbe, strategy: PrototypePollutionMutationStrategy) -> PrototypePollutionProbe`
+- `PrototypePollutionProber`:
+  - `execute_probe(mission: Any, target_url: str, probe: PrototypePollutionProbe) -> PrototypePollutionProbeResponse`
+  - `execute_redirect_chain_probe(mission: Any, target_url: str, probe: PrototypePollutionProbe, max_hops: int = 5) -> PrototypePollutionProbeResponse`
+- `PrototypePollutionAnalyzer`:
+  - `evaluate_probe(probe: PrototypePollutionProbe, response: PrototypePollutionProbeResponse, target_url: str) -> Optional[PrototypePollutionResult]`
+  - `is_false_positive(probe: PrototypePollutionProbe, response: PrototypePollutionProbeResponse) -> bool`
 
 ## Code Layout
-- `argus/collectors/oauth.py`: Main collector and analyzer subcomponents.
-- `argus/collectors/__init__.py`: Module exports for `OAuthCollector`, `OAuthPayloadGenerator`, `OAuthAnalyzer`, `TokenValidationAnalyzer`, `SessionSecurityAnalyzer`.
-- `argus/planning/task_generator.py`: `_RECON_TEMPLATES["oauth"]`, `_resolve_template_for_gap`, `from_gaps`.
-- `argus/runtime/registry.py`: `ToolRegistry` registration and aliases for `oauth`.
-- `argus/runtime/plugins.py`: `PluginExecutorAdapter._instantiate_specialist_fallback` mapping.
-- `argus/graph/attack_surface.py`: `AttackSurfaceGraphBuilder.build_from_evidence` section for oauth/session evidence.
-- `tests/collectors/test_oauth.py`: Unit and component test cases (22 tests).
-- `tests/collectors/test_oauth_adversarial.py`: Adversarial and false positive suppression test cases (8 tests).
-- `tests/runtime/test_e2e_oauth.py`: End-to-end mission loop and graph integration test cases (6 tests).
-- `.agents/sprint13_oauth/handoff.md`: Final Sprint 13 handoff report.
+- `argus/collectors/prototype_pollution.py` (Owned by Worker)
+- `argus/collectors/__init__.py` (Owned by Worker)
+- `argus/planning/task_generator.py` (Owned by Worker)
+- `argus/runtime/registry.py` (Owned by Worker)
+- `argus/runtime/plugins.py` (Owned by Worker)
+- `argus/scanning/engine.py` (Owned by Worker)
+- `argus/graph/attack_surface.py` (Owned by Worker)
+- `argus/reporting/cvss.py` (Owned by Worker)
+- `tests/collectors/test_prototype_pollution.py` (Owned by Worker / Test Writer)
+- `tests/collectors/test_prototype_pollution_adversarial.py` (Owned by Worker / Test Writer)
+- `tests/collectors/test_prototype_pollution_pipeline.py` (Owned by Worker / Test Writer)

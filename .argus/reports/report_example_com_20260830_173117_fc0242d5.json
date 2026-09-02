@@ -1,0 +1,1238 @@
+{
+  "report_id": "fc0242d5-6f20-4f40-b298-ddb0da25fca4",
+  "mission_id": "c359ef1b-44e8-447c-a5e6-fd8797b521aa",
+  "target": "example.com",
+  "generated_at": "2026-08-30T17:31:17.987904+00:00",
+  "generator_version": "1.0.0",
+  "summary": {
+    "total_findings": 7,
+    "total_evidence_items": 10,
+    "deduplicated_count": 3,
+    "severity_counts": {
+      "critical": 0,
+      "high": 1,
+      "medium": 0,
+      "low": 0,
+      "info": 6
+    },
+    "category_counts": {
+      "vulnerability": 1,
+      "endpoint": 2,
+      "live_host": 2,
+      "subdomain": 1,
+      "technology": 1
+    },
+    "host_counts": {
+      "http://api.example.com": 1,
+      "api.example.com": 4,
+      "admin.example.com": 1,
+      "example.com": 1
+    }
+  },
+  "findings": [
+    {
+      "id": "658c270f-5b81-46e7-b3fd-154601423257",
+      "title": "Vulnerability on http://api.example.com",
+      "category": "vulnerability",
+      "severity": "high",
+      "cvss": {
+        "score": 7.5,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "severity_rating": "High",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "H",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-699",
+        "name": "Software Development Security Issue"
+      },
+      "host": "http://api.example.com",
+      "endpoint": "/",
+      "parameter": null,
+      "parameter_type": null,
+      "payload": null,
+      "description": "A test CVE",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/` on host `http://api.example.com`.",
+        "Send a crafted HTTP request to `/`.",
+        "Observe the anomalous response behavior confirming vulnerability."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with high impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+      "confidence": 1.0,
+      "status": "UNVERIFIED",
+      "evidence_ids": [
+        "ca28a758-451c-48c3-bc10-94c9f6846ba4",
+        "a51fe97e-8dd0-4a42-a348-1a44dc01168e"
+      ],
+      "duplicate_count": 2,
+      "tags": [],
+      "references": [],
+      "metadata": {
+        "template_id": "CVE-2023-XXXX",
+        "name": "Example CVE",
+        "severity": "high",
+        "host": "http://api.example.com",
+        "matched_at": "http://api.example.com",
+        "description": "A test CVE",
+        "tags": [],
+        "extracted_results": [],
+        "evidence_value": "Example CVE",
+        "source": "nuclei"
+      }
+    },
+    {
+      "id": "de265808-2c03-4ef7-a208-aa63fbc50357",
+      "title": "Endpoint in /v1/login",
+      "category": "endpoint",
+      "severity": "info",
+      "cvss": {
+        "score": 0.0,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+        "severity_rating": "None",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "N",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-699",
+        "name": "Software Development Security Issue"
+      },
+      "host": "api.example.com",
+      "endpoint": "/v1/login",
+      "parameter": null,
+      "parameter_type": null,
+      "payload": null,
+      "description": "Discovered endpoint http://api.example.com/v1/login",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/v1/login` on host `api.example.com`.",
+        "Send a crafted HTTP request to `/v1/login`.",
+        "Observe the anomalous response behavior confirming endpoint."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+      "confidence": 1.0,
+      "status": "UNVERIFIED",
+      "evidence_ids": [
+        "25b1cdd2-2576-4456-b607-b9a66851e5be"
+      ],
+      "duplicate_count": 1,
+      "tags": [],
+      "references": [],
+      "metadata": {
+        "url": "http://api.example.com/v1/login",
+        "path": "/v1/login",
+        "host": "api.example.com",
+        "method": "GET",
+        "params": {},
+        "evidence_value": "http://api.example.com/v1/login",
+        "source": "katana"
+      }
+    },
+    {
+      "id": "00930ae6-c0d5-4951-9f0c-0aceb1f9b0c6",
+      "title": "Endpoint in /v1/users",
+      "category": "endpoint",
+      "severity": "info",
+      "cvss": {
+        "score": 0.0,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+        "severity_rating": "None",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "N",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-699",
+        "name": "Software Development Security Issue"
+      },
+      "host": "api.example.com",
+      "endpoint": "/v1/users",
+      "parameter": null,
+      "parameter_type": null,
+      "payload": null,
+      "description": "Discovered endpoint http://api.example.com/v1/users",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/v1/users` on host `api.example.com`.",
+        "Send a crafted HTTP request to `/v1/users`.",
+        "Observe the anomalous response behavior confirming endpoint."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+      "confidence": 1.0,
+      "status": "UNVERIFIED",
+      "evidence_ids": [
+        "c30186e3-c55c-4790-9ba8-f984da488730"
+      ],
+      "duplicate_count": 1,
+      "tags": [],
+      "references": [],
+      "metadata": {
+        "url": "http://api.example.com/v1/users",
+        "path": "/v1/users",
+        "host": "api.example.com",
+        "method": "GET",
+        "params": {},
+        "evidence_value": "http://api.example.com/v1/users",
+        "source": "katana"
+      }
+    },
+    {
+      "id": "caa87eaf-d6c5-420d-9427-98ee581c1bee",
+      "title": "Live Host on admin.example.com",
+      "category": "live_host",
+      "severity": "info",
+      "cvss": {
+        "score": 0.0,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+        "severity_rating": "None",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "N",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-699",
+        "name": "Software Development Security Issue"
+      },
+      "host": "admin.example.com",
+      "endpoint": "/",
+      "parameter": null,
+      "parameter_type": null,
+      "payload": null,
+      "description": "Discovered live host http://admin.example.com",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/` on host `admin.example.com`.",
+        "Send a crafted HTTP request to `/`.",
+        "Observe the anomalous response behavior confirming live host."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+      "confidence": 1.0,
+      "status": "UNVERIFIED",
+      "evidence_ids": [
+        "f3bdec53-5362-468a-994f-e2121b894807"
+      ],
+      "duplicate_count": 1,
+      "tags": [],
+      "references": [],
+      "metadata": {
+        "url": "http://admin.example.com",
+        "scheme": "http",
+        "host": "admin.example.com",
+        "port": 80,
+        "status": 403,
+        "title": null,
+        "server": null,
+        "technologies": [],
+        "evidence_value": "http://admin.example.com",
+        "source": "httpx"
+      }
+    },
+    {
+      "id": "1e08196b-be2b-4bd0-9404-6f68311402c5",
+      "title": "Live Host on api.example.com",
+      "category": "live_host",
+      "severity": "info",
+      "cvss": {
+        "score": 0.0,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+        "severity_rating": "None",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "N",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-699",
+        "name": "Software Development Security Issue"
+      },
+      "host": "api.example.com",
+      "endpoint": "/",
+      "parameter": null,
+      "parameter_type": null,
+      "payload": null,
+      "description": "Discovered live host http://api.example.com",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/` on host `api.example.com`.",
+        "Send a crafted HTTP request to `/`.",
+        "Observe the anomalous response behavior confirming live host."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+      "confidence": 1.0,
+      "status": "UNVERIFIED",
+      "evidence_ids": [
+        "939a219f-534d-4947-abcf-a12774ff779d"
+      ],
+      "duplicate_count": 1,
+      "tags": [],
+      "references": [],
+      "metadata": {
+        "url": "http://api.example.com",
+        "scheme": "http",
+        "host": "api.example.com",
+        "port": 80,
+        "status": 200,
+        "title": null,
+        "server": "nginx",
+        "technologies": [
+          "Nginx",
+          "React"
+        ],
+        "evidence_value": "http://api.example.com",
+        "source": "httpx"
+      }
+    },
+    {
+      "id": "ff1d52a4-a05f-4499-8cd5-309b87520809",
+      "title": "Subdomain on example.com",
+      "category": "subdomain",
+      "severity": "info",
+      "cvss": {
+        "score": 0.0,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+        "severity_rating": "None",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "N",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-699",
+        "name": "Software Development Security Issue"
+      },
+      "host": "example.com",
+      "endpoint": "/",
+      "parameter": null,
+      "parameter_type": null,
+      "payload": null,
+      "description": "Discovered subdomain api.example.com for target example.com",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/` on host `example.com`.",
+        "Send a crafted HTTP request to `/`.",
+        "Observe the anomalous response behavior confirming subdomain."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+      "confidence": 1.0,
+      "status": "UNVERIFIED",
+      "evidence_ids": [
+        "70d73051-990c-47c3-acec-acd1a8211edb",
+        "73633b69-2e3b-41fc-9448-1ec73a0781e6"
+      ],
+      "duplicate_count": 2,
+      "tags": [],
+      "references": [],
+      "metadata": {
+        "source": "subfinder",
+        "hostname": "api.example.com",
+        "evidence_value": "api.example.com"
+      }
+    },
+    {
+      "id": "3f35c079-afa9-4125-b60c-2b54beb299b0",
+      "title": "Technology on api.example.com",
+      "category": "technology",
+      "severity": "info",
+      "cvss": {
+        "score": 0.0,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+        "severity_rating": "None",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "N",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-699",
+        "name": "Software Development Security Issue"
+      },
+      "host": "api.example.com",
+      "endpoint": "/",
+      "parameter": null,
+      "parameter_type": null,
+      "payload": null,
+      "description": "Detected technology Nginx on http://api.example.com",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/` on host `api.example.com`.",
+        "Send a crafted HTTP request to `/`.",
+        "Observe the anomalous response behavior confirming technology."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+      "confidence": 1.0,
+      "status": "UNVERIFIED",
+      "evidence_ids": [
+        "20bbd533-afb6-48f9-bb7a-64116ccbd0e0",
+        "efc53210-2357-456f-897b-1824115dcc18"
+      ],
+      "duplicate_count": 2,
+      "tags": [],
+      "references": [],
+      "metadata": {
+        "name": "Nginx",
+        "host": "api.example.com",
+        "url": "http://api.example.com",
+        "source": "httpx",
+        "evidence_value": "Nginx"
+      }
+    }
+  ],
+  "grouped_by_category": {
+    "vulnerability": [
+      {
+        "id": "658c270f-5b81-46e7-b3fd-154601423257",
+        "title": "Vulnerability on http://api.example.com",
+        "category": "vulnerability",
+        "severity": "high",
+        "cvss": {
+          "score": 7.5,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "severity_rating": "High",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "H",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "http://api.example.com",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "A test CVE",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `http://api.example.com`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming vulnerability."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with high impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "ca28a758-451c-48c3-bc10-94c9f6846ba4",
+          "a51fe97e-8dd0-4a42-a348-1a44dc01168e"
+        ],
+        "duplicate_count": 2,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "template_id": "CVE-2023-XXXX",
+          "name": "Example CVE",
+          "severity": "high",
+          "host": "http://api.example.com",
+          "matched_at": "http://api.example.com",
+          "description": "A test CVE",
+          "tags": [],
+          "extracted_results": [],
+          "evidence_value": "Example CVE",
+          "source": "nuclei"
+        }
+      }
+    ],
+    "endpoint": [
+      {
+        "id": "de265808-2c03-4ef7-a208-aa63fbc50357",
+        "title": "Endpoint in /v1/login",
+        "category": "endpoint",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "api.example.com",
+        "endpoint": "/v1/login",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Discovered endpoint http://api.example.com/v1/login",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/login` on host `api.example.com`.",
+          "Send a crafted HTTP request to `/v1/login`.",
+          "Observe the anomalous response behavior confirming endpoint."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "25b1cdd2-2576-4456-b607-b9a66851e5be"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com/v1/login",
+          "path": "/v1/login",
+          "host": "api.example.com",
+          "method": "GET",
+          "params": {},
+          "evidence_value": "http://api.example.com/v1/login",
+          "source": "katana"
+        }
+      },
+      {
+        "id": "00930ae6-c0d5-4951-9f0c-0aceb1f9b0c6",
+        "title": "Endpoint in /v1/users",
+        "category": "endpoint",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "api.example.com",
+        "endpoint": "/v1/users",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Discovered endpoint http://api.example.com/v1/users",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `api.example.com`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming endpoint."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "c30186e3-c55c-4790-9ba8-f984da488730"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com/v1/users",
+          "path": "/v1/users",
+          "host": "api.example.com",
+          "method": "GET",
+          "params": {},
+          "evidence_value": "http://api.example.com/v1/users",
+          "source": "katana"
+        }
+      }
+    ],
+    "live_host": [
+      {
+        "id": "caa87eaf-d6c5-420d-9427-98ee581c1bee",
+        "title": "Live Host on admin.example.com",
+        "category": "live_host",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "admin.example.com",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Discovered live host http://admin.example.com",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `admin.example.com`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming live host."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "f3bdec53-5362-468a-994f-e2121b894807"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "url": "http://admin.example.com",
+          "scheme": "http",
+          "host": "admin.example.com",
+          "port": 80,
+          "status": 403,
+          "title": null,
+          "server": null,
+          "technologies": [],
+          "evidence_value": "http://admin.example.com",
+          "source": "httpx"
+        }
+      },
+      {
+        "id": "1e08196b-be2b-4bd0-9404-6f68311402c5",
+        "title": "Live Host on api.example.com",
+        "category": "live_host",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "api.example.com",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Discovered live host http://api.example.com",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `api.example.com`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming live host."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "939a219f-534d-4947-abcf-a12774ff779d"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com",
+          "scheme": "http",
+          "host": "api.example.com",
+          "port": 80,
+          "status": 200,
+          "title": null,
+          "server": "nginx",
+          "technologies": [
+            "Nginx",
+            "React"
+          ],
+          "evidence_value": "http://api.example.com",
+          "source": "httpx"
+        }
+      }
+    ],
+    "subdomain": [
+      {
+        "id": "ff1d52a4-a05f-4499-8cd5-309b87520809",
+        "title": "Subdomain on example.com",
+        "category": "subdomain",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "example.com",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Discovered subdomain api.example.com for target example.com",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `example.com`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming subdomain."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "70d73051-990c-47c3-acec-acd1a8211edb",
+          "73633b69-2e3b-41fc-9448-1ec73a0781e6"
+        ],
+        "duplicate_count": 2,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "source": "subfinder",
+          "hostname": "api.example.com",
+          "evidence_value": "api.example.com"
+        }
+      }
+    ],
+    "technology": [
+      {
+        "id": "3f35c079-afa9-4125-b60c-2b54beb299b0",
+        "title": "Technology on api.example.com",
+        "category": "technology",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "api.example.com",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Detected technology Nginx on http://api.example.com",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `api.example.com`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming technology."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "20bbd533-afb6-48f9-bb7a-64116ccbd0e0",
+          "efc53210-2357-456f-897b-1824115dcc18"
+        ],
+        "duplicate_count": 2,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "name": "Nginx",
+          "host": "api.example.com",
+          "url": "http://api.example.com",
+          "source": "httpx",
+          "evidence_value": "Nginx"
+        }
+      }
+    ]
+  },
+  "grouped_by_host": {
+    "http://api.example.com": [
+      {
+        "id": "658c270f-5b81-46e7-b3fd-154601423257",
+        "title": "Vulnerability on http://api.example.com",
+        "category": "vulnerability",
+        "severity": "high",
+        "cvss": {
+          "score": 7.5,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "severity_rating": "High",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "H",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "http://api.example.com",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "A test CVE",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `http://api.example.com`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming vulnerability."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with high impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "ca28a758-451c-48c3-bc10-94c9f6846ba4",
+          "a51fe97e-8dd0-4a42-a348-1a44dc01168e"
+        ],
+        "duplicate_count": 2,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "template_id": "CVE-2023-XXXX",
+          "name": "Example CVE",
+          "severity": "high",
+          "host": "http://api.example.com",
+          "matched_at": "http://api.example.com",
+          "description": "A test CVE",
+          "tags": [],
+          "extracted_results": [],
+          "evidence_value": "Example CVE",
+          "source": "nuclei"
+        }
+      }
+    ],
+    "api.example.com": [
+      {
+        "id": "de265808-2c03-4ef7-a208-aa63fbc50357",
+        "title": "Endpoint in /v1/login",
+        "category": "endpoint",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "api.example.com",
+        "endpoint": "/v1/login",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Discovered endpoint http://api.example.com/v1/login",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/login` on host `api.example.com`.",
+          "Send a crafted HTTP request to `/v1/login`.",
+          "Observe the anomalous response behavior confirming endpoint."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "25b1cdd2-2576-4456-b607-b9a66851e5be"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com/v1/login",
+          "path": "/v1/login",
+          "host": "api.example.com",
+          "method": "GET",
+          "params": {},
+          "evidence_value": "http://api.example.com/v1/login",
+          "source": "katana"
+        }
+      },
+      {
+        "id": "00930ae6-c0d5-4951-9f0c-0aceb1f9b0c6",
+        "title": "Endpoint in /v1/users",
+        "category": "endpoint",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "api.example.com",
+        "endpoint": "/v1/users",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Discovered endpoint http://api.example.com/v1/users",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `api.example.com`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming endpoint."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "c30186e3-c55c-4790-9ba8-f984da488730"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com/v1/users",
+          "path": "/v1/users",
+          "host": "api.example.com",
+          "method": "GET",
+          "params": {},
+          "evidence_value": "http://api.example.com/v1/users",
+          "source": "katana"
+        }
+      },
+      {
+        "id": "1e08196b-be2b-4bd0-9404-6f68311402c5",
+        "title": "Live Host on api.example.com",
+        "category": "live_host",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "api.example.com",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Discovered live host http://api.example.com",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `api.example.com`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming live host."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "939a219f-534d-4947-abcf-a12774ff779d"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com",
+          "scheme": "http",
+          "host": "api.example.com",
+          "port": 80,
+          "status": 200,
+          "title": null,
+          "server": "nginx",
+          "technologies": [
+            "Nginx",
+            "React"
+          ],
+          "evidence_value": "http://api.example.com",
+          "source": "httpx"
+        }
+      },
+      {
+        "id": "3f35c079-afa9-4125-b60c-2b54beb299b0",
+        "title": "Technology on api.example.com",
+        "category": "technology",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "api.example.com",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Detected technology Nginx on http://api.example.com",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `api.example.com`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming technology."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "20bbd533-afb6-48f9-bb7a-64116ccbd0e0",
+          "efc53210-2357-456f-897b-1824115dcc18"
+        ],
+        "duplicate_count": 2,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "name": "Nginx",
+          "host": "api.example.com",
+          "url": "http://api.example.com",
+          "source": "httpx",
+          "evidence_value": "Nginx"
+        }
+      }
+    ],
+    "admin.example.com": [
+      {
+        "id": "caa87eaf-d6c5-420d-9427-98ee581c1bee",
+        "title": "Live Host on admin.example.com",
+        "category": "live_host",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "admin.example.com",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Discovered live host http://admin.example.com",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `admin.example.com`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming live host."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "f3bdec53-5362-468a-994f-e2121b894807"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "url": "http://admin.example.com",
+          "scheme": "http",
+          "host": "admin.example.com",
+          "port": 80,
+          "status": 403,
+          "title": null,
+          "server": null,
+          "technologies": [],
+          "evidence_value": "http://admin.example.com",
+          "source": "httpx"
+        }
+      }
+    ],
+    "example.com": [
+      {
+        "id": "ff1d52a4-a05f-4499-8cd5-309b87520809",
+        "title": "Subdomain on example.com",
+        "category": "subdomain",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "example.com",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Discovered subdomain api.example.com for target example.com",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `example.com`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming subdomain."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "70d73051-990c-47c3-acec-acd1a8211edb",
+          "73633b69-2e3b-41fc-9448-1ec73a0781e6"
+        ],
+        "duplicate_count": 2,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "source": "subfinder",
+          "hostname": "api.example.com",
+          "evidence_value": "api.example.com"
+        }
+      }
+    ]
+  }
+}

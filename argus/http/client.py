@@ -98,6 +98,7 @@ class AuthorizedHttpClient:
         params: Optional[Dict[str, Any]] = None,
         json: Optional[Any] = None,
         data: Optional[Any] = None,
+        files: Optional[Any] = None,
         timeout: Optional[float] = None,
         action: str = "http_request",
         user_id: str = "system_user"
@@ -155,6 +156,7 @@ class AuthorizedHttpClient:
                 params=params,
                 json=json,
                 data=data,
+                files=files,
                 timeout=timeout or 10.0,
                 follow_redirects=True
             )
@@ -363,6 +365,7 @@ class AuthenticatedHttpClient(AuthorizedHttpClient):
         params: Optional[Dict[str, Any]] = None,
         json: Optional[Any] = None,
         data: Optional[Any] = None,
+        files: Optional[Any] = None,
         timeout: Optional[float] = None,
         action: str = "http_request",
         user_id: str = "system_user",
@@ -441,6 +444,7 @@ class AuthenticatedHttpClient(AuthorizedHttpClient):
                     params=params,
                     json=json,
                     data=data,
+                    files=files,
                     timeout=request_timeout,
                 )
                 elapsed = time.time() - start_time

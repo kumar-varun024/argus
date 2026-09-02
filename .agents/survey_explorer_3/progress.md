@@ -1,11 +1,13 @@
-# Progress Tracking
+# Progress Log — survey_explorer_3
 
-- [x] Initialized DISPATCH.md and BRIEFING.md
-- [x] Run test suite baseline and verify execution (861 baseline tests)
-- [x] Inspect existing collector tests (Sprint 5, 6, 8, 9)
-- [x] Inspect mocking fixtures and HTTP client test utilities
-- [x] Inspect E2E mission execution and graph assertion patterns
-- [x] Design Sprint 9 Test Plan (35 test cases across 8 functional categories)
-- [x] Write handoff.md and send completion message
+Last visited: 2026-09-02T13:46:30Z
 
-Last visited: 2026-08-30T06:41:30Z
+## Status
+- [x] Baseline test suite execution and collection: 1,929 passing tests across 113 test files (63.60s execution time).
+- [x] Test suite directory breakdown and test file distribution audited.
+- [x] Mocking utilities and HTTP client patterns audited (`HttpResponse`, `Mock<Collector>HttpClient`, `MockAdversarialHttpClient`).
+- [x] Test fixtures and isolation conventions audited (self-contained tests, direct dataclass instantiation).
+- [x] Existing collector test suites examined (`test_auth_bypass.py`, `test_file_upload.py`, `test_cors_security.py`, `test_xss.py`, etc.).
+- [x] Pipeline test patterns examined (`ToolRegistry`, `PluginExecutorAdapter`, `TaskGenerator`, `AttackSurfaceGraphBuilder`, `CVSSCalculator`).
+- [x] Comprehensive testing requirements and test matrix formulated for Sprint 29 (R1-R6).
+- [ ] Write final 5-component handoff report to `handoff.md`.

@@ -1,16 +1,14 @@
-# Progress Tracker - survey_explorer_2
+# Progress Log — Survey Explorer 2
 
-Last visited: 2026-08-29T16:27:00Z
-Status: Completed
+Last visited: 2026-09-02T13:47:00Z
 
-## Tasks
-- [x] Initialize briefing, dispatch, and progress
+## Status
+- [x] Initialized DISPATCH.md and BRIEFING.md
 - [x] Read ORIGINAL_REQUEST.md
-- [x] Survey 1: TaskGenerator and DAG wiring (endpoint discovery to collector dispatch)
-- [x] Survey 2: Tool Registry and Plugin architecture
-- [x] Survey 3: Attack Surface Graph model (nodes, edges, HAS_VULNERABILITY)
-- [x] Survey 4: Severity scoring and vulnerability attributes
-- [x] Survey 5: Identify exact integration hooks for SQLInjectionCollector
-- [x] Verify baseline test suite (861 passing tests)
-- [x] Draft comprehensive handoff report (`handoff.md`)
-- [x] Finalize briefing and notify parent
+- [x] TaskGenerator DAG and Collector Sequencing investigation
+- [x] Tool Registry and Plugin Registration investigation
+- [x] Attack Surface Graph & Vulnerability Nodes investigation
+- [x] CVSS Calibration & CWE Mapping investigation
+- [x] Document all exact file paths, signatures, enums, modification points for R5
+- [ ] Compile and write comprehensive handoff.md
+- [ ] Send completion message to parent

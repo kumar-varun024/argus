@@ -43,9 +43,22 @@ class AttackSurfaceGraphBuilder:
             return graph
 
         evidence_items = evidence.all() if hasattr(evidence, "all") else list(evidence)
+        by_cat: dict[str, list[Any]] = {}
+        for ev in evidence_items:
+            cat = getattr(ev, "category", None)
+            if cat is not None:
+                by_cat.setdefault(str(cat), []).append(ev)
+
+        def get_items(*categories: str) -> list[Any]:
+            res: list[Any] = []
+            for c in categories:
+                items = by_cat.get(c)
+                if items:
+                    res.extend(items)
+            return res
 
         # 2. Subdomains
-        for ev in evidence_items:
+        for ev in get_items("subdomain"):
             if getattr(ev, "category", None) == "subdomain":
                 hostname = ev.metadata.get("hostname") or ev.value
                 if hostname:
@@ -58,7 +71,7 @@ class AttackSurfaceGraphBuilder:
                         graph.connect(f"target:{target}", sub_id, edge_type="RESOLVES_TO")
 
         # 3. Live Hosts
-        for ev in evidence_items:
+        for ev in get_items("live_host"):
             if getattr(ev, "category", None) == "live_host":
                 url = ev.metadata.get("url") or ev.value
                 host = ev.metadata.get("host")
@@ -102,8 +115,64 @@ class AttackSurfaceGraphBuilder:
                         graph.add(Node(id=tech_id, type="technology", value=tech_name, metadata={"name": tech_name}))
                         graph.connect(lh_id, tech_id, edge_type="RUNS_TECHNOLOGY")
 
+        # Fast lookup indexes for live hosts
+        live_hosts_list = graph.nodes_by_type("live_host")
+        lh_by_url: dict[str, Node] = {}
+        lh_by_host: dict[str, Node] = {}
+        for lh in live_hosts_list:
+            lh_val = lh.value
+            lh_url = lh.metadata.get("url") or lh_val
+            lh_host = lh.metadata.get("host")
+            if lh_url:
+                lh_by_url[lh_url] = lh
+                lh_by_url[lh_url.rstrip("/")] = lh
+            if lh_host:
+                lh_by_host[lh_host] = lh
+            if lh_val:
+                lh_by_url[lh_val] = lh
+                lh_by_host[lh_val] = lh
+
+        def resolve_lh(target_url_val: Optional[str] = None, host_val: Optional[str] = None) -> Optional[Node]:
+            if target_url_val:
+                if target_url_val in lh_by_url:
+                    return lh_by_url[target_url_val]
+                t_rstrip = target_url_val.rstrip("/")
+                if t_rstrip in lh_by_url:
+                    return lh_by_url[t_rstrip]
+                if target_url_val in lh_by_host:
+                    return lh_by_host[target_url_val]
+                parsed = urllib.parse.urlparse(target_url_val)
+                if parsed.scheme and parsed.netloc:
+                    base = f"{parsed.scheme}://{parsed.netloc}"
+                    if base in lh_by_url:
+                        return lh_by_url[base]
+                if parsed.netloc and parsed.netloc in lh_by_host:
+                    return lh_by_host[parsed.netloc]
+                if parsed.hostname and parsed.hostname in lh_by_host:
+                    return lh_by_host[parsed.hostname]
+                for n in live_hosts_list:
+                    u = n.metadata.get("url") or n.value
+                    if u and (target_url_val.startswith(u) or u.startswith(target_url_val)):
+                        return n
+
+            if host_val:
+                if host_val in lh_by_host:
+                    return lh_by_host[host_val]
+                if host_val in lh_by_url:
+                    return lh_by_url[host_val]
+                parsed_h = urllib.parse.urlparse(host_val).hostname or host_val
+                if parsed_h in lh_by_host:
+                    return lh_by_host[parsed_h]
+                for n in live_hosts_list:
+                    if n.metadata.get("host") == host_val or n.value == host_val or n.metadata.get("host") == parsed_h or parsed_h in n.value:
+                        return n
+
+            if len(live_hosts_list) == 1:
+                return live_hosts_list[0]
+            return None
+
         # 4. Technologies (distinct evidence items)
-        for ev in evidence_items:
+        for ev in get_items("technology"):
             if getattr(ev, "category", None) == "technology":
                 tech_name = ev.metadata.get("name") or ev.value
                 if tech_name:
@@ -115,24 +184,12 @@ class AttackSurfaceGraphBuilder:
                     graph.add(Node(id=tech_id, type="technology", value=tech_name, metadata=tech_meta))
 
                     lh_target = ev.metadata.get("url") or ev.metadata.get("host")
-                    lh_node = None
-                    if lh_target:
-                        lh_node = graph.get(f"live_host:{lh_target}")
-                        if not lh_node:
-                            for n in graph.nodes_by_type("live_host"):
-                                if n.value == lh_target or n.metadata.get("url") == lh_target or n.metadata.get("host") == lh_target:
-                                    lh_node = n
-                                    break
-                    if not lh_node:
-                        live_hosts = graph.nodes_by_type("live_host")
-                        if len(live_hosts) == 1:
-                            lh_node = live_hosts[0]
-
+                    lh_node = resolve_lh(target_url_val=ev.metadata.get("url"), host_val=ev.metadata.get("host"))
                     if lh_node:
                         graph.connect(lh_node.id, tech_id, edge_type="RUNS_TECHNOLOGY")
 
         # 5. Endpoints
-        for ev in evidence_items:
+        for ev in get_items("endpoint"):
             if getattr(ev, "category", None) == "endpoint":
                 ep_url = ev.metadata.get("url") or ev.value
                 ep_host = ev.metadata.get("host")
@@ -150,28 +207,12 @@ class AttackSurfaceGraphBuilder:
                 graph.add(Node(id=ep_id, type="endpoint", value=ep_url, metadata=ep_meta))
 
                 # Link Live Host -> Endpoint
-                lh_node = None
-                if ep_url:
-                    for n in graph.nodes_by_type("live_host"):
-                        lh_url = n.metadata.get("url") or n.value
-                        if lh_url and ep_url.startswith(lh_url):
-                            lh_node = n
-                            break
-                if not lh_node and ep_host:
-                    for n in graph.nodes_by_type("live_host"):
-                        if n.metadata.get("host") == ep_host or n.value == ep_host:
-                            lh_node = n
-                            break
-                if not lh_node:
-                    live_hosts = graph.nodes_by_type("live_host")
-                    if len(live_hosts) == 1:
-                        lh_node = live_hosts[0]
-
+                lh_node = resolve_lh(target_url_val=ep_url, host_val=ep_host)
                 if lh_node:
                     graph.connect(lh_node.id, ep_id, edge_type="HAS_ENDPOINT")
 
         # 6. Vulnerabilities
-        for ev in evidence_items:
+        for ev in get_items("vulnerability"):
             if getattr(ev, "category", None) == "vulnerability":
                 vuln_name = ev.metadata.get("template_id") or ev.metadata.get("name") or ev.value
                 vuln_id = f"vulnerability:{vuln_name}"
@@ -186,31 +227,13 @@ class AttackSurfaceGraphBuilder:
                 graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
 
                 # Link Live Host -> Vulnerability
-                lh_node = None
                 vuln_host = ev.metadata.get("host") or ev.metadata.get("matched_at")
-                if vuln_host:
-                    for n in graph.nodes_by_type("live_host"):
-                        lh_url = n.metadata.get("url") or n.value
-                        if lh_url and (vuln_host.startswith(lh_url) or lh_url.startswith(vuln_host) or n.metadata.get("host") == vuln_host):
-                            lh_node = n
-                            break
-                    if not lh_node:
-                        parsed_vhost = urllib.parse.urlparse(vuln_host).hostname or vuln_host
-                        for n in graph.nodes_by_type("live_host"):
-                            if n.metadata.get("host") == parsed_vhost or parsed_vhost in n.value:
-                                lh_node = n
-                                break
-                if not lh_node:
-                    live_hosts = graph.nodes_by_type("live_host")
-                    if len(live_hosts) == 1:
-                        lh_node = live_hosts[0]
-
+                lh_node = resolve_lh(target_url_val=vuln_host, host_val=vuln_host)
                 if lh_node:
                     graph.connect(lh_node.id, vuln_id, edge_type="HAS_VULNERABILITY")
 
         # 7. Subdomain Takeover Vulnerabilities
-        for ev in evidence_items:
-            if getattr(ev, "category", None) == "subdomain_takeover":
+        for ev in get_items("subdomain_takeover"):
                 subdomain = ev.metadata.get("subdomain") or ev.metadata.get("host") or ev.value
                 cname = ev.metadata.get("cname")
                 service = ev.metadata.get("service") or "Unknown"
@@ -240,8 +263,7 @@ class AttackSurfaceGraphBuilder:
                         graph.connect(f"subdomain:{subdomain}", cname_id, edge_type="POINTS_TO_CNAME")
 
         # 8. Information Disclosure Vulnerabilities
-        for ev in evidence_items:
-            if getattr(ev, "category", None) == "information_disclosure":
+        for ev in get_items("information_disclosure"):
                 target_url = ev.metadata.get("url") or ev.value
                 base_url = ev.metadata.get("host") or target_url
                 template_id = ev.metadata.get("template_id") or "info-disclosure"
@@ -295,8 +317,7 @@ class AttackSurfaceGraphBuilder:
                     graph.connect(vuln_id, sub_id, edge_type="DISCLOSED_SUBDOMAIN")
 
         # 9. Broken Access Control / IDOR Vulnerabilities
-        for ev in evidence_items:
-            if getattr(ev, "category", None) == "broken_access_control":
+        for ev in get_items("broken_access_control"):
                 target_url = ev.metadata.get("url") or ev.value
                 parsed_url = urllib.parse.urlparse(target_url) if target_url else None
                 base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
@@ -316,28 +337,13 @@ class AttackSurfaceGraphBuilder:
                 graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
 
                 # Link live host to endpoint & vulnerability
-                lh_node = None
-                if base_url:
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
                     lh_id = f"live_host:{base_url}"
                     if lh_id not in graph.nodes:
                         parsed_b = urllib.parse.urlparse(base_url)
                         graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
                     lh_node = graph.get(lh_id)
-                    if not lh_node:
-                        for n in graph.nodes_by_type("live_host"):
-                            if n.value == base_url or n.metadata.get("url") == base_url or n.metadata.get("host") == base_url:
-                                lh_node = n
-                                break
-                if not lh_node and target_url:
-                    for n in graph.nodes_by_type("live_host"):
-                        lh_url = n.metadata.get("url") or n.value
-                        if lh_url and target_url.startswith(lh_url):
-                            lh_node = n
-                            break
-                if not lh_node:
-                    live_hosts = graph.nodes_by_type("live_host")
-                    if len(live_hosts) == 1:
-                        lh_node = live_hosts[0]
 
                 if lh_node:
                     if ep_id:
@@ -347,8 +353,7 @@ class AttackSurfaceGraphBuilder:
                     graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
 
         # 10. Path Traversal Vulnerabilities
-        for ev in evidence_items:
-            if getattr(ev, "category", None) == "path_traversal":
+        for ev in get_items("path_traversal"):
                 target_url = ev.metadata.get("url") or ev.value
                 parsed_url = urllib.parse.urlparse(target_url) if target_url else None
                 base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
@@ -368,28 +373,13 @@ class AttackSurfaceGraphBuilder:
                 graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
 
                 # Link live host to endpoint & vulnerability
-                lh_node = None
-                if base_url:
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
                     lh_id = f"live_host:{base_url}"
                     if lh_id not in graph.nodes:
                         parsed_b = urllib.parse.urlparse(base_url)
                         graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
                     lh_node = graph.get(lh_id)
-                    if not lh_node:
-                        for n in graph.nodes_by_type("live_host"):
-                            if n.value == base_url or n.metadata.get("url") == base_url or n.metadata.get("host") == base_url:
-                                lh_node = n
-                                break
-                if not lh_node and target_url:
-                    for n in graph.nodes_by_type("live_host"):
-                        lh_url = n.metadata.get("url") or n.value
-                        if lh_url and target_url.startswith(lh_url):
-                            lh_node = n
-                            break
-                if not lh_node:
-                    live_hosts = graph.nodes_by_type("live_host")
-                    if len(live_hosts) == 1:
-                        lh_node = live_hosts[0]
 
                 if lh_node:
                     if ep_id:
@@ -399,8 +389,7 @@ class AttackSurfaceGraphBuilder:
                     graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
 
         # 11. SQL Injection Vulnerabilities
-        for ev in evidence_items:
-            if getattr(ev, "category", None) == "sql_injection":
+        for ev in get_items("sql_injection"):
                 target_url = ev.metadata.get("url") or ev.value
                 parsed_url = urllib.parse.urlparse(target_url) if target_url else None
                 base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
@@ -421,28 +410,13 @@ class AttackSurfaceGraphBuilder:
                 graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
 
                 # Link live host to endpoint & vulnerability
-                lh_node = None
-                if base_url:
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
                     lh_id = f"live_host:{base_url}"
                     if lh_id not in graph.nodes:
                         parsed_b = urllib.parse.urlparse(base_url)
                         graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
                     lh_node = graph.get(lh_id)
-                    if not lh_node:
-                        for n in graph.nodes_by_type("live_host"):
-                            if n.value == base_url or n.metadata.get("url") == base_url or n.metadata.get("host") == base_url:
-                                lh_node = n
-                                break
-                if not lh_node and target_url:
-                    for n in graph.nodes_by_type("live_host"):
-                        lh_url = n.metadata.get("url") or n.value
-                        if lh_url and target_url.startswith(lh_url):
-                            lh_node = n
-                            break
-                if not lh_node:
-                    live_hosts = graph.nodes_by_type("live_host")
-                    if len(live_hosts) == 1:
-                        lh_node = live_hosts[0]
 
                 if lh_node:
                     if ep_id:
@@ -452,8 +426,7 @@ class AttackSurfaceGraphBuilder:
                     graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
 
         # 12. Cross-Site Scripting (XSS) Vulnerabilities
-        for ev in evidence_items:
-            if getattr(ev, "category", None) in ("xss", "cross_site_scripting"):
+        for ev in get_items("xss", "cross_site_scripting"):
                 target_url = ev.metadata.get("url") or ev.value
                 parsed_url = urllib.parse.urlparse(target_url) if target_url else None
                 base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
@@ -490,28 +463,13 @@ class AttackSurfaceGraphBuilder:
                 graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
 
                 # Link live host to endpoint & vulnerability
-                lh_node = None
-                if base_url:
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
                     lh_id = f"live_host:{base_url}"
                     if lh_id not in graph.nodes:
                         parsed_b = urllib.parse.urlparse(base_url)
                         graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
                     lh_node = graph.get(lh_id)
-                    if not lh_node:
-                        for n in graph.nodes_by_type("live_host"):
-                            if n.value == base_url or n.metadata.get("url") == base_url or n.metadata.get("host") == base_url:
-                                lh_node = n
-                                break
-                if not lh_node and target_url:
-                    for n in graph.nodes_by_type("live_host"):
-                        lh_url = n.metadata.get("url") or n.value
-                        if lh_url and target_url.startswith(lh_url):
-                            lh_node = n
-                            break
-                if not lh_node:
-                    live_hosts = graph.nodes_by_type("live_host")
-                    if len(live_hosts) == 1:
-                        lh_node = live_hosts[0]
 
                 if lh_node:
                     if ep_id:
@@ -521,8 +479,7 @@ class AttackSurfaceGraphBuilder:
                     graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
 
         # 13. Command Injection (CMDi) Vulnerabilities
-        for ev in evidence_items:
-            if getattr(ev, "category", None) in ("command_injection", "cmdi", "os_command_injection", "cmd_injection"):
+        for ev in get_items("command_injection", "cmdi", "os_command_injection", "cmd_injection"):
                 target_url = ev.metadata.get("url") or ev.value
                 parsed_url = urllib.parse.urlparse(target_url) if target_url else None
                 base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
@@ -544,28 +501,13 @@ class AttackSurfaceGraphBuilder:
                 graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
 
                 # Link live host to endpoint & vulnerability
-                lh_node = None
-                if base_url:
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
                     lh_id = f"live_host:{base_url}"
                     if lh_id not in graph.nodes:
                         parsed_b = urllib.parse.urlparse(base_url)
                         graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
                     lh_node = graph.get(lh_id)
-                    if not lh_node:
-                        for n in graph.nodes_by_type("live_host"):
-                            if n.value == base_url or n.metadata.get("url") == base_url or n.metadata.get("host") == base_url:
-                                lh_node = n
-                                break
-                if not lh_node and target_url:
-                    for n in graph.nodes_by_type("live_host"):
-                        lh_url = n.metadata.get("url") or n.value
-                        if lh_url and target_url.startswith(lh_url):
-                            lh_node = n
-                            break
-                if not lh_node:
-                    live_hosts = graph.nodes_by_type("live_host")
-                    if len(live_hosts) == 1:
-                        lh_node = live_hosts[0]
 
                 if lh_node:
                     if ep_id:
@@ -575,8 +517,7 @@ class AttackSurfaceGraphBuilder:
                     graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
 
         # 14. Server-Side Request Forgery (SSRF) Vulnerabilities
-        for ev in evidence_items:
-            if getattr(ev, "category", None) in ("ssrf", "server_side_request_forgery", "ssrf_validation"):
+        for ev in get_items("ssrf", "server_side_request_forgery", "ssrf_validation"):
                 target_url = ev.metadata.get("url") or ev.value
                 parsed_url = urllib.parse.urlparse(target_url) if target_url else None
                 base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
@@ -598,28 +539,13 @@ class AttackSurfaceGraphBuilder:
                 graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
 
                 # Link live host to endpoint & vulnerability
-                lh_node = None
-                if base_url:
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
                     lh_id = f"live_host:{base_url}"
                     if lh_id not in graph.nodes:
                         parsed_b = urllib.parse.urlparse(base_url)
                         graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
                     lh_node = graph.get(lh_id)
-                    if not lh_node:
-                        for n in graph.nodes_by_type("live_host"):
-                            if n.value == base_url or n.metadata.get("url") == base_url or n.metadata.get("host") == base_url:
-                                lh_node = n
-                                break
-                if not lh_node and target_url:
-                    for n in graph.nodes_by_type("live_host"):
-                        lh_url = n.metadata.get("url") or n.value
-                        if lh_url and target_url.startswith(lh_url):
-                            lh_node = n
-                            break
-                if not lh_node:
-                    live_hosts = graph.nodes_by_type("live_host")
-                    if len(live_hosts) == 1:
-                        lh_node = live_hosts[0]
 
                 if lh_node:
                     if ep_id:
@@ -629,8 +555,7 @@ class AttackSurfaceGraphBuilder:
                     graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
 
         # 15. OAuth / OIDC Misconfigurations, Token Validation & Stateful Authentication Vulnerabilities
-        for ev in evidence_items:
-            if getattr(ev, "category", None) in (
+        for ev in get_items(
                 "oauth",
                 "oidc",
                 "oauth_oidc",
@@ -660,28 +585,707 @@ class AttackSurfaceGraphBuilder:
                 graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
 
                 # Link live host to endpoint & vulnerability
-                lh_node = None
-                if base_url:
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
                     lh_id = f"live_host:{base_url}"
                     if lh_id not in graph.nodes:
                         parsed_b = urllib.parse.urlparse(base_url)
                         graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
                     lh_node = graph.get(lh_id)
-                    if not lh_node:
-                        for n in graph.nodes_by_type("live_host"):
-                            if n.value == base_url or n.metadata.get("url") == base_url or n.metadata.get("host") == base_url:
-                                lh_node = n
-                                break
-                if not lh_node and target_url:
-                    for n in graph.nodes_by_type("live_host"):
-                        lh_url = n.metadata.get("url") or n.value
-                        if lh_url and target_url.startswith(lh_url):
-                            lh_node = n
-                            break
-                if not lh_node:
-                    live_hosts = graph.nodes_by_type("live_host")
-                    if len(live_hosts) == 1:
-                        lh_node = live_hosts[0]
+
+                if lh_node:
+                    if ep_id:
+                        graph.connect(lh_node.id, ep_id, edge_type="HAS_ENDPOINT")
+                    graph.connect(lh_node.id, vuln_id, edge_type="HAS_VULNERABILITY")
+                if ep_id:
+                    graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
+
+        # 16. XML Parser Security / XXE Vulnerabilities
+        for ev in get_items(
+                "xml_parser_validation",
+                "xxe",
+                "xml_external_entity",
+                "xml_parser",
+                "xml_parser_security",
+            ):
+                target_url = ev.metadata.get("url") or ev.value
+                parsed_url = urllib.parse.urlparse(target_url) if target_url else None
+                base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
+                template_id = ev.metadata.get("template_id") or "xxe"
+                param_name = ev.metadata.get("parameter") or ""
+                technique = ev.metadata.get("technique") or "external_entity"
+                vuln_id = f"vulnerability:{template_id}:{target_url}:{param_name}" if (target_url and param_name) else (f"vulnerability:{template_id}:{target_url}" if target_url else f"vulnerability:{template_id}")
+                vuln_name = ev.title or f"XML Parser Misconfiguration ({technique})"
+                vuln_meta = dict(ev.metadata) if ev.metadata else {}
+                if "name" not in vuln_meta:
+                    vuln_meta["name"] = vuln_name
+                if "severity" not in vuln_meta:
+                    vuln_meta["severity"] = getattr(ev, "severity", "critical") or "critical"
+
+                ep_id = f"endpoint:{target_url}" if target_url else None
+                if ep_id and ep_id not in graph.nodes:
+                    graph.add(Node(id=ep_id, type="endpoint", value=target_url, metadata={"url": target_url, "status_code": ev.metadata.get("status_code", 200)}))
+
+                graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
+
+                # Link live host to endpoint & vulnerability
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
+                    lh_id = f"live_host:{base_url}"
+                    if lh_id not in graph.nodes:
+                        parsed_b = urllib.parse.urlparse(base_url)
+                        graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
+                    lh_node = graph.get(lh_id)
+
+                if lh_node:
+                    if ep_id:
+                        graph.connect(lh_node.id, ep_id, edge_type="HAS_ENDPOINT")
+                    graph.connect(lh_node.id, vuln_id, edge_type="HAS_VULNERABILITY")
+                if ep_id:
+                    graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
+
+        # 17. Insecure Deserialization Vulnerabilities
+        for ev in get_items(
+                "deserialization",
+                "insecure_deserialization",
+                "unsafe_deserialization",
+                "java_deserialization",
+                "python_pickle",
+                "php_unserialize",
+                "ruby_marshal",
+                "dotnet_viewstate",
+                "dotnet_binary_formatter",
+            ):
+                target_url = ev.metadata.get("url") or ev.value
+                parsed_url = urllib.parse.urlparse(target_url) if target_url else None
+                base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
+                template_id = ev.metadata.get("template_id") or "deserialization"
+                param_name = ev.metadata.get("parameter") or ""
+                fmt = ev.metadata.get("format") or "deserialization"
+                vuln_id = f"vulnerability:{template_id}:{target_url}:{param_name}" if (target_url and param_name) else (f"vulnerability:{template_id}:{target_url}" if target_url else f"vulnerability:{template_id}")
+                vuln_name = ev.title or f"Insecure Deserialization ({fmt})"
+                vuln_meta = dict(ev.metadata) if ev.metadata else {}
+                if "name" not in vuln_meta:
+                    vuln_meta["name"] = vuln_name
+                if "severity" not in vuln_meta:
+                    vuln_meta["severity"] = getattr(ev, "severity", "critical") or "critical"
+
+                ep_id = f"endpoint:{target_url}" if target_url else None
+                if ep_id and ep_id not in graph.nodes:
+                    graph.add(Node(id=ep_id, type="endpoint", value=target_url, metadata={"url": target_url, "status_code": ev.metadata.get("status_code", 200)}))
+
+                graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
+
+                # Link live host to endpoint & vulnerability
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
+                    lh_id = f"live_host:{base_url}"
+                    if lh_id not in graph.nodes:
+                        parsed_b = urllib.parse.urlparse(base_url)
+                        graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
+                    lh_node = graph.get(lh_id)
+
+                if lh_node:
+                    if ep_id:
+                        graph.connect(lh_node.id, ep_id, edge_type="HAS_ENDPOINT")
+                    graph.connect(lh_node.id, vuln_id, edge_type="HAS_VULNERABILITY")
+                if ep_id:
+                    graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
+
+        # 18. GraphQL Security Vulnerabilities
+        for ev in get_items(
+                "graphql",
+                "graphql_security",
+                "graphql_introspection",
+                "graphql_dos",
+                "graphql_batching",
+                "graphql_access_control",
+            ):
+                target_url = ev.metadata.get("url") or ev.value
+                parsed_url = urllib.parse.urlparse(target_url) if target_url else None
+                base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
+                template_id = ev.metadata.get("template_id") or "graphql-security"
+                param_name = ev.metadata.get("parameter") or ev.metadata.get("technique") or ""
+                vuln_type = ev.metadata.get("vulnerability_type") or ev.metadata.get("technique") or "security_misconfiguration"
+                vuln_id = f"vulnerability:{template_id}:{target_url}:{param_name}" if (target_url and param_name) else (f"vulnerability:{template_id}:{target_url}" if target_url else f"vulnerability:{template_id}")
+                vuln_name = ev.title or f"GraphQL Security ({vuln_type})"
+                vuln_meta = dict(ev.metadata) if ev.metadata else {}
+                if "name" not in vuln_meta:
+                    vuln_meta["name"] = vuln_name
+                if "severity" not in vuln_meta:
+                    vuln_meta["severity"] = getattr(ev, "severity", "medium") or "medium"
+
+                ep_id = f"endpoint:{target_url}" if target_url else None
+                if ep_id and ep_id not in graph.nodes:
+                    graph.add(Node(id=ep_id, type="endpoint", value=target_url, metadata={"url": target_url, "status_code": ev.metadata.get("status_code", 200)}))
+
+                graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
+
+                # Link live host to endpoint & vulnerability
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
+                    lh_id = f"live_host:{base_url}"
+                    if lh_id not in graph.nodes:
+                        parsed_b = urllib.parse.urlparse(base_url)
+                        graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
+                    lh_node = graph.get(lh_id)
+
+                if lh_node:
+                    if ep_id:
+                        graph.connect(lh_node.id, ep_id, edge_type="HAS_ENDPOINT")
+                    graph.connect(lh_node.id, vuln_id, edge_type="HAS_VULNERABILITY")
+                if ep_id:
+                    graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
+
+        # 19. WebSocket Security Vulnerabilities
+        for ev in get_items(
+                "websocket",
+                "websocket_security",
+                "cswsh",
+                "websocket_injection",
+                "websocket_dos",
+                "websocket_auth",
+            ):
+                target_url = ev.metadata.get("url") or ev.value
+                parsed_url = urllib.parse.urlparse(target_url) if target_url else None
+                base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
+                template_id = ev.metadata.get("template_id") or "websocket-security"
+                param_name = ev.metadata.get("parameter") or ev.metadata.get("technique") or ""
+                vuln_type = ev.metadata.get("vulnerability_type") or ev.metadata.get("technique") or "security_misconfiguration"
+                vuln_id = f"vulnerability:{template_id}:{target_url}:{param_name}" if (target_url and param_name) else (f"vulnerability:{template_id}:{target_url}" if target_url else f"vulnerability:{template_id}")
+                vuln_name = ev.title or f"WebSocket Security ({vuln_type})"
+                vuln_meta = dict(ev.metadata) if ev.metadata else {}
+                if "name" not in vuln_meta:
+                    vuln_meta["name"] = vuln_name
+                if "severity" not in vuln_meta:
+                    vuln_meta["severity"] = getattr(ev, "severity", "medium") or "medium"
+
+                ep_id = f"endpoint:{target_url}" if target_url else None
+                if ep_id and ep_id not in graph.nodes:
+                    graph.add(Node(id=ep_id, type="endpoint", value=target_url, metadata={"url": target_url, "status_code": ev.metadata.get("status_code", 200)}))
+
+                graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
+
+                # Link live host to endpoint & vulnerability
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
+                    lh_id = f"live_host:{base_url}"
+                    if lh_id not in graph.nodes:
+                        parsed_b = urllib.parse.urlparse(base_url)
+                        graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
+                    lh_node = graph.get(lh_id)
+
+                if lh_node:
+                    if ep_id:
+                        graph.connect(lh_node.id, ep_id, edge_type="HAS_ENDPOINT")
+                    graph.connect(lh_node.id, vuln_id, edge_type="HAS_VULNERABILITY")
+                if ep_id:
+                    graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
+
+        # 20. HTTP Request Smuggling Vulnerabilities
+        for ev in get_items(
+                "request_smuggling",
+                "http_request_smuggling",
+                "cl_te",
+                "te_cl",
+                "te_te",
+                "h2_smuggling",
+                "smuggling",
+                "http_desync",
+            ):
+                target_url = ev.metadata.get("url") or ev.value
+                parsed_url = urllib.parse.urlparse(target_url) if target_url else None
+                base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
+                template_id = ev.metadata.get("template_id") or "request-smuggling"
+                param_name = ev.metadata.get("parameter") or ev.metadata.get("technique") or ""
+                vuln_type = ev.metadata.get("vulnerability_type") or ev.metadata.get("technique") or "request_smuggling"
+                vuln_id = f"vulnerability:{template_id}:{target_url}:{param_name}" if (target_url and param_name) else (f"vulnerability:{template_id}:{target_url}" if target_url else f"vulnerability:{template_id}")
+                vuln_name = ev.title or f"HTTP Request Smuggling ({vuln_type})"
+                vuln_meta = dict(ev.metadata) if ev.metadata else {}
+                if "name" not in vuln_meta:
+                    vuln_meta["name"] = vuln_name
+                if "severity" not in vuln_meta:
+                    vuln_meta["severity"] = getattr(ev, "severity", "critical") or "critical"
+
+                ep_id = f"endpoint:{target_url}" if target_url else None
+                if ep_id and ep_id not in graph.nodes:
+                    graph.add(Node(id=ep_id, type="endpoint", value=target_url, metadata={"url": target_url, "status_code": ev.metadata.get("status_code", 200)}))
+
+                graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
+
+                # Link live host to endpoint & vulnerability
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
+                    lh_id = f"live_host:{base_url}"
+                    if lh_id not in graph.nodes:
+                        parsed_b = urllib.parse.urlparse(base_url)
+                        graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
+                    lh_node = graph.get(lh_id)
+
+                if lh_node:
+                    if ep_id:
+                        graph.connect(lh_node.id, ep_id, edge_type="HAS_ENDPOINT")
+                    graph.connect(lh_node.id, vuln_id, edge_type="HAS_VULNERABILITY")
+                if ep_id:
+                    graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
+
+        # 21. Race Condition & Concurrency Vulnerabilities
+        for ev in get_items(
+            "race_condition",
+            "race_conditions",
+            "limit_overrun",
+            "toctou",
+            "concurrency",
+            "concurrency_limit",
+            "session_concurrency",
+            "multi_redemption",
+        ):
+            target_url = ev.metadata.get("url") or ev.value
+            parsed_url = urllib.parse.urlparse(target_url) if target_url else None
+            base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
+            template_id = ev.metadata.get("template_id") or "race-conditions"
+            param_name = ev.metadata.get("parameter") or ev.metadata.get("technique") or ""
+            vuln_type = ev.metadata.get("vulnerability_type") or ev.metadata.get("technique") or "race_condition"
+            vuln_id = f"vulnerability:{template_id}:{target_url}:{param_name}" if (target_url and param_name) else (f"vulnerability:{template_id}:{target_url}" if target_url else f"vulnerability:{template_id}")
+            vuln_name = ev.title or f"Race Condition ({vuln_type})"
+            vuln_meta = dict(ev.metadata) if ev.metadata else {}
+            if "name" not in vuln_meta:
+                vuln_meta["name"] = vuln_name
+            if "severity" not in vuln_meta:
+                vuln_meta["severity"] = getattr(ev, "severity", "high") or "high"
+
+            ep_id = f"endpoint:{target_url}" if target_url else None
+            if ep_id and ep_id not in graph.nodes:
+                graph.add(Node(id=ep_id, type="endpoint", value=target_url, metadata={"url": target_url, "status_code": ev.metadata.get("status_code", 200)}))
+
+            graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
+
+            # Link live host to endpoint & vulnerability
+            lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+            if not lh_node and base_url:
+                lh_id = f"live_host:{base_url}"
+                if lh_id not in graph.nodes:
+                    parsed_b = urllib.parse.urlparse(base_url)
+                    graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
+                lh_node = graph.get(lh_id)
+
+            if lh_node:
+                if ep_id:
+                    graph.connect(lh_node.id, ep_id, edge_type="HAS_ENDPOINT")
+                graph.connect(lh_node.id, vuln_id, edge_type="HAS_VULNERABILITY")
+            if ep_id:
+                graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
+
+        # 22. Business Logic Flaws & State Machine Security Vulnerabilities
+        for ev in get_items(
+            "business_logic",
+            "business_logic_flaws",
+            "business_logic_security",
+            "state_machine",
+            "state_machine_security",
+            "price_tampering",
+            "quantity_tampering",
+            "parameter_tampering",
+            "workflow_bypass",
+            "workflow_skip",
+            "workflow_step_skip",
+            "mass_assignment",
+            "coupon_stacking",
+            "idempotency_abuse",
+            "differential_state_verification",
+            "differential_state",
+        ):
+            target_url = ev.metadata.get("url") or ev.value
+            parsed_url = urllib.parse.urlparse(target_url) if target_url else None
+            base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
+            template_id = ev.metadata.get("template_id") or "business-logic"
+            param_name = ev.metadata.get("parameter") or ev.metadata.get("technique") or ""
+            vuln_type = ev.metadata.get("vulnerability_type") or ev.metadata.get("technique") or "business_logic"
+            vuln_id = f"vulnerability:{template_id}:{target_url}:{param_name}" if (target_url and param_name) else (f"vulnerability:{template_id}:{target_url}" if target_url else f"vulnerability:{template_id}")
+            vuln_name = ev.title or f"Business Logic Vulnerability ({vuln_type})"
+            vuln_meta = dict(ev.metadata) if ev.metadata else {}
+            if "name" not in vuln_meta:
+                vuln_meta["name"] = vuln_name
+            if "severity" not in vuln_meta:
+                vuln_meta["severity"] = getattr(ev, "severity", "high") or "high"
+
+            ep_id = f"endpoint:{target_url}" if target_url else None
+            if ep_id and ep_id not in graph.nodes:
+                graph.add(Node(id=ep_id, type="endpoint", value=target_url, metadata={"url": target_url, "status_code": ev.metadata.get("status_code", 200)}))
+
+            graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
+
+            # Link live host to endpoint & vulnerability
+            lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+            if not lh_node and base_url:
+                lh_id = f"live_host:{base_url}"
+                if lh_id not in graph.nodes:
+                    parsed_b = urllib.parse.urlparse(base_url)
+                    graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
+                lh_node = graph.get(lh_id)
+
+            if lh_node:
+                if ep_id:
+                    graph.connect(lh_node.id, ep_id, edge_type="HAS_ENDPOINT")
+                graph.connect(lh_node.id, vuln_id, edge_type="HAS_VULNERABILITY")
+            if ep_id:
+                graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
+
+        # 23. Server-Side Template Injection (SSTI) Vulnerabilities
+        for ev in get_items(
+                "ssti",
+                "server_side_template_injection",
+                "template_injection",
+                "ssti_rce",
+                "ssti_blind",
+                "ssti_error",
+                "jinja2",
+                "twig",
+                "freemarker",
+                "velocity",
+                "mako",
+                "spel",
+                "thymeleaf",
+                "erb",
+                "smarty",
+                "pug",
+                "ejs",
+            ):
+                target_url = ev.metadata.get("url") or ev.value
+                parsed_url = urllib.parse.urlparse(target_url) if target_url else None
+                base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
+                template_id = ev.metadata.get("template_id") or "ssti"
+                param_name = ev.metadata.get("parameter") or ev.metadata.get("technique") or ""
+                engine = ev.metadata.get("engine") or ev.metadata.get("vulnerability_type") or ev.metadata.get("technique") or "template_injection"
+                vuln_id = f"vulnerability:{template_id}:{target_url}:{param_name}" if (target_url and param_name) else (f"vulnerability:{template_id}:{target_url}" if target_url else f"vulnerability:{template_id}")
+                vuln_name = ev.title or f"Server-Side Template Injection ({engine})"
+                vuln_meta = dict(ev.metadata) if ev.metadata else {}
+                if "name" not in vuln_meta:
+                    vuln_meta["name"] = vuln_name
+                if "severity" not in vuln_meta:
+                    vuln_meta["severity"] = getattr(ev, "severity", "high") or "high"
+
+                ep_id = f"endpoint:{target_url}" if target_url else None
+                if ep_id and ep_id not in graph.nodes:
+                    graph.add(Node(id=ep_id, type="endpoint", value=target_url, metadata={"url": target_url, "status_code": ev.metadata.get("status_code", 200)}))
+
+                graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
+
+                # Link live host to endpoint & vulnerability
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
+                    lh_id = f"live_host:{base_url}"
+                    if lh_id not in graph.nodes:
+                        parsed_b = urllib.parse.urlparse(base_url)
+                        graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
+                    lh_node = graph.get(lh_id)
+
+                if lh_node:
+                    if ep_id:
+                        graph.connect(lh_node.id, ep_id, edge_type="HAS_ENDPOINT")
+                    graph.connect(lh_node.id, vuln_id, edge_type="HAS_VULNERABILITY")
+                if ep_id:
+                    graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
+
+        # 24. Web Cache Poisoning & Cache Deception Vulnerabilities
+        for ev in get_items(
+                "cache_security",
+                "cache_poisoning",
+                "web_cache_poisoning",
+                "cache_deception",
+                "web_cache_deception",
+                "unkeyed_header_poisoning",
+                "unkeyed_param_poisoning",
+                "unkeyed_query_poisoning",
+                "parameter_cloaking",
+                "cache_key_normalization",
+                "fat_get_poisoning",
+                "method_override_poisoning",
+                "wcd",
+            ):
+                target_url = ev.metadata.get("url") or ev.value
+                parsed_url = urllib.parse.urlparse(target_url) if target_url else None
+                base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
+                template_id = ev.metadata.get("template_id") or "web-cache-poisoning"
+                param_name = ev.metadata.get("parameter") or ev.metadata.get("technique") or ""
+                vuln_type = ev.metadata.get("vulnerability_type") or ev.metadata.get("technique") or "cache_security"
+                vuln_id = f"vulnerability:{template_id}:{target_url}:{param_name}" if (target_url and param_name) else (f"vulnerability:{template_id}:{target_url}" if target_url else f"vulnerability:{template_id}")
+                vuln_name = ev.title or f"Web Cache Security ({vuln_type})"
+                vuln_meta = dict(ev.metadata) if ev.metadata else {}
+                if "name" not in vuln_meta:
+                    vuln_meta["name"] = vuln_name
+                if "severity" not in vuln_meta:
+                    vuln_meta["severity"] = getattr(ev, "severity", "high") or "high"
+
+                ep_id = f"endpoint:{target_url}" if target_url else None
+                if ep_id and ep_id not in graph.nodes:
+                    graph.add(Node(id=ep_id, type="endpoint", value=target_url, metadata={"url": target_url, "status_code": ev.metadata.get("status_code", 200)}))
+
+                graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
+
+                # Link live host to endpoint & vulnerability
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
+                    lh_id = f"live_host:{base_url}"
+                    if lh_id not in graph.nodes:
+                        parsed_b = urllib.parse.urlparse(base_url)
+                        graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
+                    lh_node = graph.get(lh_id)
+
+                if lh_node:
+                    if ep_id:
+                        graph.connect(lh_node.id, ep_id, edge_type="HAS_ENDPOINT")
+                    graph.connect(lh_node.id, vuln_id, edge_type="HAS_VULNERABILITY")
+                if ep_id:
+                    graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
+
+        # 25. CORS Misconfiguration & HTTP Security Header Vulnerabilities
+        for ev in get_items(
+                "cors",
+                "cors_security",
+                "cors_headers",
+                "cors_misconfiguration",
+                "security_headers",
+                "http_security_headers",
+                "http_headers",
+                "security_header",
+                "header_security",
+            ):
+                target_url = ev.metadata.get("url") or ev.value
+                parsed_url = urllib.parse.urlparse(target_url) if target_url else None
+                base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
+                template_id = ev.metadata.get("template_id") or "cors-security-finding"
+                param_name = ev.metadata.get("parameter") or ev.metadata.get("vector_name") or ev.metadata.get("header_name") or ""
+                vuln_type = ev.metadata.get("vulnerability_type") or ev.metadata.get("technique") or "cors_security"
+                vuln_id = f"vulnerability:{template_id}:{target_url}:{param_name}" if (target_url and param_name) else (f"vulnerability:{template_id}:{target_url}" if target_url else f"vulnerability:{template_id}")
+                vuln_name = ev.title or f"CORS / Security Header ({vuln_type})"
+                vuln_meta = dict(ev.metadata) if ev.metadata else {}
+                if "name" not in vuln_meta:
+                    vuln_meta["name"] = vuln_name
+                if "severity" not in vuln_meta:
+                    vuln_meta["severity"] = getattr(ev, "severity", "medium") or "medium"
+
+                ep_id = f"endpoint:{target_url}" if target_url else None
+                if ep_id and ep_id not in graph.nodes:
+                    graph.add(Node(id=ep_id, type="endpoint", value=target_url, metadata={"url": target_url, "status_code": ev.metadata.get("status_code", 200)}))
+
+                graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
+
+                # Link live host to endpoint & vulnerability
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
+                    lh_id = f"live_host:{base_url}"
+                    if lh_id not in graph.nodes:
+                        parsed_b = urllib.parse.urlparse(base_url)
+                        graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
+                    lh_node = graph.get(lh_id)
+
+                if lh_node:
+                    if ep_id:
+                        graph.connect(lh_node.id, ep_id, edge_type="HAS_ENDPOINT")
+                    graph.connect(lh_node.id, vuln_id, edge_type="HAS_VULNERABILITY")
+                if ep_id:
+                    graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
+
+        # 26. File Upload Vulnerabilities
+        for ev in get_items(
+                "file_upload",
+                "upload_security",
+                "unrestricted_upload",
+                "unrestricted_file_upload",
+                "arbitrary_file_upload",
+                "mime_type_bypass",
+                "double_extension_bypass",
+                "polyglot_magic_bytes",
+                "path_traversal_filename",
+                "web_shell_execution",
+            ):
+                target_url = ev.metadata.get("url") or ev.value
+                parsed_url = urllib.parse.urlparse(target_url) if target_url else None
+                base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
+                template_id = ev.metadata.get("template_id") or "file-upload-finding"
+                filename = ev.metadata.get("filename") or ev.metadata.get("parameter") or ""
+                vuln_type = ev.metadata.get("vulnerability_type") or ev.metadata.get("technique") or "file_upload"
+                vuln_id = f"vulnerability:{template_id}:{target_url}:{filename}" if (target_url and filename) else (f"vulnerability:{template_id}:{target_url}" if target_url else f"vulnerability:{template_id}")
+                vuln_name = ev.title or f"File Upload Vulnerability ({vuln_type})"
+                vuln_meta = dict(ev.metadata) if ev.metadata else {}
+                if "name" not in vuln_meta:
+                    vuln_meta["name"] = vuln_name
+                if "severity" not in vuln_meta:
+                    vuln_meta["severity"] = getattr(ev, "severity", "high") or "high"
+
+                ep_id = f"endpoint:{target_url}" if target_url else None
+                if ep_id and ep_id not in graph.nodes:
+                    graph.add(Node(id=ep_id, type="endpoint", value=target_url, metadata={"url": target_url, "status_code": ev.metadata.get("status_code", 200)}))
+
+                graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
+
+                # Link live host to endpoint & vulnerability
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
+                    lh_id = f"live_host:{base_url}"
+                    if lh_id not in graph.nodes:
+                        parsed_b = urllib.parse.urlparse(base_url)
+                        graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
+                    lh_node = graph.get(lh_id)
+
+                if lh_node:
+                    if ep_id:
+                        graph.connect(lh_node.id, ep_id, edge_type="HAS_ENDPOINT")
+                    graph.connect(lh_node.id, vuln_id, edge_type="HAS_VULNERABILITY")
+                if ep_id:
+                    graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
+
+        # 27. API Security Vulnerabilities (REST & gRPC)
+        for ev in get_items(
+                "api_security",
+                "api_security_testing",
+                "rest_api_security",
+                "rest_security",
+                "grpc_security",
+                "parameter_tampering",
+                "mass_assignment",
+                "rate_limiting",
+                "rate_limiting_bypass",
+                "rate_limit_bypass",
+                "bola",
+                "idor",
+                "bola_idor",
+                "broken_object_level_authorization",
+                "excessive_data_exposure",
+                "method_tampering",
+                "api_bypass",
+            ):
+                target_url = ev.metadata.get("url") or ev.value
+                parsed_url = urllib.parse.urlparse(target_url) if target_url else None
+                base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
+                template_id = ev.metadata.get("template_id") or "api-security-finding"
+                param_name = ev.metadata.get("parameter") or ev.metadata.get("field") or ev.metadata.get("endpoint") or ""
+                vuln_type = ev.metadata.get("vulnerability_type") or ev.metadata.get("technique") or "api_security"
+                vuln_id = f"vulnerability:{template_id}:{target_url}:{param_name}" if (target_url and param_name) else (f"vulnerability:{template_id}:{target_url}" if target_url else f"vulnerability:{template_id}")
+                vuln_name = ev.title or f"API Security Vulnerability ({vuln_type})"
+                vuln_meta = dict(ev.metadata) if ev.metadata else {}
+                if "name" not in vuln_meta:
+                    vuln_meta["name"] = vuln_name
+                if "severity" not in vuln_meta:
+                    vuln_meta["severity"] = getattr(ev, "severity", "high") or "high"
+
+                ep_id = f"endpoint:{target_url}" if target_url else None
+                if ep_id and ep_id not in graph.nodes:
+                    graph.add(Node(id=ep_id, type="endpoint", value=target_url, metadata={"url": target_url, "status_code": ev.metadata.get("status_code", 200)}))
+
+                graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
+
+                # Link live host to endpoint & vulnerability
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
+                    lh_id = f"live_host:{base_url}"
+                    if lh_id not in graph.nodes:
+                        parsed_b = urllib.parse.urlparse(base_url)
+                        graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
+                    lh_node = graph.get(lh_id)
+
+                if lh_node:
+                    if ep_id:
+                        graph.connect(lh_node.id, ep_id, edge_type="HAS_ENDPOINT")
+                    graph.connect(lh_node.id, vuln_id, edge_type="HAS_VULNERABILITY")
+                if ep_id:
+                    graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
+
+        # 28. Authentication Bypass & Credential Attack Vulnerabilities
+        for ev in get_items(
+                "auth_bypass",
+                "authentication",
+                "authentication_bypass",
+                "credential_attack",
+                "credential_attacks",
+                "brute_force",
+                "password_reset",
+                "password_reset_abuse",
+                "mfa_bypass",
+                "session_fixation",
+                "jwt_manipulation",
+                "default_credentials",
+                "session_token_analysis",
+                "credential_stuffing",
+            ):
+                target_url = ev.metadata.get("url") or ev.value
+                parsed_url = urllib.parse.urlparse(target_url) if target_url else None
+                base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
+                template_id = ev.metadata.get("template_id") or "auth-bypass-finding"
+                param_name = ev.metadata.get("parameter") or ev.metadata.get("field") or ev.metadata.get("endpoint") or ""
+                vuln_type = ev.metadata.get("vulnerability_type") or ev.metadata.get("technique") or "auth_bypass"
+                vuln_id = f"vulnerability:{template_id}:{target_url}:{param_name}" if (target_url and param_name) else (f"vulnerability:{template_id}:{target_url}" if target_url else f"vulnerability:{template_id}")
+                vuln_name = ev.title or f"Authentication Vulnerability ({vuln_type})"
+                vuln_meta = dict(ev.metadata) if ev.metadata else {}
+                if "name" not in vuln_meta:
+                    vuln_meta["name"] = vuln_name
+                if "severity" not in vuln_meta:
+                    vuln_meta["severity"] = getattr(ev, "severity", "high") or "high"
+
+                ep_id = f"endpoint:{target_url}" if target_url else None
+                if ep_id and ep_id not in graph.nodes:
+                    graph.add(Node(id=ep_id, type="endpoint", value=target_url, metadata={"url": target_url, "status_code": ev.metadata.get("status_code", 200)}))
+
+                graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
+
+                # Link live host to endpoint & vulnerability
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
+                    lh_id = f"live_host:{base_url}"
+                    if lh_id not in graph.nodes:
+                        parsed_b = urllib.parse.urlparse(base_url)
+                        graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
+                    lh_node = graph.get(lh_id)
+
+                if lh_node:
+                    if ep_id:
+                        graph.connect(lh_node.id, ep_id, edge_type="HAS_ENDPOINT")
+                    graph.connect(lh_node.id, vuln_id, edge_type="HAS_VULNERABILITY")
+                if ep_id:
+                    graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
+
+        # 29. Prototype Pollution & Client-Side Attack Vulnerabilities
+        for ev in get_items(
+                "prototype_pollution",
+                "client_side_prototype_pollution",
+                "server_side_prototype_pollution",
+                "dom_clobbering",
+                "html_clobbering",
+                "open_redirect",
+                "open_redirect_chain",
+                "clickjacking",
+                "ui_redressing",
+                "client_side_attacks",
+            ):
+                target_url = ev.metadata.get("url") or ev.value
+                parsed_url = urllib.parse.urlparse(target_url) if target_url else None
+                base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
+                template_id = ev.metadata.get("template_id") or "prototype-pollution-finding"
+                param_name = ev.metadata.get("parameter") or ev.metadata.get("gadget") or ev.metadata.get("field") or ev.metadata.get("endpoint") or ""
+                vuln_type = ev.metadata.get("vulnerability_type") or ev.metadata.get("technique") or "prototype_pollution"
+                vuln_id = f"vulnerability:{template_id}:{target_url}:{param_name}" if (target_url and param_name) else (f"vulnerability:{template_id}:{target_url}" if target_url else f"vulnerability:{template_id}")
+                vuln_name = ev.title or f"Client-Side Attack Vulnerability ({vuln_type})"
+                vuln_meta = dict(ev.metadata) if ev.metadata else {}
+                if "name" not in vuln_meta:
+                    vuln_meta["name"] = vuln_name
+                if "severity" not in vuln_meta:
+                    vuln_meta["severity"] = getattr(ev, "severity", "high") or "high"
+
+                ep_id = f"endpoint:{target_url}" if target_url else None
+                if ep_id and ep_id not in graph.nodes:
+                    graph.add(Node(id=ep_id, type="endpoint", value=target_url, metadata={"url": target_url, "status_code": ev.metadata.get("status_code", 200)}))
+
+                graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
+
+                # Link live host to endpoint & vulnerability
+                lh_node = resolve_lh(target_url_val=target_url, host_val=base_url)
+                if not lh_node and base_url:
+                    lh_id = f"live_host:{base_url}"
+                    if lh_id not in graph.nodes:
+                        parsed_b = urllib.parse.urlparse(base_url)
+                        graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
+                    lh_node = graph.get(lh_id)
 
                 if lh_node:
                     if ep_id:

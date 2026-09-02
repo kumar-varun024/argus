@@ -1,297 +1,239 @@
-# Pipeline Connectivity, DAG Task Generation, Registry, Graph Builders, and Test Architecture Survey
+# Pipeline & Integration Survey Report: Authentication Bypass & Credential Attack Detection Module
+
+**Author**: Pipeline & Integration Explorer  
+**Sprint**: Authentication Bypass & Credential Attack Detection Module  
+**Date**: 2026-09-02  
+**Artifact**: `/home/varun/argus/.agents/explorer_survey_pipeline/handoff.md`
+
+---
 
 ## 1. Observation
 
-Direct code observations across the ARGUS platform architecture:
+### 1.1 TaskGenerator & DAG Scheduling Architecture
+- **Location**: `/home/varun/argus/argus/planning/task_generator.py`
+  - **Recon & Tool Templates (`_RECON_TEMPLATES`)** (lines 12–302):
+    - Stores structured task metadata keyed by canonical tool ID (`subfinder`, `httpx`, `katana_crawler`, `nuclei`, `info_disclosure`, `access_control`, `path_traversal`, `sql_injection`, `xss`, `command_injection`, `ssrf`, `oauth`, `xml_parser_validation`, `deserialization`, `graphql_security`, `websocket_security`, `request_smuggling`, `race_conditions`, `business_logic`, `ssti`, `cache_security`, `cors_security`, `file_upload`, `api_security`).
+    - Standard keys per template: `title`, `goal`, `category` (from `TaskCategory`), `required_inputs`, `expected_outputs`, `dependencies`, `required_specialists`, `metadata: {"tool_id": ...}`, `estimated_duration_minutes`, `priority`.
+  - **Gap Resolution Engine (`_resolve_template_for_gap`)** (lines 520–865):
+    - Maps `CoverageGap.area` and `CoverageGap.description` to the appropriate tool or specialist template.
+    - Uses lower-cased area matching (e.g., `"access control"`, `"oauth"`, `"websocket"`, `"file upload"`, `"api security"`), keyword searches in `gap.description`, and fallback to `gap.category` (`TaskCategory.TECHNOLOGY_DISCOVERY`, `TaskCategory.API_DISCOVERY`, `TaskCategory.AUTHENTICATION_ANALYSIS`, `TaskCategory.AUTHORIZATION_ANALYSIS`, `TaskCategory.EVIDENCE_CORRELATION`, `TaskCategory.COVERAGE_IMPROVEMENT`).
+  - **Task Generation (`from_gaps`)** (lines 866–924):
+    - Converts `List[CoverageGap]` into deduplicated `List[ResearchTask]`.
+    - Automatically maps `required_inputs` by inspecting `gap.related_assets`, `mission.endpoints`, `mission.live_hosts`, or root `mission.target`.
+- **Location**: `/home/varun/argus/argus/planning/gap_analysis.py`
+  - **Gap Detection Engine (`GapAnalyzer`)** (lines 31–450):
+    - Continuously inspects mission state via `analyze()` running 9 modular checks:
+      1. `_check_recon_gaps()` (lines 51–177): checks subdomains, live hosts, uncrawled hosts (`graph.get_hosts_without_endpoints()`), unscanned hosts (`graph.get_hosts_without_vulnerabilities()`), info disclosure probing.
+      2. `_check_technology_gaps()` (lines 315–325)
+      3. `_check_api_gaps()` (lines 327–344)
+      4. `_check_graphql_gaps()` (lines 346–359)
+      5. `_check_authentication_gaps()` (lines 361–383): verifies if authentication state exists but has no analyzed workflows.
+      6. `_check_authorization_gaps()` (lines 385–400)
+      7. `_check_business_logic_gaps()` (lines 402–415)
+      8. `_check_javascript_gaps()` (lines 417–432)
+      9. `_check_correlation_gaps()` (lines 434–450)
+- **Location**: `/home/varun/argus/argus/scanning/dag.py`
+  - **ScanDAG** (lines 40–191):
+    - Loads task templates from `task_generator._RECON_TEMPLATES` and classifies into `phase="recon"` (for `subfinder`, `httpx`, `katana_crawler`, `nuclei`, `info_disclosure`) or `phase="vulnerability"` (for active fuzzing/validation collectors).
+    - `get_execution_order()` (lines 120–190): Computes deterministic topological order using Kahn's algorithm with stable tie-breaking: `(phase_score, -priority, registration_index)`.
+- **Location**: `/home/varun/argus/argus/scanning/engine.py`
+  - **ScanEngine** (lines 25–486):
+    - Orchestrates end-to-end execution across state machine transitions (`CREATED` -> `READY` -> `RUNNING` -> `COLLECTING_EVIDENCE`).
+    - `resolve_collector(task)` (lines 53–136): Resolves collectors dynamically via `collector_factory`, `PluginExecutorAdapter._instantiate_specialist_fallback`, `collector_class_map` (importing from `argus.collectors`), or `PluginManager`.
+    - Isolates collector execution, collects telemetry, updates `EvidenceStore` and `AttackSurfaceGraph`, and generates reports.
 
-### 1.1 Tool Registry and Plugin Architecture
-- **`argus/runtime/registry.py`**:
-  - Contains `ToolRegistry` class with global instance `registry` (lines 46-47).
-  - Registry method `get(key: str)` supports tool lookup with alias resolution (lines 15-29):
-    ```python
-    aliases = {
-        "cross_site_scripting": "xss",
-        "sqli": "sql_injection",
-    }
-    ```
-  - Registration pattern for internal security collectors (lines 249-326):
-    - Example `sql_injection` (lines 297-310):
-      ```python
-      registry.register(
-          Tool(
-              id="sql_injection",
-              name="SQL Injection Collector",
-              capability="sql_injection_detector",
-              description="Actively injects SQL payloads into discovered endpoint parameters (query, body, headers) detecting error-based, boolean-based, and time-based blind SQLi.",
-              supported_tasks=["SQL Injection Detection", "SQL Injection", "Vulnerability Scanning", "Evidence Correlation", "API Discovery"],
-              required_inputs=["endpoints"],
-              produced_outputs=["vulnerabilities", "observations", "evidence"],
-              capabilities=["sql_injection_detector", "sql_injection_collector"],
-              safety_requirements={"type": "internal", "permissions": ["network", "db_read", "db_write"]},
-              timeout=300.0,
-              priority=95,
-          )
-      )
-      ```
-    - Example `xss` (lines 312-326):
-      ```python
-      registry.register(
-          Tool(
-              id="xss",
-              name="Cross-Site Scripting (XSS) Collector",
-              capability="xss_detector",
-              description="Actively injects context-aware XSS payloads into discovered endpoint parameters and forms detecting reflected and stored XSS using AuthenticatedHttpClient.",
-              supported_tasks=["XSS Detection", "Cross-Site Scripting", "Vulnerability Scanning", "Evidence Correlation", "API Discovery"],
-              required_inputs=["endpoints"],
-              produced_outputs=["vulnerabilities", "observations", "evidence"],
-              capabilities=["xss_detector", "xss_collector"],
-              safety_requirements={"type": "internal", "permissions": ["network", "db_read", "db_write"]},
-              timeout=300.0,
-              priority=95,
-          )
-      )
-      ```
-- **`argus/runtime/plugins.py`**:
-  - `PluginExecutorAdapter` dispatches execution via `execute_plugin(plugin_id, mission)` (lines 30-64).
-  - Invokes `ControlledMission(mission)` wrapper and calls `plugin.execute(controlled_mission)` or `plugin.discover()`.
-  - Fallback instantiation `_instantiate_specialist_fallback(plugin_id)` contains dispatch routing by key (lines 65-106):
-    - Line 98-100: `elif "sql_injection" in plugin_id or "sqli" in plugin_id or plugin_id == "sql": from argus.collectors.sql_injection import SQLInjectionCollector; return SQLInjectionCollector()`
-    - Line 101-103: `elif "xss" in plugin_id or "cross_site_scripting" in plugin_id: from argus.collectors.xss import XSSCollector; return XSSCollector()`
-- **`argus/collectors/__init__.py`**:
-  - Exports collector classes and analyzers/generators (lines 1-33).
+### 1.2 Plugin & Tool Registry Mechanisms
+- **Location**: `/home/varun/argus/argus/runtime/registry.py`
+  - **`ToolRegistry` & singleton `registry`** (lines 5–985):
+    - Stores `Tool` records with fields: `id`, `name`, `capability`, `description`, `supported_tasks`, `required_inputs`, `produced_outputs`, `capabilities`, `safety_requirements`, `timeout`, `priority`.
+    - Implements alias lookup via `get(key)` resolving aliases (e.g., `"auth_bypass"`, `"jwt"`, `"oauth"`, `"session_fixation"`, `"deserialization"`).
+- **Location**: `/home/varun/argus/argus/plugins/registry.py`
+  - **`PluginRegistry`** (lines 6–66):
+    - Manages plugin registrations with manifest permission checking (`network`, `filesystem`, `db_read`, `db_write`) and topological dependency resolution (`resolve_load_order`).
+- **Location**: `/home/varun/argus/argus/runtime/plugins.py`
+  - **`PluginExecutorAdapter`** (lines 10–249):
+    - Wraps missions in `ControlledMission` and invokes `execute()` or `discover()/analyze()`.
+    - `_instantiate_specialist_fallback(plugin_id)` (lines 65–246): Instantiates internal collector classes if not loaded from external plugin directories.
+- **Location**: `/home/varun/argus/argus/collectors/base.py`
+  - **`BaseCollector`** (lines 4–10): Abstract base class requiring `collect(self, mission)` (and conventionally `execute(self, mission)`).
 
-### 1.2 TaskGenerator DAG Architecture
-- **`argus/planning/task_generator.py`**:
-  - Defines `_RECON_TEMPLATES` mapping tool keys to task templates (lines 13-122).
-  - SQLi / XSS template definitions (lines 98-121):
-    ```python
-    "sql_injection": {
-        "title": "Fuzz SQL Injection",
-        "goal": "Actively fuzz discovered endpoint parameters and HTTP headers for error-based, boolean-based, and time-based SQL injection vulnerabilities using AuthenticatedHttpClient.",
-        "category": TaskCategory.EVIDENCE_CORRELATION,
-        "required_inputs": ["endpoints"],
-        "expected_outputs": ["vulnerabilities", "observations", "evidence"],
-        "dependencies": ["Discover API Endpoints"],
-        "required_specialists": [],
-        "metadata": {"tool_id": "sql_injection"},
-        "estimated_duration_minutes": 10,
-        "priority": 0.81,
-    }
-    ```
-  - Gap resolution `_resolve_template_for_gap(gap: CoverageGap)`:
-    - Matches `area_lower` strings (lines 343-402).
-    - Matches `gap.category == TaskCategory.EVIDENCE_CORRELATION` keyword descriptions (lines 420-432).
-  - `from_gaps(gaps)` maps gaps to `ResearchTask` instances, populating `inputs` from `endpoints` when `tool_id in ("katana_crawler", "nuclei", "info_disclosure", "access_control", "path_traversal", "sql_injection", "xss")` (line 463).
+### 1.3 Attack Surface Graph & Model Architecture
+- **Location**: `/home/varun/argus/argus/graph/node.py` and `argus/graph/edge.py`
+  - `Node(id: str, type: str, value: str, metadata: dict[str, Any])`
+  - `Edge(source: str, target: str, type: str, metadata: dict[str, Any])`
+- **Location**: `/home/varun/argus/argus/graph/graph.py`
+  - `KnowledgeGraph`: Thread-safe in-memory graph with `add(node)`, `connect(source, target, edge_type, metadata)`, `get(node_id)`, `nodes_by_type(type)`, `edges_from(node)`, `edges_to(node)`, `neighbors(node)`.
+- **Location**: `/home/varun/argus/argus/graph/attack_surface.py`
+  - **`AttackSurfaceGraphBuilder`** (lines 11–1380):
+    - Node Types: `target`, `subdomain`, `live_host`, `technology`, `endpoint`, `vulnerability`, `cname`, `service`, `secret`.
+    - Edge Types:
+      - `target` -> `subdomain` via `RESOLVES_TO`
+      - `subdomain` -> `live_host` via `HOSTS`
+      - `live_host` -> `technology` via `RUNS_TECHNOLOGY`
+      - `live_host` -> `endpoint` via `HAS_ENDPOINT`
+      - `live_host` -> `vulnerability` via `HAS_VULNERABILITY`
+      - `endpoint` -> `vulnerability` via `HAS_VULNERABILITY`
+      - `subdomain` -> `vulnerability` via `HAS_VULNERABILITY`
+      - `subdomain` -> `cname` via `POINTS_TO_CNAME`
+      - `vulnerability` -> `secret` via `EXPOSES_SECRET`
+      - `vulnerability` -> `subdomain` via `DISCLOSED_SUBDOMAIN`
+  - **Quadruple State Publishing Convention** (exemplified in `argus/collectors/file_upload.py:1328-1375`):
+    1. `raw_mission.evidence.add(ev)` (or `.append(ev)`)
+    2. `raw_mission.vulnerabilities.append({...})`
+    3. `attack_surface_graph.connect(lh_id, ep_id, "HAS_ENDPOINT")`, `attack_surface_graph.connect(lh_id, vuln_id, "HAS_VULNERABILITY")`, `attack_surface_graph.connect(ep_id, vuln_id, "HAS_VULNERABILITY")`
+    4. `ControlledMission.publish_finding(ev.evidence_id, ev)`
 
-### 1.3 Attack Surface Graph Edge Creation
-- **`argus/graph/attack_surface.py`**:
-  - `AttackSurfaceGraphBuilder.build_from_evidence(evidence, target, graph)` (lines 17-524):
-    - Processes evidence categories to build `KnowledgeGraph` nodes and edges.
-    - Section 10: Path Traversal (lines 350-400)
-    - Section 11: SQL Injection (lines 401-453)
-    - Section 12: Cross-Site Scripting (lines 454-522)
-  - Node ID conventions:
-    - Live Host: `f"live_host:{base_url}"` (`type="live_host"`, `value=base_url`, `metadata={"url": base_url, "host": ...}`)
-    - Endpoint: `f"endpoint:{target_url}"` (`type="endpoint"`, `value=target_url`, `metadata={"url": target_url, "status_code": status_code}`)
-    - Vulnerability: `f"vulnerability:{template_id}:{target_url}:{param_name}"` (`type="vulnerability"`, `value=vuln_name`, `metadata=vuln_meta`)
-  - Edge types and connections:
-    - `graph.connect(lh_node.id, ep_id, edge_type="HAS_ENDPOINT")`
-    - `graph.connect(lh_node.id, vuln_id, edge_type="HAS_VULNERABILITY")`
-    - `graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")`
-- Collector internal graph integration:
-  - Both `SQLInjectionCollector._create_evidence_and_update_state` (lines 1157-1171 of `sql_injection.py`) and `XSSCollector._create_evidence_and_update_state` (lines 1052-1066 of `xss.py`) mirror this graph expansion directly on `mission.attack_surface_graph` or `mission.graph`.
+### 1.4 CVSS & CWE Mappings
+- **Location**: `/home/varun/argus/argus/reporting/cvss.py`
+  - **`CVSSCalculator`** (lines 21–543):
+    - Strict FIRST CVSS v3.1 calculation with floating-point precision correction via `cvss_roundup()`.
+    - Computes Base Score from vector string or metric dict (handling Scope Changed vs Scope Unchanged).
+    - `CWE_DATABASE` (lines 33–264): Dictionary mapping normalized finding names/tags to `CWEInfo(id, name)`.
+    - Current relevant mappings:
+      - `"authentication"` / `"auth_bypass"` / `"broken_authentication"` -> `CWE-287 ("Improper Authentication")`
+      - `"session_fixation"` -> `CWE-384 ("Session Fixation")`
+      - `"jwt"` -> `CWE-345 ("Insufficient Verification of Data Authenticity")`
+      - `"broken_access_control"` -> `CWE-284 ("Improper Access Control")`
+      - `"idor"` / `"bola"` -> `CWE-639 ("Authorization Bypass Through User-Controlled Key")`
+      - `"rate_limiting"` -> `CWE-770 ("Allocation of Resources Without Limits or Throttling")`
+    - Mappings requiring expansion for Authentication Sprint:
+      - `CWE-307`: `Improper Restriction of Excessive Authentication Attempts` (for brute force, password spraying, credential stuffing)
+      - `CWE-640`: `Weak Password Recovery Mechanism for Forgotten Password` (for password reset abuse, predictable tokens, host header injection)
+      - `CWE-288`: `Authentication Bypass Using an Alternate Path or Channel` (for MFA bypass, direct endpoint access)
+      - `CWE-1390`: `Weak Authentication Token` (for JWT manipulation, alg:none, key confusion)
+      - `CWE-798`: `Use of Hard-coded Credentials` (for default credentials on admin interfaces)
+      - `CWE-522`: `Insufficiently Protected Credentials` (for auth state leakage in errors)
+      - `CWE-613`: `Insufficient Session Expiration` (for session token expiration / rotation)
+      - `CWE-1275`: `Sensitive Cookie with Improper SameSite Attribute` (for cookie flag audits)
 
-### 1.4 Test Architecture and Mock Conventions
-- **`tests/collectors/test_sql_injection.py` and `tests/collectors/test_xss.py`**:
-  - Mock HTTP client pattern: `MockSQLiHttpClient` / `MockXSSHttpClient` implementing `.get()` and `.post()` returning `HttpResponse` objects.
-  - Route registry dictionary matching full URLs, injected headers (`f"header:{k}:{v}"`), or payload substring keys (`f"payload:{v}"`).
-  - Latency simulation via `HttpResponse.elapsed` float field for time-based blind injection tests.
-- **`tests/runtime/test_e2e_sql_injection.py` and `tests/runtime/test_e2e_xss.py`**:
-  - Full end-to-end integration tests proving `Mission` -> `TaskGenerator` -> `ControlledMission` -> Collector execution -> `EvidenceStore` -> `KnowledgeGraph` expansion -> `AttackSurfaceGraphBuilder` reconstruction.
-- **Test execution**:
-  - Command: `python3 -m pytest tests/ --ignore=tests/workspace -q`
-  - Current baseline status: `996 passed, 2 warnings in 44.59s` (100% pass rate).
+### 1.5 Existing Test Suite Baseline & Environment
+- **Test Command**: `./venv/bin/pytest --import-mode=importlib -q`
+- **Execution Result**: **1,953 passed, 1 skipped in 62.99s**
+- **Test Infrastructure**:
+  - Requires `--import-mode=importlib` to avoid module name shadowing between top-level `tests/` and nested plugin test packages.
+  - Standard test structure: `tests/<module>/test_<feature>.py` and `tests/<module>/test_<feature>_adversarial.py`.
+  - Mocks: `unittest.mock.Mock`, `unittest.mock.MagicMock`, `unittest.mock.patch`, custom simulated HTTP clients returning `HttpResponse` instances.
 
 ---
 
 ## 2. Logic Chain
 
-### 2.1 Tool Registration & Plugin Architecture Requirements for Command Injection
-1. **Registry Entry (`argus/runtime/registry.py`)**:
-   - Must register `Tool` with ID `"command_injection"` (or `"cmdi"`), `capability="command_injection_detector"`, `supported_tasks=["Command Injection Detection", "Command Injection", "Vulnerability Scanning", "Evidence Correlation", "API Discovery"]`, `required_inputs=["endpoints"]`, `produced_outputs=["vulnerabilities", "observations", "evidence"]`, `capabilities=["command_injection_detector", "command_injection_collector", "cmdi_detector", "cmdi_collector"]`, `safety_requirements={"type": "internal", "permissions": ["network", "db_read", "db_write"]}`, `timeout=300.0`, `priority=95`.
-   - Must add alias resolution in `ToolRegistry.get`:
-     ```python
-     aliases = {
-         "cross_site_scripting": "xss",
-         "sqli": "sql_injection",
-         "cmdi": "command_injection",
-         "cmd_injection": "command_injection",
-         "os_command_injection": "command_injection",
-     }
-     ```
-2. **Plugin Executor Adapter (`argus/runtime/plugins.py`)**:
-   - In `PluginExecutorAdapter._instantiate_specialist_fallback`:
-     ```python
-     elif "command_injection" in plugin_id or "cmdi" in plugin_id or "cmd_injection" in plugin_id or plugin_id == "command":
-         from argus.collectors.command_injection import CommandInjectionCollector
-         return CommandInjectionCollector()
-     ```
-3. **Collector Module Export (`argus/collectors/__init__.py`)**:
-   - Export `CommandInjectionCollector`, `CommandInjectionAnalyzer`, `CommandInjectionPayloadGenerator`, etc.
+```
+                   +-----------------------------------------------+
+                   |              Reconnaissance Phase             |
+                   |   (Subfinder -> Httpx -> Katana / Nuclei)     |
+                   +-----------------------------------------------+
+                                          |
+                                          v
+               +------------------------------------------------------+
+               |                GapAnalyzer Inspection                |
+               |  - Detects endpoints with login/auth paths           |
+               |  - Identifies missing authentication security scans  |
+               +------------------------------------------------------+
+                                          |
+                                          v
+               +------------------------------------------------------+
+               |                 TaskGenerator Routing                |
+               |  - Maps auth gap to auth_bypass / credential_attack  |
+               |  - Generates ResearchTask(tool_id="auth_bypass")     |
+               +------------------------------------------------------+
+                                          |
+                                          v
+               +------------------------------------------------------+
+               |                     ScanDAG Sort                     |
+               |  - Orders: Discover API Endpoints -> Auth Bypass     |
+               |  - Phase: "vulnerability", Priority: 0.81            |
+               +------------------------------------------------------+
+                                          |
+                                          v
+               +------------------------------------------------------+
+               |                  ScanEngine Execution                |
+               |  - Resolves AuthenticationBypassCollector            |
+               |  - Executes Tripartite Probe Pipeline:               |
+               |    * AuthPayloadGenerator (Modes 1-6 + Evasions)     |
+               |    * AuthenticatedHttpClient Prober                  |
+               |    * AuthAnalyzer (Strict FP Rejection)              |
+               +------------------------------------------------------+
+                                          |
+                                          v
+               +------------------------------------------------------+
+               |              Quadruple State Publishing              |
+               |  1. raw_mission.evidence.add(ev)                     |
+               |  2. raw_mission.vulnerabilities.append(vuln_dict)    |
+               |  3. KnowledgeGraph (Node + HAS_VULNERABILITY)        |
+               |  4. ControlledMission.publish_finding(id, ev)        |
+               +------------------------------------------------------+
+                                          |
+                                          v
+               +------------------------------------------------------+
+               |               CVSS & Report Generation               |
+               |  - CVSSCalculator maps CWE-287, 307, 384, 640, etc.  |
+               |  - Base score calculated & report synthesized        |
+               +------------------------------------------------------+
+```
 
-### 2.2 TaskGenerator DAG Wiring
-1. **Task Template (`argus/planning/task_generator.py`)**:
-   ```python
-   "command_injection": {
-       "title": "Fuzz OS Command Injection",
-       "goal": "Actively fuzz discovered endpoint parameters, POST bodies, path segments, and HTTP headers for OS command injection vulnerabilities using AuthenticatedHttpClient.",
-       "category": TaskCategory.EVIDENCE_CORRELATION,
-       "required_inputs": ["endpoints"],
-       "expected_outputs": ["vulnerabilities", "observations", "evidence"],
-       "dependencies": ["Discover API Endpoints"],
-       "required_specialists": [],
-       "metadata": {"tool_id": "command_injection"},
-       "estimated_duration_minutes": 10,
-       "priority": 0.81,
-   }
-   ```
-2. **Coverage Gap Resolution (`_resolve_template_for_gap`)**:
-   - Keyword triggers in `area_lower`:
-     ```python
-     if area_lower in ("command injection", "cmdi", "command_injection", "cmd_injection", "os command injection", "remote code execution", "rce", "os injection"):
-         return _RECON_TEMPLATES["command_injection"]
-     ```
-   - Category triggers under `TaskCategory.EVIDENCE_CORRELATION`:
-     ```python
-     if "command" in gap_desc_lower or "cmdi" in gap_desc_lower or "rce" in gap_desc_lower or "os injection" in gap_desc_lower:
-         return _RECON_TEMPLATES["command_injection"]
-     ```
-3. **Inputs Resolution (`from_gaps`)**:
-   - Include `"command_injection"` in the endpoint input binding list:
-     ```python
-     elif tool_id in ("katana_crawler", "nuclei", "info_disclosure", "access_control", "path_traversal", "sql_injection", "xss", "command_injection"):
-     ```
-
-### 2.3 Attack Surface Graph Edge Creation
-1. **Graph Builder Extension (`argus/graph/attack_surface.py`)**:
-   - Add Section 13 for Command Injection evidence:
-     ```python
-     # 13. Command Injection Vulnerabilities
-     for ev in evidence_items:
-         if getattr(ev, "category", None) in ("command_injection", "cmdi", "cmd_injection"):
-             target_url = ev.metadata.get("url") or ev.value
-             parsed_url = urllib.parse.urlparse(target_url) if target_url else None
-             base_url = ev.metadata.get("host") or (f"{parsed_url.scheme}://{parsed_url.netloc}" if parsed_url and parsed_url.netloc else target_url)
-             template_id = ev.metadata.get("template_id") or "cmdi"
-             param_name = ev.metadata.get("parameter") or ""
-             technique = ev.metadata.get("technique") or "result_based"
-             vuln_id = f"vulnerability:{template_id}:{target_url}:{param_name}" if (target_url and param_name) else (f"vulnerability:{template_id}:{target_url}" if target_url else f"vulnerability:{template_id}")
-             vuln_name = ev.title or f"Command Injection ({technique})"
-             vuln_meta = dict(ev.metadata) if ev.metadata else {}
-             if "name" not in vuln_meta:
-                 vuln_meta["name"] = vuln_name
-             if "severity" not in vuln_meta:
-                 vuln_meta["severity"] = getattr(ev, "severity", "critical") or "critical"
-
-             ep_id = f"endpoint:{target_url}" if target_url else None
-             if ep_id and ep_id not in graph.nodes:
-                 graph.add(Node(id=ep_id, type="endpoint", value=target_url, metadata={"url": target_url, "status_code": ev.metadata.get("status_code", 200)}))
-
-             graph.add(Node(id=vuln_id, type="vulnerability", value=vuln_name, metadata=vuln_meta))
-
-             # Link live host to endpoint & vulnerability
-             lh_node = None
-             if base_url:
-                 lh_id = f"live_host:{base_url}"
-                 if lh_id not in graph.nodes:
-                     parsed_b = urllib.parse.urlparse(base_url)
-                     graph.add(Node(id=lh_id, type="live_host", value=base_url, metadata={"url": base_url, "host": parsed_b.hostname or base_url}))
-                 lh_node = graph.get(lh_id)
-                 if not lh_node:
-                     for n in graph.nodes_by_type("live_host"):
-                         if n.value == base_url or n.metadata.get("url") == base_url or n.metadata.get("host") == base_url:
-                             lh_node = n
-                             break
-             if not lh_node and target_url:
-                 for n in graph.nodes_by_type("live_host"):
-                     lh_url = n.metadata.get("url") or n.value
-                     if lh_url and target_url.startswith(lh_url):
-                         lh_node = n
-                         break
-             if not lh_node:
-                 live_hosts = graph.nodes_by_type("live_host")
-                 if len(live_hosts) == 1:
-                     lh_node = live_hosts[0]
-
-             if lh_node:
-                 if ep_id:
-                     graph.connect(lh_node.id, ep_id, edge_type="HAS_ENDPOINT")
-                 graph.connect(lh_node.id, vuln_id, edge_type="HAS_VULNERABILITY")
-             if ep_id:
-                 graph.connect(ep_id, vuln_id, edge_type="HAS_VULNERABILITY")
-     ```
-2. **Collector State Integration (`CommandInjectionCollector._create_evidence_and_update_state`)**:
-   - Must create `Evidence(category="command_injection", severity="critical" or "high", provenance=ProvenanceData(step_id="command_injection_collector"), ...)`
-   - Must append to `raw_mission.evidence` and `raw_mission.vulnerabilities`.
-   - Must expand `raw_mission.attack_surface_graph` with `live_host`, `endpoint`, and `vulnerability` nodes and `HAS_ENDPOINT`, `HAS_VULNERABILITY` edges.
-
-### 2.4 Test Suite Strategy
-1. **Unit & Module Tests (`tests/collectors/test_command_injection.py`)**:
-   - `test_command_injection_generator_base_payloads`: Result-based (`id`, `whoami`, `hostname`), time-based (`sleep 5`, `ping -c 5`, `timeout 5`), error-based.
-   - `test_command_injection_generator_mutations`: 5+ distinct mutation/separator strategies (semicolons `;`, pipes `|`, `||`, ampersands `&`, `&&`, backticks `` `cmd` ``, dollar-parens `$(cmd)`, newlines `%0a`, URL encoding).
-   - `test_command_injection_analyzer_result_based`: Regex matching for Unix `uid=0(root) gid=0(root)` and Windows `Windows IP Configuration` / `NT AUTHORITY\SYSTEM`.
-   - `test_command_injection_analyzer_time_based`: Validates delta >= 4.0s vs baseline generates critical evidence; < 4.0s rejected.
-   - `test_command_injection_analyzer_error_based`: Shell error signatures (`sh: command not found`, `syntax error near unexpected token`, `'cmd' is not recognized as an internal or external command`).
-   - `test_command_injection_analyzer_false_positive_rejection`: Plain echo of injected commands in HTML search titles or static help text is rejected.
-   - `test_command_injection_collector_query_param`: Fuzzing GET query parameters.
-   - `test_command_injection_collector_post_body_json_and_form`: Fuzzing JSON and form bodies.
-   - `test_command_injection_collector_path_segments`: Fuzzing path parameters.
-   - `test_command_injection_collector_headers`: Fuzzing `User-Agent`, `Referer`, `Cookie`, `X-Forwarded-For`.
-   - `test_command_injection_task_generator_dag_wiring`: Template resolution from CoverageGap.
-   - `test_command_injection_tool_registry_and_plugin_adapter`: Tool registration and fallback instantiation.
-   - `test_command_injection_attack_surface_graph_reconstruction`: Graph builder reconstruction from EvidenceStore.
-2. **E2E Mission Loop Tests (`tests/runtime/test_e2e_command_injection.py`)**:
-   - `test_e2e_command_injection_mission_loop_flow`: Full pipeline execution on realistic mock target.
-   - `test_e2e_command_injection_multi_technique_mission`: Error-based + result-based + time-based in single mission.
-   - `test_e2e_command_injection_gap_analysis_and_replanning`: Gap analysis triggers DAG task creation.
+1. **Step 1: Gap Detection**: When Katana crawls endpoints containing authentication interfaces (e.g., `/login`, `/auth`, `/oauth/token`, `/reset-password`, `/admin`, `/mfa`), `GapAnalyzer` detects an active assessment gap for authentication mechanisms.
+2. **Step 2: Task Generation**: `TaskGenerator._resolve_template_for_gap` maps the gap to `_RECON_TEMPLATES["auth_bypass"]` (or `"credential_attack"`), creating a `ResearchTask` with `dependencies=["Discover API Endpoints"]` and `metadata={"tool_id": "auth_bypass"}`.
+3. **Step 3: DAG Ordering**: `ScanDAG` builds a dependency graph where `Discover API Endpoints` must complete before `auth_bypass` executes, ordering tasks topologically via Kahn's algorithm.
+4. **Step 4: Tool Resolution & Execution**: `ScanEngine.resolve_collector` resolves `tool_id="auth_bypass"` via `collector_class_map` / `PluginExecutorAdapter` to instantiate `AuthenticationBypassCollector` (subclass of `BaseCollector`).
+5. **Step 5: Tripartite Probing**:
+   - `AuthPayloadGenerator` synthesizes probes across 6 multi-vector modes and 5 evasion strategies.
+   - Prober issues HTTP requests via `AuthenticatedHttpClient`.
+   - `AuthAnalyzer` applies strict false positive rejection (suppressing legitimate 401/403/429 rejections and rate limits) and emits validated findings.
+6. **Step 6: Graph & State Integration**: `_emit_evidence()` updates the 4 sinks: Evidence store, Vulnerabilities list, KnowledgeGraph nodes/edges (`HAS_ENDPOINT`, `HAS_VULNERABILITY`), and `ControlledMission.publish_finding`.
+7. **Step 7: CVSS & Reporting**: `CVSSCalculator` resolves CWE details and CVSS v3.1 scores for reporting.
 
 ---
 
 ## 3. Caveats
 
-- **Scope & Safety**: In accordance with the ARGUS safety architecture, the `CommandInjectionCollector` must only use benign commands (`id`, `whoami`, `hostname`, `sleep 5`, `echo canary`) for verification; destructive commands (e.g. `rm`, `mkfs`, arbitrary write) must never be used.
-- **Timing Reliability in Benchmarks**: Time-based blind tests in mock unit suites should use mocked `HttpResponse.elapsed` (e.g., `elapsed=5.1` vs `baseline=0.1`) rather than actual wall-clock `time.sleep()`, ensuring fast and deterministic CI test execution.
-- **Read-Only Scope**: This report is purely an exploratory investigation and architectural blueprint. No source code modifications were made.
+1. **Test Execution Import Mode**: Pytest must be invoked with `--import-mode=importlib` (e.g. `./venv/bin/pytest --import-mode=importlib`) due to identically named test files in legacy plugin folders (e.g. `test_file_upload.py`, `test_graphql.py`, `test_business_logic.py`).
+2. **CWE Database Precision**: `CVSSCalculator.CWE_DATABASE` already has entries for `authentication` (CWE-287) and `session_fixation` (CWE-384), but explicitly requires additions for CWE-307, CWE-640, CWE-288, CWE-1390, CWE-798, CWE-522, and CWE-613 to support all 6 attack vectors without falling back to generic CWE-699.
+3. **Graph Builder Dynamic Resolution**: `AttackSurfaceGraphBuilder.build_from_evidence()` should include explicit evidence category matching for `authentication`, `auth_bypass`, `credential_attack`, `brute_force`, `password_reset`, `mfa_bypass`, `session_fixation`, `jwt_manipulation`, `default_credentials` so that graphs reconstructed from serialized evidence stores contain identical node IDs and `HAS_VULNERABILITY` edges.
+4. **Tool Registry Aliases**: `ToolRegistry` and `PluginExecutorAdapter` must register comprehensive alias variants (`auth_bypass`, `authentication_bypass`, `credential_attack`, `brute_force`, `jwt_manipulation`, `password_reset`, `mfa_bypass`, `session_fixation`, `default_credentials`) to ensure smooth resolution regardless of how tasks or callers invoke the capability.
 
 ---
 
 ## 4. Conclusion
 
-The pipeline connectivity, DAG task generation, tool registry, attack surface graph builder, and test suite conventions in ARGUS are highly structured, modular, and consistent. Adding Sprint 11 Command Injection requires:
-1. Registering `"command_injection"` in `argus/runtime/registry.py` and `argus/runtime/plugins.py`.
-2. Adding `"command_injection"` template, gap resolution, and input resolution in `argus/planning/task_generator.py`.
-3. Adding category `"command_injection"` handler in `argus/graph/attack_surface.py` to create `HAS_ENDPOINT` and `HAS_VULNERABILITY` edges.
-4. Exporting the new collector in `argus/collectors/__init__.py`.
-5. Adding ~20+ unit and E2E tests in `tests/collectors/test_command_injection.py` and `tests/runtime/test_e2e_command_injection.py`.
+The ARGUS pipeline architecture is highly modular and strictly structured. Implementing the **Authentication Bypass & Credential Attack Detection Module** requires integrating across 5 exact touchpoints:
+
+| Component | Target File | Specific Integration Required |
+|---|---|---|
+| **1. Collector Module** | `argus/collectors/authentication.py` or `argus/collectors/auth_bypass.py` | Implement `AuthenticationBypassCollector`, `AuthPayloadGenerator`, `AuthAnalyzer`, `AuthProber` following Tripartite Pattern and Quadruple State Publishing. Expose in `argus/collectors/__init__.py`. |
+| **2. Task Generator & DAG** | `argus/planning/task_generator.py` | Add `"auth_bypass"` template to `_RECON_TEMPLATES`, add matching rules in `_resolve_template_for_gap`, add required inputs mapping in `from_gaps`. |
+| **3. ScanDAG & Engine** | `argus/scanning/dag.py` & `argus/scanning/engine.py` | Ensure `"auth_bypass"` is in `collector_class_map` in `ScanEngine.resolve_collector`. |
+| **4. Tool & Plugin Registry** | `argus/runtime/registry.py` & `argus/runtime/plugins.py` | Register `Tool(id="auth_bypass", ...)` with capability flags and aliases in `registry`; add fallback in `_instantiate_specialist_fallback()`. |
+| **5. Graph & CVSS/CWE** | `argus/graph/attack_surface.py` & `argus/reporting/cvss.py` | Add auth category ingestion in `AttackSurfaceGraphBuilder.build_from_evidence`; add CWE-307, CWE-640, CWE-288, CWE-1390, CWE-798, CWE-522, CWE-613 in `CVSSCalculator.CWE_DATABASE` and `_get_preset_vector`. |
+
+The existing test suite is healthy with **1,953 passing tests**, providing an established baseline for zero-regression validation.
 
 ---
 
 ## 5. Verification Method
 
-### Test Suite Execution
-Run the full test suite using the standard ARGUS command:
+### 5.1 Pytest Test Suite Execution
+To verify the existing test suite baseline and ensure zero regressions:
 ```bash
-python3 -m pytest tests/ --ignore=tests/workspace -q
+cd /home/varun/argus
+./venv/bin/pytest --import-mode=importlib -q
 ```
-**Expected Current Baseline**:
-`996 passed, 2 warnings in ~44s`
+*Expected Output*: `1953 passed, 1 skipped` (or higher when new tests are added).
 
-**Post-Sprint 11 Target**:
-`1016+ passed, 0 failures, 0 regressions`
+### 5.2 TaskGenerator Integration Verification
+```bash
+./venv/bin/pytest --import-mode=importlib -k "task_generator" -q
+```
 
-### Files to Inspect
-- `argus/runtime/registry.py` (lines 19-30, 297-326)
-- `argus/runtime/plugins.py` (lines 65-106)
-- `argus/planning/task_generator.py` (lines 98-122, 365-433, 463)
-- `argus/graph/attack_surface.py` (lines 350-523)
-- `tests/collectors/test_sql_injection.py` & `tests/collectors/test_xss.py` (for test structure reference)
+### 5.3 ScanDAG & ScanEngine Topological Verification
+```bash
+./venv/bin/pytest --import-mode=importlib tests/scanning/ -q
+```
+
+### 5.4 Graph Model & CVSS Verification
+```bash
+./venv/bin/pytest --import-mode=importlib tests/reporting/test_cvss.py tests/graph/ -q
+```
+
+---
+*Report complete and ready for the Orchestrator and Specialist implementation teams.*

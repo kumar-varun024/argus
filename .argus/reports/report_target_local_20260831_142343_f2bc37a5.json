@@ -1,0 +1,24 @@
+{
+  "report_id": "f2bc37a5-8b6e-41cd-98df-fa10170bca6e",
+  "mission_id": "77bb565d-d7d6-4832-9806-e7ff154b168c",
+  "target": "target.local",
+  "generated_at": "2026-08-31T14:23:43.296774+00:00",
+  "generator_version": "1.0.0",
+  "summary": {
+    "total_findings": 0,
+    "total_evidence_items": 0,
+    "deduplicated_count": 0,
+    "severity_counts": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0,
+      "info": 0
+    },
+    "category_counts": {},
+    "host_counts": {}
+  },
+  "findings": [],
+  "grouped_by_category": {},
+  "grouped_by_host": {}
+}

@@ -1,9 +1,12 @@
-# Progress Log - survey_explorer_1
-Last visited: 2026-08-30T06:42:00Z
+# Progress — survey_explorer_1
+
 - [x] Initialized DISPATCH.md and BRIEFING.md
-- [x] Investigate existing collector implementations (Sprint 5, Sprint 6, Sprint 8)
-- [x] Investigate TaskGenerator DAG and pipeline connectivity
-- [x] Investigate Tool Registry (`registry.py`) and PluginExecutorAdapter
-- [x] Investigate Attack Surface Graph, Evidence, Finding, Models, Edges
-- [x] Investigate Code layout, directory structures, naming conventions, test conventions
-- [x] Synthesize findings and write handoff.md
+- [x] Survey BaseCollector, AuthenticatedHttpClient, and active collector base patterns
+- [x] Survey existing active collectors across argus/collectors/
+- [x] Document Tripartite Pattern (Collector + PayloadGenerator + Prober + Analyzer)
+- [x] Document Quadruple State Publishing Pattern (state, events, findings, graph edges)
+- [x] Enumerate required classes, dataclasses, methods, configs for Prototype Pollution & Client-Side collector
+- [x] Verify baseline test suite (1,929 passing tests)
+- [x] Compile comprehensive handoff.md report
+
+Last visited: 2026-09-02T13:48:00Z

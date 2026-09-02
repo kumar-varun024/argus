@@ -1,15 +1,21 @@
-# Progress Tracker — survey_spec_miner
+# Progress — Sprint 23 Web Cache Poisoning & Cache Deception Detection Module
 
-- [x] Initialized DISPATCH.md and BRIEFING.md
-- [x] Ran baseline test suite: 861 passed, 13416 warnings in 22.33s (0 failures)
-- [x] Extracted and analyzed exact requirements and specifications for SQLi detection:
-  - [x] Error-based detection: error patterns/signatures across MySQL, PostgreSQL, MSSQL, Oracle, SQLite
-  - [x] Boolean-based blind detection: differential analysis logic, tolerance, baseline comparison
-  - [x] Time-based blind detection: delay measurement heuristics, baseline timing calculation, threshold (>=4s)
-  - [x] False positive rejection logic: distinguishing genuine SQL errors from normal application text
-  - [x] WAF bypass payload mutations: 5 distinct strategies (case alternation, comment insertion, URL encoding, double encoding, whitespace substitution)
-- [x] Cataloged test suite baseline, test mocks, fixtures, and conventions
-- [x] Produced comprehensive handoff.md following 5-component format
-- [x] Ready to notify orchestrator
+**Last visited:** 2026-09-01T01:21:45+05:30
+**Status:** Completed
+**Agent:** survey_spec_miner
 
-Last visited: 2026-08-29T16:26:30Z
+## Completed Steps
+- [x] Initialized DISPATCH.md and BRIEFING.md for Sprint 23 Web Cache Poisoning & Cache Deception Detection.
+- [x] Read `ORIGINAL_REQUEST.md` and codebase architectural contracts.
+- [x] Surveyed existing ARGUS collectors, pipeline DAG, registry, BaseCollector, AuthenticatedHttpClient, and test patterns.
+- [x] Detailed R1: Cache Security Collector & Prober specifications (BaseCollector, AuthenticatedHttpClient, baseline vs perturbed requests, 4-step confirmation sequence).
+- [x] Detailed R2: Multi-Vector Detection Modes (Unkeyed Headers, Unkeyed Parameters, Web Cache Deception, Normalization Flaws, Cache Fingerprinting).
+- [x] Detailed R3: 5+ Mutation & Evasion Strategies (Dynamic Cache Buster Insertion, Path Delimiter Variations, Normalization Inversion, Header Parameterization/Cloaking, Cache Rule Probing).
+- [x] Detailed R4: Pipeline, Registry, and AttackSurfaceGraph integration.
+- [x] Detailed R5: False positive rejection rules and verification oracle matrix.
+- [x] Compiled comprehensive handoff report to `/home/varun/argus/.agents/survey_spec_miner/handoff.md`.
+- [x] Verified baseline test suite status (1,648 passed).
+
+
+
+
