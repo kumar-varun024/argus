@@ -1,18 +1,30 @@
-## 2026-09-02T03:24:00Z
-You are the Forensic Auditor for the ARGUS API Security Testing Module.
-Your working directory is `/home/varun/argus/.agents/auditor_1`.
+## 2026-09-03T00:04:42Z
+You are the Forensic Integrity Auditor (Auditor 1).
+Working directory: /home/varun/argus/.agents/auditor_1
 
-MANDATORY FIRST STEP:
-Read `/home/varun/argus/.agents/ORIGINAL_REQUEST.md` and `/home/varun/argus/.agents/worker_collector_impl/handoff.md`.
+Read /home/varun/argus/.agents/ORIGINAL_REQUEST.md and /home/varun/argus/PROJECT.md before starting work.
 
-Perform an exhaustive, forensic integrity audit of the codebase:
-1. Inspect `argus/collectors/api_security.py` for genuine logic. Ensure there are NO hardcoded test results, fake returns, bypassed validation, dummy facades, or shortcuts.
-2. Inspect `tests/collectors/test_api_security.py` and `tests/collectors/test_api_security_adversarial.py` to ensure tests genuinely exercise the collector logic, payload generators, probers, and analyzers rather than asserting tautologies or trivial mocks.
-3. Inspect pipeline integration in `task_generator.py`, `registry.py`, `plugins.py`, `attack_surface.py`, `cvss.py`.
-4. Run static analysis / test execution to verify integrity:
-   `python -m pytest tests/collectors/test_api_security.py tests/collectors/test_api_security_adversarial.py -v`
-
-Provide an unambiguous verdict: CLEAN or INTEGRITY VIOLATION.
-Document all evidence in `/home/varun/argus/.agents/auditor_1/handoff.md`.
-Update `/home/varun/argus/.agents/auditor_1/progress.md` before finishing.
-When done, notify the orchestrator with send_message.
+Your task:
+Perform a comprehensive, zero-tolerance Forensic Integrity Audit across all changes implemented in Sprint 30:
+1. Inspect all created and modified files across the codebase:
+   - `pyproject.toml`
+   - `argus/ai/` (`openai_client.py`, `gemini_client.py`, `client.py`, `__init__.py`)
+   - `argus/runtime/mission.py` & `argus/runtime/registry.py`
+   - `argus/authorization/scope.py`
+   - `argus/collectors/` (`subfinder.py`, `httpx.py`, `katana.py`, `nuclei.py`)
+   - `argus/bridges/burp/` (`__init__.py`, `server.py`, `importer.py`, `scanner.py`, `collaborator.py`, `proxy.py`, `__main__.py`)
+   - `argus/__main__.py` & `argus/cli/app.py`
+   - `argus/scanning/dag.py`
+   - Test files: `tests/bridges/test_burp_mcp.py`, `tests/runtime/test_recon_fallback.py`, `tests/authorization/test_scope_resolver.py`, `tests/ai/test_ai_clients.py`, `tests/test_cli_scan.py`.
+2. Check for integrity violations:
+   - Are there any hardcoded test results or expected string constants fabricated to pass tests?
+   - Are there any dummy or facade implementations (e.g. methods returning mock constants without real logic)?
+   - Are all 6 MCP tools genuinely implemented?
+   - Is XML/JSON parsing genuine (with real ElementTree / base64 decoding)?
+   - Is Scope defaulting genuinely parsing targets (domains, IPs, CIDRs, wildcards)?
+   - Are Recon fallbacks genuinely creating structured hosts/endpoints and Evidence?
+   - Is `python -m argus scan` genuinely executing `ScanEngine` DAG?
+3. Execute the full test suite independently: `python -m pytest tests/ --ignore=tests/workspace -x -q`.
+4. Formulate an explicit binary verdict: CLEAN or INTEGRITY VIOLATION.
+5. Write your full audit evidence report to `/home/varun/argus/.agents/auditor_1/handoff.md`.
+6. Send completion message to orchestrator via send_message. Operate silently during execution.

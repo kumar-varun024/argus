@@ -44,8 +44,10 @@ class ScopeResolver:
     def _match_rule(self, target: str, rule: str) -> bool:
         # Wildcard domain match
         if rule.startswith("*."):
-            if target.endswith(rule[2:]) or target == rule[2:]:
+            base = rule[2:]
+            if target == base or target.endswith("." + base):
                 return True
+            return False
         # Exact match
         if target == rule:
             return True
@@ -53,7 +55,7 @@ class ScopeResolver:
         # Basic IP range support
         if "/" in rule:
             try:
-                network = ipaddress.ip_network(rule)
+                network = ipaddress.ip_network(rule, strict=False)
                 ip = ipaddress.ip_address(target)
                 if ip in network:
                     return True
@@ -63,12 +65,39 @@ class ScopeResolver:
         return fnmatch.fnmatch(target, rule)
 
     def _is_url(self, target: str) -> bool:
-        return target.startswith("http://") or target.startswith("https://")
+        return target.startswith(("http://", "https://")) or "://" in target
 
     def resolve_target(self, target: str) -> str:
-        """Normalize target."""
+        """Normalize target by stripping protocol schemes, ports, and trailing paths."""
+        if not target or not isinstance(target, str):
+            return ""
+        target = target.strip()
         if self._is_url(target):
             return self.resolve_url(target)
+
+        # Handle host/path if not CIDR
+        if "/" in target:
+            try:
+                ipaddress.ip_network(target, strict=False)
+                return target
+            except ValueError:
+                target = target.split("/")[0]
+
+        # Handle host:port notation
+        if target.startswith("[") and "]" in target:
+            # IPv6 with port e.g. [2001:db8::1]:8080 or [::1]
+            host_part = target[1:target.index("]")]
+            return host_part
+
+        if ":" in target:
+            try:
+                ipaddress.ip_address(target)
+                return target
+            except ValueError:
+                parts = target.rsplit(":", 1)
+                if len(parts) == 2 and parts[1].isdigit():
+                    return parts[0]
+
         return target
 
     def resolve_domain(self, target: str) -> str:
@@ -78,15 +107,18 @@ class ScopeResolver:
         """Extracts the hostname from a URL."""
         try:
             parsed = urlparse(url)
-            return parsed.hostname or url
+            host = parsed.hostname or parsed.netloc.split(":")[0]
+            if host.startswith("[") and host.endswith("]"):
+                host = host[1:-1]
+            return host or url
         except Exception:
             return url
 
     def resolve_ip(self, ip: str) -> str:
-        return ip
+        return self.resolve_target(ip)
         
     def resolve_subdomain(self, subdomain: str) -> str:
-        return subdomain
+        return self.resolve_target(subdomain)
 
     def resolve_resource(self, resource: str) -> str:
         return resource

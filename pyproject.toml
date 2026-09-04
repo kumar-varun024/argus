@@ -19,11 +19,18 @@ dependencies = [
     "fastapi>=0.100.0",
     "uvicorn>=0.23.0",
     "python-multipart>=0.0.6",
-    "jinja2>=3.1.2"
+    "jinja2>=3.1.2",
+    "httpx>=0.25.0",
+    "python-dotenv>=1.0.0",
+    "openai>=1.0.0",
+    "beautifulsoup4>=4.12.0",
+    "python-dateutil>=2.8.2",
+    "sqlite-vec>=0.1.6"
 ]
 
 [project.scripts]
 argus = "argus.cli.app:app"
 
-[tool.setuptools]
-packages = ["argus"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["argus*"]

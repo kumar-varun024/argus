@@ -1,4 +1,4 @@
-# ARGUS Sprint Handoff — Sprint 29 Complete (All Planned Sprints Done)
+# ARGUS Sprint Handoff — Sprint 31c Complete
 
 > **This file is self-contained.** A new agent with zero prior context can execute the next sprint from this file alone.
 > **Instructions for user:** Open a new conversation and say:
@@ -8,7 +8,7 @@
 
 ## Current State of ARGUS
 
-**Test baseline:** 1,992 passing tests (`python -m pytest tests/ --ignore=tests/workspace -x -q`)
+**Test baseline:** 2,356 passing tests (`python -m pytest tests/ --ignore=tests/workspace -x -q`)
 **Working directory:** `/home/varun/argus`
 **Integrity mode:** benchmark (all sprints use this)
 
@@ -43,29 +43,29 @@
 | 26 | File Upload Vulnerability Detection (6 Upload Detection Modes, Upload Response Analysis, 5 Mutation/Evasion Strategies, CWE-434/CWE-436) | 1,828 | `argus/collectors/file_upload.py`, `tests/collectors/test_file_upload.py`, `tests/collectors/test_file_upload_adversarial.py` |
 | 27 | API Security Testing REST/gRPC (Parameter Tampering, Mass Assignment, BOLA/IDOR, Rate Limiting Bypass, Excessive Data Exposure, Method Tampering, 5 Mutation Strategies, CWE-639/CWE-915/CWE-770) | 1,862 | `argus/collectors/api_security.py`, `tests/collectors/test_api_security.py`, `tests/collectors/test_api_security_adversarial.py` |
 | 28 | Authentication Bypass & Credential Attacks (Brute Force, Password Reset Abuse, MFA Bypass, Session Fixation, JWT Manipulation, Default Credentials, Shannon Entropy Analysis, 5 Mutation Strategies, CWE-287/CWE-307/CWE-384/CWE-640) | 1,929 | `argus/collectors/auth_bypass.py`, `tests/collectors/test_auth_bypass.py`, `tests/collectors/test_auth_bypass_pipeline.py`, `tests/collectors/test_auth_bypass_adversarial.py` |
-| **29** | **Prototype Pollution & Client-Side Attacks (Server/Client Prototype Pollution, DOM Clobbering, Open Redirect Chains, Clickjacking, Gadget Analysis, 5 Mutation Strategies, CWE-1321/CWE-79/CWE-601/CWE-1021)** | **1,992** | **`argus/collectors/prototype_pollution.py`, `tests/collectors/test_prototype_pollution.py`, `tests/collectors/test_prototype_pollution_adversarial.py`, `tests/collectors/test_prototype_pollution_pipeline.py`** |
+| 29 | Prototype Pollution & Client-Side Attacks (Server/Client Prototype Pollution, DOM Clobbering, Open Redirect Chains, Clickjacking, Gadget Analysis, 5 Mutation Strategies, CWE-1321/CWE-79/CWE-601/CWE-1021) | 1,992 | `argus/collectors/prototype_pollution.py`, `tests/collectors/test_prototype_pollution.py`, `tests/collectors/test_prototype_pollution_adversarial.py`, `tests/collectors/test_prototype_pollution_pipeline.py` |
+| 30 | Scanner Glue & Burp MCP (CLI Entry Point, Scan Command, Scope Defaulting, Recon Fallback, Burp Suite MCP Server, Dependency & AI Stub Cleanup) | 2,089 | `argus/__main__.py`, `argus/cli/app.py`, `argus/bridges/burp/server.py`, `argus/bridges/burp/proxy.py`, `argus/bridges/burp/importer.py`, `argus/bridges/burp/scanner.py`, `argus/bridges/burp/collaborator.py` |
+| 31a | Conversational Memory System & Vector Recall (MemoryEntry, MemoryStore, MemoryManager, ResearchContextEngine Integration) | 2,261 | `argus/memory/models.py`, `argus/memory/store.py`, `argus/memory/manager.py`, `argus/memory/__init__.py`, `tests/memory/test_memory.py`, `tests/memory/test_memory_adversarial.py`, `tests/memory/test_memory_integration.py` |
+| **31b** | **CLI Search & End-to-End Vector RAG Integration Tests (`argus search`, `argus/cli/search_cli.py`, `tests/vector/test_rag_integration.py`, `tests/cli/test_search_cli.py`)** | **2,311** | **`argus/cli/search_cli.py`, `argus/cli/app.py`, `tests/vector/test_rag_integration.py`, `tests/cli/test_search_cli.py`** |
+| **31c** | **Adversarial RAG Pipeline Tests (Poisoned Findings, Deceptive CVEs, Prompt Injection Resilience, Embedding Robustness, Cross-Source Contamination, Ranking Manipulation)** | **2,356** | **`tests/vector/test_rag_adversarial.py`, `tests/vector/test_rag_prompt_injection.py`, `tests/vector/test_embedding_robustness.py`** |
 
 ---
 
 ## Remaining Roadmap
 
-All planned sprints (0–29) have been completed. The ARGUS platform now covers 26 vulnerability detection modules with 1,992 passing tests.
+All planned sprints are complete. The ARGUS Vector RAG subsystem is fully implemented and hardened.
 
 ---
 
 ## Key Architecture Patterns (for the new agent)
 
-- **Collectors** follow the tripartite pattern in `argus/collectors/ssti.py`, `argus/collectors/business_logic.py`, `argus/collectors/race_conditions.py`, `argus/collectors/request_smuggling.py`, `argus/collectors/websocket.py`, `argus/collectors/graphql.py`, `argus/collectors/auth_bypass.py`:
-  - `NewCollector(BaseCollector)` inheriting from `argus/collectors/base.py`
-  - `NewPayloadGenerator` generating attack payloads
-  - `NewAnalyzer` identifying vulnerabilities and suppressing false positives
-- **Registration:** add tool and aliases to `argus/runtime/registry.py` AND fallback in `argus/runtime/plugins.py`
-- **DAG scheduling:** add template to `_RECON_TEMPLATES` in `argus/planning/task_generator.py` with dependency `["Discover API Endpoints"]`
-- **Graph edges:** create `HAS_VULNERABILITY` and `HAS_ENDPOINT` edges in `argus/graph/attack_surface.py` connecting `live_host` and `endpoint` to `vulnerability` node
-- **Evidence:** use `EvidenceStore` (at `argus/evidence/store.py`) to record findings with status `CONFIRMED`
-- **CVSS & CWE:** map vulnerability types in `argus/reporting/cvss.py`
-- **AuthenticatedHttpClient** in `argus/http/client.py` enforces scope boundaries
-- **ScanEngine** in `argus/scanning/engine.py` orchestrates the full DAG -> collector dispatch -> report generation pipeline
+- **Vector Store:** `argus/vector/store.py` (`VectorStore`, `get_vector_store()`) backed by SQLite with native sqlite-vec or NumPy vector fallback.
+- **Embeddings:** `argus/vector/embeddings.py` (`EmbeddingEngine`) providing deterministic 384-d feature hashing & concept clustering offline.
+- **Search CLI:** `argus/cli/search_cli.py` registered as `search` subcommand in `argus/cli/app.py`.
+- **Finding Indexer & Search:** `argus/reporting/vector_indexer.py` (`ScanEvidenceIndexer`, `FindingSemanticSearchEngine`).
+- **CVE KB & Correlator:** `argus/knowledge/cve_kb.py`, `argus/knowledge/cve_correlator.py`.
+- **Conversational Memory:** `argus/memory/` (`MemoryManager`, `MemoryStore`, `MemoryEntry`).
+- **Research Context Engine:** `argus/workspace/context/engine.py` (`ResearchContextEngine`).
 
 ## Orchestration Rules
 
@@ -76,20 +76,32 @@ Read `/home/varun/argus/.agents/rules/user_global.md` before starting. Key rules
 
 ---
 
-## Sprint 29 — Completed (2026-09-02)
+## Sprint 31c — Completed (2026-09-04)
 
-Sprint 29 was executed via teamwork_preview and completed with orchestrator-level post-sprint fixes.
+Sprint 31c was executed to implement adversarial RAG pipeline evaluations, prompt injection resilience tests, and embedding retrieval robustness test suites.
 
 **Results:**
-- 1,992 tests passing (63 new, 0 regressions)
-- All 5 detection modes implemented (server/client prototype pollution, DOM clobbering, open redirects, clickjacking)
-- Gadget analysis for Express, Lodash, jQuery, Handlebars frameworks
-- 5+ mutation/evasion strategies
-- Full pipeline connectivity verified (registry, DAG, graph edges, CWE mappings)
-- Handoff at `.agents/sprint29_prototype_pollution/handoff.md`
+- **2,356 tests passing across the codebase** (45 new tests, 0 regressions).
+- `tests/vector/test_rag_adversarial.py` (17 tests): Poisoned finding injection (SQL payloads, XSS, null bytes, RTL overrides, verbatim storage), deceptive CVE records (misleading descriptions, empty/None fields, 10K char descriptions, correlator resistance), embedding collision attacks (lexical overlap, ranking differentiation, stability), cross-source contamination (source-type filtering between findings/CVEs/memory), ranking manipulation (keyword stuffing, query repetition, long queries), large-scale stress (500+ documents, concurrent indexing & searching).
+- `tests/vector/test_rag_prompt_injection.py` (12 tests): Stored prompt injection in findings (title, description, impact with exact preservation), prompt injection in CVE descriptions & references (CVEKnowledgeBase and CVECorrelator handling), prompt injection in memory (MemoryManager recall, lifecycle, archive, supersede), ResearchContextEngine injection (injection queries, injection data isolation, template preservation), nested/chained injection (JSON + Base64, control codes, null bytes, Unicode).
+- `tests/vector/test_embedding_robustness.py` (16 tests): Unicode normalization forms (NFC/NFD/NFKC/NFKD, CJK, Arabic, emoji, zero-width), null/control characters, extreme length inputs (empty to 100K+), homoglyph attacks (Latin vs Cyrillic, lookalike domains), security taxonomy coverage (synonym pairs, multi-word concepts, abbreviations), determinism & idempotency (100 repeated calls, batch vs single), distance metric consistency (self-similarity, range bounds, semantic ordering).
+- Handoff report written to `.agents/swe_sprint31c/handoff.md`.
 
 ---
 
-## All Planned Sprints Complete
+## Sprint 31b — Completed (2026-09-03)
 
-All 30 sprints (0–29) have been completed. The ARGUS platform includes 26 vulnerability detection modules with 1,992 passing tests.
+Sprint 31b was executed to implement the `argus search` CLI command group and comprehensive end-to-end Vector RAG integration tests.
+
+**Results:**
+- **2,311 tests passing across the codebase** (50 new tests: 28 vector RAG integration, 22 CLI search, 0 regressions).
+- `argus/cli/search_cli.py`: Complete CLI command group built with Typer and Rich:
+  - `argus search <query>`: Cross-source semantic search across findings, evidence, CVEs, and memory with Rich table output (Score, Type, Severity, Title/Content, Category) and raw JSON array output (`--json`). Supports filtering by `--type`, `--severity`, `--category`, `--mission`, `--top-k`, `--min-score`, and `--verbose` (`-v`).
+  - `argus search cves <query>`: Specialized CVE semantic search shortcut with `--cwe` and `--product` post-filtering.
+  - `argus search memory <query>`: Specialized memory recall shortcut with `--memory-type` filtering.
+  - `argus search stats`: Index statistics displaying document counts by source type, total document count, vector database path, dimension, metric, and embedding provider name.
+- `argus/cli/app.py`: Registered `search_app` under name `"search"`.
+- `tests/vector/test_rag_integration.py`: 28 end-to-end integration tests verifying finding indexing & search, CVE ingestion & CVECorrelator matching, memory recall & lifecycle, cross-source unified queries, ResearchContextEngine multi-source resolution, round-trip persistence across store reopening, and multi-field filter composition.
+- `tests/cli/test_search_cli.py`: 22 CLI integration tests verifying table formatting, `--json` serialization, error handling, empty results, subcommands (`cves`, `memory`, `stats`), and CLI registration.
+- Handoff reports written to `.agents/implementer_r1/handoff.md` and `.agents/swe_sprint31b/handoff.md`.
+

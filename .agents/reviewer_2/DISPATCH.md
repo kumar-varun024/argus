@@ -1,22 +1,23 @@
-## 2026-09-02T03:24:00Z
-You are Reviewer 2 (Specification Conformance Reviewer) for the ARGUS API Security Testing Module.
-Your working directory is `/home/varun/argus/.agents/reviewer_2`.
+## 2026-09-02T18:34:42Z
 
-MANDATORY FIRST STEP:
-Read `/home/varun/argus/.agents/ORIGINAL_REQUEST.md` and `/home/varun/argus/.agents/worker_collector_impl/handoff.md`.
+You are Reviewer 2 (M3 & M4 Specialist Reviewer).
+Working directory: /home/varun/argus/.agents/reviewer_2
 
-Audit strict compliance with ALL requirements:
-- R1: API Security Collector & Prober inheriting from BaseCollector using AuthenticatedHttpClient.
-- R2: Multi-Vector API Detection Modes (Parameter Tampering, Mass Assignment, Rate Limiting Bypass, BOLA/IDOR, Excessive Data Exposure, Method Tampering).
-- R3: API Response Analysis (schema violations, authorization boundaries, rate limit headers, error message disclosure, pagination bypass, false positive rejection).
-- R4: Mutation & Evasion Strategies (Content-Type Switching, Parameter Pollution, Header-Based Auth Bypass, Version Downgrade, Encoding Variations).
-- R5: Pipeline Connectivity (TaskGenerator DAG, registry.py plugin registration, attack surface graph Section 27 HAS_VULNERABILITY edges, CWE-639/915/770 in cvss.py).
-- R6: Zero Regression & E2E Validation (all 1,828+ baseline tests pass, at least 25 new tests added).
+Read /home/varun/argus/.agents/ORIGINAL_REQUEST.md and /home/varun/argus/PROJECT.md before starting work.
 
-Run the tests to independently verify:
-`python -m pytest tests/collectors/test_api_security.py tests/collectors/test_api_security_adversarial.py -v`
-`python -m pytest tests/ --ignore=tests/workspace -x -q`
-
-Record your findings, test results, and clear verdict (APPROVE or REQUEST_CHANGES) in `/home/varun/argus/.agents/reviewer_2/handoff.md`.
-Update `/home/varun/argus/.agents/reviewer_2/progress.md` before finishing.
-When done, notify the orchestrator with send_message.
+Your task:
+1. Conduct a rigorous review of Milestone M3 (Burp Suite MCP Server Integration, R3) and Milestone M4 (CLI Entry Point & Scan Command, R1):
+   - M3 files: `argus/bridges/__init__.py`, `argus/bridges/burp/` (`__init__.py`, `server.py`, `importer.py`, `scanner.py`, `collaborator.py`, `proxy.py`, `__main__.py`), `tests/bridges/test_burp_mcp.py`.
+   - M4 files: `argus/__main__.py`, `argus/cli/app.py` (`@app.command("scan")`), `argus/scanning/dag.py` (`create_for_profile`), `tests/test_cli_scan.py`.
+2. Verify JSON-RPC 2.0 protocol compliance, tool definitions & schema accuracy, base64 request/response decoding, Burp REST API resilience, CLI options & flags, Rich UI table/panel rendering, and report creation.
+3. Run test verification commands:
+   - `python -m pytest tests/bridges/test_burp_mcp.py -v`
+   - `python -m pytest tests/test_cli_scan.py -v`
+   - `python -m pytest tests/ --ignore=tests/workspace -x -q`
+4. Formulate an explicit verdict: APPROVE or REQUEST_CHANGES.
+5. Write your structured review report to `/home/varun/argus/.agents/reviewer_2/handoff.md` with:
+   - Observation
+   - Logic Chain
+   - Verification results
+   - Verdict (APPROVE / REQUEST_CHANGES)
+6. Send completion message to orchestrator via send_message. Operate silently during execution.

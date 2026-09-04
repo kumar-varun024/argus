@@ -14,6 +14,10 @@ from argus.reporting.models import (
 )
 from argus.reporting.processor import EvidenceProcessor
 from argus.reporting.queue import ResearchQueue
+from argus.reporting.vector_indexer import (
+    FindingSemanticSearchEngine,
+    ScanEvidenceIndexer,
+)
 
 __all__ = [
     "ReportSeverity",
@@ -29,4 +33,7 @@ __all__ = [
     "JSONReportRenderer",
     "ReportGenerator",
     "ResearchQueue",
+    "ScanEvidenceIndexer",
+    "FindingSemanticSearchEngine",
 ]
+

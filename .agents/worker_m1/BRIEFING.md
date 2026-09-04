@@ -1,66 +1,56 @@
-# BRIEFING — 2026-08-30T07:16:00Z
+# BRIEFING — 2026-09-02T23:48:00Z
 
 ## Mission
-Implement EnvironmentDetector utility, mission environment state integration, and comprehensive test suite for Sprint 10 Milestone 1.
+Implement Milestone 1 (R1): Vector Store & Embedding Engine for Argus with SQLite-vec native support and resilient Python/NumPy fallback, deterministic local embeddings, filtering, persistence, and 100% test coverage.
 
 ## 🔒 My Identity
-- Archetype: Worker 1 (Environment Specialist)
+- Archetype: implementer
 - Roles: implementer, qa, specialist
 - Working directory: /home/varun/argus/.agents/worker_m1
-- Original parent: 13346e46-f3a9-4e87-a9c0-df36c82fce1a
-- Milestone: Sprint 10 Milestone 1 (Environment Detector & Mission State)
+- Original parent: a53acd93-0ea1-40be-815c-a20580966e3d
+- Milestone: M1 (R1 - Vector Store & Embedding Engine)
 
 ## 🔒 Key Constraints
-- Exclusive file ownership:
-  - `argus/utils/__init__.py`
-  - `argus/utils/environment.py`
-  - `argus/runtime/mission.py`
-  - `argus/runtime/mission_runtime.py`
-  - `tests/tools/test_environment_detector.py`
-- Zero regression across existing 896 tests.
-- Genuine implementation with no hardcoded test results or mock shortcuts.
+- Pure offline capability with fast deterministic 384-d embedding provider (zero external API/model download required)
+- Support sqlite-vec extension where available, with graceful automatic fallback to SQLite + Python/NumPy vector arithmetic
+- Strict adherence to data models: VectorDocument, SearchResult, VectorFilter, VectorStoreConfig, DistanceMetric
+- Full CRUD, metadata filtering, top-k similarity search, min_score threshold, disk persistence
+- 100% test pass rate on tests/test_vector_store.py with comprehensive coverage
 
 ## Current Parent
-- Conversation ID: 13346e46-f3a9-4e87-a9c0-df36c82fce1a
-- Updated: 2026-08-30T07:16:00Z
+- Conversation ID: a53acd93-0ea1-40be-815c-a20580966e3d
+- Updated: 2026-09-02T23:48:00Z
 
 ## Task Summary
-- **What to build**:
-  1. `argus/utils/__init__.py` and `argus/utils/environment.py` with `EnvironmentDetector`.
-  2. `argus/runtime/mission.py`: added `environment: dict = field(default_factory=dict)` to `Mission`.
-  3. `argus/runtime/mission_runtime.py`: auto-populates `mission.environment` during init and PLANNING phase if empty.
-  4. `tests/tools/test_environment_detector.py`: complete 22 unit, boundary, and integration tests.
-- **Success criteria**:
-  - `EnvironmentDetector` checks tools (`subfinder`, `httpx`/`httpx-toolkit`, `nuclei`, `katana`, `dnsx`, `node`, `npm`), network (DNS + HTTP), and cloud metadata (AWS, GCP, Azure).
-  - `detect()` aggregates results into structured dict with summary.
-  - `mission.environment` properly stores detected environment.
-  - All tests pass (0 regressions, 918 total passing).
-- **Interface contracts**: PROJECT.md § Interface Contracts, survey handoff.
-- **Code layout**: PROJECT.md § Code Layout.
+- **What to build**: `argus/vector/` package (`models.py`, `embeddings.py`, `store.py`, `exceptions.py`, `__init__.py`), update `pyproject.toml`, and write `tests/test_vector_store.py`.
+- **Success criteria**: All tests in `tests/test_vector_store.py` pass cleanly (25/25), full workspace test suite regression passes (2,135/2,135).
+- **Interface contracts**: PROJECT.md & ORIGINAL_REQUEST.md.
 
 ## Change Tracker
 - **Files modified**:
-  - `argus/utils/__init__.py`: Package export for `EnvironmentDetector`.
-  - `argus/utils/environment.py`: Implemented `EnvironmentDetector` with `check_tools`, `check_network`, `check_cloud_metadata`, and `detect`.
-  - `argus/runtime/mission.py`: Added `environment` dict field to `Mission` dataclass.
-  - `argus/runtime/mission_runtime.py`: Added auto-detection hook to `AutonomousMissionRuntime.__init__` and `step()` during `PLANNING`.
-  - `tests/tools/test_environment_detector.py`: Added 22 tests covering tools, network, cloud metadata, schema, and runtime integration.
-- **Build status**: 918 passed, 0 failed.
-- **Pending issues**: None.
+  - `pyproject.toml`: Added `"sqlite-vec>=0.1.6"` dependency.
+  - `argus/vector/exceptions.py`: VectorStoreError, EmbeddingError, ExtensionLoadError, DocumentNotFoundError, DimensionMismatchError.
+  - `argus/vector/models.py`: DistanceMetric, VectorStoreConfig, VectorDocument, SearchResult, VectorFilter.
+  - `argus/vector/embeddings.py`: BaseEmbeddingProvider, DeterministicEmbeddingProvider, FastEmbedProvider, SentenceTransformerProvider, EmbeddingEngine, get_embedding_engine.
+  - `argus/vector/store.py`: VectorStore dual-engine implementation with sqlite-vec and NumPy fallback, get_vector_store.
+  - `argus/vector/__init__.py`: Clean public API exports.
+  - `tests/test_vector_store.py`: 25 unit and integration tests.
+- **Build status**: PASS (25/25 vector tests passed; 2,135/2,135 full suite passed)
+- **Pending issues**: None
 
 ## Quality Status
-- **Build/test result**: 918 passed in 30.55s.
-- **Lint status**: Clean (py_compile validated).
-- **Tests added/modified**: 22 new tests in `tests/tools/test_environment_detector.py`.
+- **Build/test result**: 25/25 passed in `tests/test_vector_store.py` (2.59s); 2,135/2,135 passed in full test suite.
+- **Lint status**: Clean
+- **Tests added/modified**: 25 new tests in `tests/test_vector_store.py`
+
+## Loaded Skills
+- None specified
 
 ## Key Decisions Made
-- `check_tools` checks `httpx` and fallback `httpx-toolkit`.
-- `check_network` safely parses target into hostname and URL, executes DNS via `socket.getaddrinfo`, and probes HTTP reachability via `httpx.Client.get`.
-- `check_cloud_metadata` probes AWS, GCP (`Metadata-Flavor: Google`), and Azure (`Metadata: true`) with quick 1.0s non-blocking timeout.
-- `AutonomousMissionRuntime` preserves pre-existing `mission.environment` if already set.
+- Implemented dual-engine pattern in `VectorStore`: native `sqlite-vec` virtual table (`vec0`) when C-extension is available, with seamless vectorized NumPy fallback on SQLite `embedding_blob` storage when disabled or unavailable.
+- Designed high-performance 384-d `DeterministicEmbeddingProvider` featuring canonical cybersecurity taxonomy clustering, multi-phrase concept matching, subword n-grams, and L2 normalization for instant, 100% offline semantic embeddings.
 
 ## Artifact Index
-- `.agents/worker_m1/DISPATCH.md` — Assignment instructions
-- `.agents/worker_m1/BRIEFING.md` — Agent state memory
-- `.agents/worker_m1/progress.md` — Liveness & heartbeat
-- `.agents/worker_m1/handoff.md` — Final handoff report
+- /home/varun/argus/.agents/worker_m1/DISPATCH.md
+- /home/varun/argus/.agents/worker_m1/progress.md
+- /home/varun/argus/.agents/worker_m1/handoff.md

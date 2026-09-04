@@ -197,6 +197,11 @@ class ScanEngine:
         if getattr(mission, "reports", None) is None:
             mission.reports = []
 
+        # Register mission in mission_manager so ScopeResolver and clients can resolve scope
+        from argus.runtime.manager import mission_manager
+        if hasattr(mission, "id") and mission.id:
+            mission_manager._active_missions[mission.id] = mission
+
         state_machine = MissionStateMachine(mission)
 
         # 1. State machine progression: CREATED -> READY -> RUNNING -> COLLECTING_EVIDENCE
@@ -426,6 +431,15 @@ class ScanEngine:
             report_paths = self.report_generator.generate_and_save(mission, output_dir=self.output_dir)
         except Exception as e:
             logger.error(f"Report generation failed: {e}", exc_info=True)
+
+        # 5.1 Post-scan Vector RAG Indexing of Findings & Evidence
+        try:
+            from argus.reporting.vector_indexer import ScanEvidenceIndexer
+            indexer = ScanEvidenceIndexer()
+            indexer.index_mission(mission)
+        except Exception as e:
+            logger.warning(f"Post-scan semantic indexing skipped: {e}")
+
 
         # 6. Compute vulnerability breakdown by severity
         vulnerabilities_by_severity: Dict[str, int] = {

@@ -1,4 +1,5 @@
 from typing import List, Optional, Dict
+import shutil
 from argus.runtime.models import Tool
 
 
@@ -15,6 +16,18 @@ class ToolRegistry:
     def get(self, key: str) -> Optional[Tool]:
         """Retrieves a tool by ID or capability name."""
         aliases = {
+            "httpx": "httpx",
+            "httpx_toolkit": "httpx",
+            "httpx-toolkit": "httpx",
+            "live_host_detector": "httpx",
+            "live_hosts": "httpx",
+            "subfinder": "subfinder",
+            "subdomain_enumerator": "subfinder",
+            "katana": "katana_crawler",
+            "katana_crawler": "katana_crawler",
+            "crawler": "katana_crawler",
+            "nuclei": "nuclei",
+            "vulnerability_scanner": "nuclei",
             "auth_bypass": "auth_bypass",
             "auth_bypass_collector": "auth_bypass",
             "authentication_bypass": "auth_bypass",
@@ -262,14 +275,38 @@ class ToolRegistry:
         }
 
         if key in aliases and aliases[key] in self.tools:
-            return self.tools[aliases[key]]
+            tool = self.tools[aliases[key]]
+            self._ensure_tool_command(tool)
+            return tool
         if key in self.tools:
-            return self.tools[key]
+            tool = self.tools[key]
+            self._ensure_tool_command(tool)
+            return tool
         # Fallback to capability lookup for backwards compatibility
         for tool in self.tools.values():
             if tool.capability == key or key in tool.capabilities:
+                self._ensure_tool_command(tool)
                 return tool
         return None
+
+    def _ensure_tool_command(self, tool: Tool) -> None:
+        """Dynamically ensures tool command points to an available binary if possible."""
+        if tool.id == "httpx" and tool.command:
+            if not shutil.which(tool.command):
+                for cand in ["httpx-toolkit", "httpx", "/usr/bin/httpx-toolkit", "/usr/bin/httpx"]:
+                    if shutil.which(cand):
+                        tool.command = cand
+                        break
+
+    def resolve_tool_command(self, tool_id_or_cmd: str) -> str:
+        """Resolves the executable binary name or path for a tool."""
+        tool = self.get(tool_id_or_cmd)
+        cmd = tool.command if tool and tool.command else tool_id_or_cmd
+        if tool and tool.id == "httpx":
+            for cand in ["httpx-toolkit", "httpx", "/usr/bin/httpx-toolkit", "/usr/bin/httpx"]:
+                if shutil.which(cand):
+                    return cand
+        return shutil.which(cmd) or cmd
 
     def list(self) -> List[Tool]:
         """Returns all registered tools."""
@@ -284,6 +321,13 @@ class ToolRegistry:
         # Deterministic sorting: priority descending, then tool id alphabetically
         compatible.sort(key=lambda t: (-t.priority, t.id))
         return compatible
+
+
+def _resolve_httpx_command() -> str:
+    for candidate in ["httpx-toolkit", "httpx", "/usr/bin/httpx-toolkit", "/usr/bin/httpx"]:
+        if shutil.which(candidate):
+            return candidate
+    return "/usr/bin/httpx-toolkit"
 
 
 # Instantiate global registry
@@ -329,7 +373,7 @@ registry.register(
         id="httpx",
         name="httpx",
         capability="live_host_detector",
-        command="/usr/bin/httpx-toolkit",
+        command=_resolve_httpx_command(),
         description="Find live hosts",
         supported_tasks=["Technology Discovery", "API Discovery"],
         required_inputs=["subdomains"],

@@ -1,18 +1,20 @@
-# Orchestrator Dispatch Log
+# Dispatch Record
 
-## 2026-09-02T13:42:32Z
+## 2026-09-03T01:52:07+05:30
+You are the Project Orchestrator for the ARGUS platform sprint: Vector RAG & Semantic Search.
 
-User Request:
-Sprint 29: Prototype Pollution & Client-Side Attack Detection Module
 Working directory: /home/varun/argus
 Agent working directory: /home/varun/argus/.agents/orchestrator
 Original request: /home/varun/argus/.agents/ORIGINAL_REQUEST.md
-Final handoff location: /home/varun/argus/.agents/sprint29_prototype_pollution/handoff.md
+Final handoff location: /home/varun/argus/.agents/sprint31_vector_rag/handoff.md
+Integrity mode: development
 
-Requirements:
-- R1: Client-Side Attack Collector & Prober (BaseCollector subclass, AuthenticatedHttpClient, tripartite pattern, quadruple state publishing)
-- R2: Multi-Vector Client-Side Detection Modes (Server-Side Proto Pollution, Client-Side Proto Pollution, DOM Clobbering, Open Redirect Chains, Clickjacking / UI Redressing)
-- R3: Prototype Pollution Gadget Analysis (Property injection, Gadget chain detection, DoS via toString/valueOf, RCE gadget detection, Nested property traversal)
-- R4: Mutation & Evasion Strategies (JSON Key Encoding, Content-Type Manipulation, URL Encoding Layers, DOM Clobbering Variants, Frame-Busting Bypass)
-- R5: Pipeline Connectivity (TaskGenerator DAG, registry.py, AttackSurface HAS_VULNERABILITY edges, cvss.py CWE-1321, CWE-79, CWE-601, CWE-1021)
-- R6: Zero Regression & E2E Validation (1,929+ passing tests, >=25 new unit & adversarial tests, handoff.md)
+Your mission is to orchestrate and execute the complete implementation of Sprint 31: Vector RAG & Semantic Search across the codebase, adhering strictly to the multi-agent orchestration protocol and zero-regression requirement (2,089+ passing tests).
+
+## Requirements Overview
+- R1: Embedding & Vector Store Engine — Build a vector store backed by SQLite-vec that can generate embeddings, store them, and perform semantic similarity search. File-based, zero external services, local lightweight embedding generation (e.g. sentence-transformers or lightweight embedding model). Support inserting documents with metadata, querying by semantic similarity with configurable top-k, and filtering by metadata fields (source_type, mission_id, severity, etc.). Store persists to disk and survives process restarts.
+- R2: Semantic Search Over Scan Evidence & Findings — Index all collected evidence and confirmed findings from ARGUS scans into vector store after scan completion. Enable semantic searching over findings (e.g., "authentication bypass via parameter tampering" retrieving relevant SQLi, IDOR, auth bypass findings even without exact keyword match). Historical scan reports indexable and searchable.
+- R3: CVE & Vulnerability Knowledge Base — Indexable knowledge base for CVE data and vulnerability intelligence. Ingest CVE records from JSON feeds/local files, embed descriptions, semantic search by description similarity. Finding-to-CVE correlation suggestions.
+- R4: Enhanced Workspace Copilot Integration — Upgrade `ResearchContextEngine` in `argus/workspace/context/` to use semantic retrieval alongside existing keyword/graph retrieval. Blended context ranker (vector similarity + lexical scores). Rich contextual retrieval of semantically relevant evidence, findings, and knowledge base entries.
+- R5: Conversational Learning & Growth — Memory system in `argus/memory/` that learns from conversations and scans. Key interactions, decisions, attack patterns, user corrections embedded and stored. Recall past experiences across sessions.
+- R6: Zero Regression & Validation — All 2,089+ currently passing tests must pass (`python -m pytest tests/ --ignore=tests/workspace -x -q`). At least 20 new tests added covering vector store, semantic search, CVE indexing, copilot integration, and memory. Add `sqlite-vec` and embedding dependencies to `pyproject.toml`. Write handoff to `.agents/sprint31_vector_rag/handoff.md`.

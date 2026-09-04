@@ -1,30 +1,59 @@
-## 2026-08-30T08:58:31Z
+## 2026-09-02T17:59:59Z
 
-You are Worker M4 (E2E Test Specialist Worker) for ARGUS Sprint 10.
+You are Worker M4: CLI & Scan Command Specialist.
 Working directory: /home/varun/argus/.agents/worker_m4
-Assigned File Ownership: tests/runtime/test_e2e_xss.py (and metadata in /home/varun/argus/.agents/worker_m4/)
 
-Mandatory Context to Read First:
-- /home/varun/argus/.agents/ORIGINAL_REQUEST.md
-- /home/varun/argus/PROJECT.md
-- /home/varun/argus/tests/runtime/test_e2e_sql_injection.py
-- /home/varun/argus/tests/collectors/test_xss.py
-- /home/varun/argus/tests/tools/test_environment_detector.py
+Read /home/varun/argus/.agents/ORIGINAL_REQUEST.md and /home/varun/argus/PROJECT.md before starting work.
 
 MANDATORY INTEGRITY WARNING:
-DO NOT CHEAT. All implementations must be genuine. DO NOT hardcode test results, create dummy/facade implementations, or circumvent the intended task. A teamwork_preview_auditor will independently verify your work. Integrity violations WILL be detected and your work WILL be rejected.
+DO NOT CHEAT. All implementations must be genuine. DO NOT hardcode test results, create dummy/facade implementations, or circumvent the intended task. An auditor will independently verify your work. Integrity violations WILL be detected and your work WILL be rejected.
 
-Mission Objectives:
-1. Implement comprehensive End-to-End tests in `tests/runtime/test_e2e_xss.py` that validate:
-   - `test_e2e_reflected_xss_mission_lifecycle`: Full mission setup with target, scope, live hosts, and crawled endpoints. Verifies TaskGenerator DAG scheduling, ToolRegistry lookup for 'xss', PluginExecutorAdapter execution, XSSCollector evidence generation (category='xss', severity='high', status='CONFIRMED'), KnowledgeGraph expansion (live_host, endpoint, vulnerability nodes, HAS_ENDPOINT and HAS_VULNERABILITY edges), and AttackSurfaceGraphBuilder graph reconstruction.
-   - `test_e2e_stored_xss_mission_lifecycle`: Multi-step POST-then-GET stored XSS detection on mock HTTP client, verifying emission of Evidence with category='xss' and severity='critical', updating KnowledgeGraph with critical vulnerability node and HAS_VULNERABILITY edges.
-   - `test_e2e_multi_vulnerability_mission_xss_and_sqli`: Multi-vulnerability mission with both SQL injection and XSS endpoints, verifying concurrent categorization, independent evidence stores, and knowledge graph integrity.
-   - `test_e2e_environment_detector_mission_initialization`: Mission runtime lifecycle test validating that environment detection populates `mission.environment` with tool availability, network status, and cloud metadata.
-   - `test_e2e_xss_gap_analysis_and_replanning`: TaskGenerator gap analysis testing resolving XSS coverage gaps to DAG tasks.
+Your Exclusive Write Boundaries (DO NOT touch files outside this list):
+- `argus/__main__.py`
+- `argus/cli/app.py`
+- `argus/scanning/dag.py`
+- `tests/test_cli_scan.py`
 
-2. Run test verification commands:
-   - `python -m pytest tests/runtime/test_e2e_xss.py -v`
-   - `python -m pytest tests/collectors/test_xss.py tests/tools/test_environment_detector.py tests/runtime/test_e2e_xss.py -v`
-   - Full suite zero regression check: `python -m pytest tests/ --ignore=tests/workspace -x -q`
+Detailed Tasks:
+1. Create `argus/__main__.py`:
+   - Enables direct execution via `python -m argus`.
+   - Imports `app` from `argus.cli.app` and runs `app()`.
+2. Enhance `argus/scanning/dag.py` (if needed):
+   - Add helper `ScanDAG.create_for_profile(profile_name)` or filter tasks based on profile: `"full"` (all 26 tasks), `"recon"` (recon phase only), `"vuln"` (vulnerability phase only), `"quick"` (recon + high-priority vulnerability tasks).
+3. Implement `@app.command("scan")` in `argus/cli/app.py`:
+   - Typer options:
+     - `target: str = typer.Argument(..., help="Target URL, domain, or IP address to scan.")`
+     - `--profile`, `-p`: scan profile (`full`, `recon`, `vuln`, `quick`, default: `"full"`)
+     - `--output`, `-o`, `--output-dir`: output directory for reports (default: `None` -> `.argus/reports`)
+     - `--threads`, `-t`: worker threads / concurrency (default: `10`)
+     - `--timeout`: scan timeout in seconds (default: `None`)
+     - `--scope`, `-s`: additional in-scope domains/CIDRs (Optional[List[str]])
+     - `--workspace`, `-w`: workspace identifier (default: `"default"`)
+     - `--format`, `-f`: report format (`both`, `markdown`, `json`, default: `"both"`)
+     - `--verbose`, `-v`: verbose execution logs (default: `False`)
+   - Rich UI display:
+     - Banner Panel with Target, Profile, Workspace, Output dir.
+     - Creates `Mission(target=target, workspace=workspace)` and appends any extra scope.
+     - Registers mission in `mission_manager._active_missions[mission.id] = mission`.
+     - Executes `ScanEngine(dag=dag, output_dir=output_dir).run(mission)` with Rich spinner/status.
+     - Displays Rich Collector Execution Table showing Task/Collector name, Phase, Status (COMPLETED [green], SKIPPED [yellow], FAILED [red]), Evidence count, and Duration (s).
+     - Displays Vulnerability Severity Summary Panel (CRITICAL, HIGH, MEDIUM, LOW, INFO counts).
+     - Displays Generated Reports list with paths to Markdown (.md) and JSON (.json) files.
+     - Exits with code `0` on success, `1` on failure (`raise typer.Exit(code=1)`).
+4. Write comprehensive tests in `tests/test_cli_scan.py` using `typer.testing.CliRunner`:
+   - Test `python -m argus` / `app` help, version, and scan help.
+   - Test `argus scan <target>` default profile execution and successful exit code 0.
+   - Test profiles: `--profile recon`, `--profile vuln`, `--profile quick`.
+   - Test custom `--output` directory and report generation verification on disk.
+   - Test `--scope` option appending additional scopes.
+   - Test invalid target or scan failure exit code 1 handling.
+5. VICTORY AUDIT:
+   - Run `python -m pytest tests/test_cli_scan.py -v`
+   - Run `python -m pytest tests/ --ignore=tests/workspace -x -q` (confirm 2,086+ passing with 0 failures).
+6. Write complete handoff report to `/home/varun/argus/.agents/worker_m4/handoff.md`.
+7. Send a final completion message to orchestrator via send_message. Operate silently during execution.
 
-3. Write detailed handoff report to `/home/varun/argus/.agents/worker_m4/handoff.md` following the standard format (Observation, Logic Chain, Caveats, Conclusion, Verification Method) and send completion message to parent.
+## 2026-09-02T18:31:50Z
+**Context**: Status check on Milestone M4 (CLI Entry Point & Scan Command).
+**Content**: Please report your current progress on tasks (creating `argus/__main__.py`, implementing `scan` command in `argus/cli/app.py`, `ScanDAG` profile support, `tests/test_cli_scan.py`, and victory audit).
+**Action**: Continue execution, run victory audit, and provide handoff when complete.

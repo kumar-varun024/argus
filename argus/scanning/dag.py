@@ -43,6 +43,57 @@ class ScanDAG:
     for reconnaissance and vulnerability detection collectors.
     """
 
+    @classmethod
+    def create_for_profile(cls, profile_name: str = "full") -> ScanDAG:
+        """
+        Creates and returns a ScanDAG instance configured for the specified profile.
+
+        Profiles:
+            - 'full': All 26 reconnaissance and vulnerability detection tasks.
+            - 'recon': Reconnaissance phase tasks only (subfinder, httpx, katana_crawler, nuclei, info_disclosure).
+            - 'vuln' (or 'vulnerability'): Vulnerability detection phase tasks only.
+            - 'quick': Reconnaissance tasks + high-priority vulnerability detection tasks.
+        """
+        base_dag = cls()
+        norm = (profile_name or "full").lower().strip()
+
+        if norm in ("full", "all", "default"):
+            return base_dag
+
+        if norm in ("recon", "reconnaissance", "recon-only"):
+            recon_tasks = [t for t in base_dag.tasks if t.phase == "recon"]
+            return cls(tasks=recon_tasks)
+
+        if norm in ("vuln", "vulnerability", "vuln-only"):
+            vuln_tasks = [t for t in base_dag.tasks if t.phase == "vulnerability"]
+            return cls(tasks=vuln_tasks)
+
+        if norm in ("quick", "fast"):
+            quick_keys = {
+                "subfinder",
+                "httpx",
+                "katana_crawler",
+                "nuclei",
+                "info_disclosure",
+                "sql_injection",
+                "xss",
+                "auth_bypass",
+                "access_control",
+                "ssrf",
+                "command_injection",
+                "cors_security",
+                "cache_security",
+            }
+            quick_tasks = [
+                t for t in base_dag.tasks
+                if t.key in quick_keys or (t.phase == "vulnerability" and t.priority >= 0.82)
+            ]
+            return cls(tasks=quick_tasks)
+
+        return base_dag
+
+    from_profile = create_for_profile
+
     def __init__(self, tasks: Optional[List[ScanTask]] = None):
         self._tasks: Dict[str, ScanTask] = {}
         self._task_order: List[str] = []

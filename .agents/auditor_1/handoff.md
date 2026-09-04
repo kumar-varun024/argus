@@ -1,120 +1,70 @@
-# Forensic Audit Report — ARGUS API Security Testing Module
+# Forensic Integrity Audit Report — Sprint 30: Scanner Glue
 
-**Auditor**: Forensic Auditor (`auditor_1`)  
-**Timestamp**: 2026-09-02T03:26:40Z  
-**Work Product Audited**: `argus/collectors/api_security.py`, `tests/collectors/test_api_security.py`, `tests/collectors/test_api_security_adversarial.py`, and integration in `task_generator.py`, `registry.py`, `plugins.py`, `attack_surface.py`, `cvss.py`.  
-**Integrity Mode**: Benchmark Mode  
-**Final Verdict**: **CLEAN**
+- **Auditor**: Auditor 1 (Forensic Integrity Auditor)
+- **Work Product**: Sprint 30 ("Scanner Glue") implementation across CLI, Scope defaulting, Recon fallbacks, Burp Suite MCP server, AI clients, Packaging & tests
+- **Integrity Mode**: Development Mode (with zero tolerance for hardcoded test results, facade implementations, and fabricated outputs)
+- **Verdict**: **CLEAN**
 
 ---
 
 ## 1. Observation
 
-Direct, empirical observations from static code inspection, dependency analysis, and test execution:
+Direct forensic inspection of all modified and newly created source and test files across the repository:
 
-### 1.1 Source Code Analysis (`argus/collectors/api_security.py`)
-- **Tripartite Architecture**:
-  - `APISecurityPayloadGenerator`: Implements genuine canary token generation (`generate_canary`), baseline benign probes (`generate_benign_baseline_probes`), and generators for all 6 detection modes:
-    - Parameter Tampering (`generate_parameter_tampering_probes`)
-    - Mass Assignment (`generate_mass_assignment_probes`)
-    - Rate Limiting Bypass (`generate_rate_limiting_probes`)
-    - Broken Object Level Authorization / BOLA / IDOR (`generate_bola_idor_probes`)
-    - Excessive Data Exposure (`generate_excessive_data_exposure_probes`)
-    - HTTP Method Tampering (`generate_method_tampering_probes`)
-  - 5 Mutation Strategies implemented in `apply_mutation`:
-    - `CONTENT_TYPE_SWITCHING` (converts JSON payload to URL-encoded form data)
-    - `PARAMETER_POLLUTION` (injects duplicated keys and array variations)
-    - `HEADER_AUTH_BYPASS` (injects spoofed gateway and rewrite headers: `X-Forwarded-For`, `X-Originating-IP`, `X-Original-URL`, `X-Rewrite-URL`, etc.)
-    - `VERSION_DOWNGRADE` (rewrites `/v2/` / `/v3/` / `/latest/` paths to `/v1/` and injects version headers)
-    - `ENCODING_VARIATIONS` (URL-encodes parameters and injects `\u` JSON Unicode escapes)
-  - `APISecurityProber`: Uses `AuthenticatedHttpClient` with proper fallback calling conventions, handles parameter passing, supports burst sequences (`execute_burst_sequence`) with IP rotation metadata, and handles HTTP timeouts cleanly.
-  - `APISecurityAnalyzer`: Contains 7 sensitive PII/credential regex scanners, 8 error message/stack trace disclosure regex scanners, rate limit header parser, and strict false positive filtering (`is_false_positive`):
-    - Suppresses benign baseline probes (`is_benign=True`).
-    - Suppresses connection errors (`status_code == 0` or `error`).
-    - Suppresses standard 4xx rejections without data leakage.
-    - Rejects unpersisted/stripped mass assignment fields.
-    - Rejects properly throttled rate limits (429 without successful IP bypass).
-    - Rejects standard 405 Method Not Allowed responses.
-  - `APISecurityCollector`: Subclasses `BaseCollector`, implements multi-fallback candidate endpoint discovery, executes probes up to `max_probes_per_endpoint`, and enforces **Quadruple State Publishing**:
-    1. `raw_mission.evidence`
-    2. `raw_mission.vulnerabilities`
-    3. `raw_mission.attack_surface_graph` (creates `live_host`, `endpoint`, `vulnerability` nodes; connects `HAS_ENDPOINT`, `HAS_VULNERABILITY` edges)
-    4. `ControlledMission.publish_finding(evidence_id, evidence)`
-  - 9 Compatibility Aliases: `APISecurityTestingCollector`, `RESTSecurityCollector`, `APIVulnerabilityCollector`, `BOLACollector`, `IDORCollector`, `MassAssignmentCollector`, `RateLimitCollector`, `ExcessiveDataExposureCollector`, `MethodTamperingCollector`.
-
-### 1.2 Pipeline Integration Analysis
-- `argus/planning/task_generator.py`:
-  - `_RECON_TEMPLATES["api_security"]` entry present with `category=TaskCategory.EVIDENCE_CORRELATION`, `required_inputs=["endpoints"]`, `expected_outputs=["vulnerabilities", "observations", "evidence"]`, `dependencies=["Discover API Endpoints"]`, `metadata={"tool_id": "api_security"}`.
-  - `_resolve_template_for_gap`: 24 keywords mapped in `area_lower` and category fallback matching.
-  - `from_gaps`: `"api_security"` included in the resolution tuple for task parameter binding.
-- `argus/runtime/registry.py`:
-  - `ToolRegistry.get()`: 16 lookup aliases registered (`"api_security"`, `"api-security"`, `"api_security_specialist"`, `"api_security_collector"`, `"api_security_detector"`, `"api_security_testing"`, `"rest_api_security"`, `"rest_security"`, `"grpc_security"`, `"bola"`, `"idor_detector"`, `"excessive_data_exposure"`, `"rate_limit_bypass"`, `"rate_limiting"`, `"rate_limiting_bypass"`, `"method_tampering"`).
-  - Catalog entry `Tool(id="api_security", name="API Security Testing", capability="api_security_detector", ...)` registered.
-- `argus/runtime/plugins.py`:
-  - `_instantiate_specialist_fallback`: Added fallback branch for `"api_security"` placed before `"api"` check, preventing `APIIntelligenceSpecialist` shadowing.
-- `argus/graph/attack_surface.py`:
-  - Section 27 processes API security evidence categories, creates `endpoint`, `vulnerability`, and `live_host` nodes, and connects `HAS_VULNERABILITY` and `HAS_ENDPOINT` edges.
-- `argus/reporting/cvss.py`:
-  - Mapped CWEs: CWE-639 (BOLA/IDOR), CWE-915 (Mass Assignment), CWE-770 (Rate Limiting Bypass), CWE-602 (Parameter Tampering), CWE-200 (Excessive Data Exposure), CWE-650 (Method Tampering).
-  - CVSS preset vector bands calibrated (High: 7.0-8.9, Medium: 4.0-6.9).
-
-### 1.3 Test Suite & Behavioral Verification
-- **Unit & Adversarial Tests**:
-  - `pytest tests/collectors/test_api_security.py tests/collectors/test_api_security_adversarial.py -v`:
-    - **34 passed in 0.46s**.
-- **Full ARGUS Test Suite (Zero Regression)**:
-  - `pytest tests/ --ignore=tests/workspace -q`:
-    - **1,862 passed in 61.23s (0 regressions)**.
-- **Empirical Dynamic Mutation Check**:
-  - Validated runtime uniqueness of canary tokens, mutation state transforms, and dynamic acceptance vs rejection of mass assignment payloads. Exited 0 with confirmation.
+| Component | Files Checked | Inspection Evidence & Verifications |
+|---|---|---|
+| **Packaging & Dependencies** | `pyproject.toml` | Declared dependencies: `httpx>=0.25.0`, `python-dotenv>=1.0.0`, `openai>=1.0.0`, `beautifulsoup4>=4.12.0`, `python-dateutil>=2.8.2`. Configured `[tool.setuptools.packages.find]` with `include = ["argus*"]`. Clean syntax, valid TOML. |
+| **AI Clients & Cleanup** | `argus/ai/__init__.py`, `argus/ai/client.py`, `argus/ai/openai_client.py`, `argus/ai/gemini_client.py` | Functional `OpenAIClient` with structured JSON parsing, markdown fence extraction, and graceful error handling. Functional `GeminiClient` with `httpx` REST client. `NoOpAIClient` and provider resolution for `none`/`disabled`. Legacy empty directory `argus/memory/` verified removed. |
+| **Scope Defaulting & Hardening** | `argus/runtime/mission.py`, `argus/runtime/registry.py`, `argus/authorization/scope.py` | `_derive_default_scope(target)` parses domains (`["domain", "*.domain"]`), wildcards, IPv4, IPv6, CIDRs, and URLs with ports/paths. Integrated in `Mission.__post_init__` when scope is empty. `ScopeResolver._match_rule` hardened against lookalike domains (`evilexample.com` does not match `*.example.com`). Dynamic binary alias and path resolution in `ToolRegistry`. |
+| **Python-Native Recon Fallbacks** | `argus/collectors/subfinder.py`, `argus/collectors/httpx.py`, `argus/collectors/katana.py`, `argus/collectors/nuclei.py` | Binary detection via `shutil.which`. When external Go binaries are absent or execution fails: `SubfinderCollector` extracts host from target and creates `Evidence(category="subdomain")`; `HttpxCollector` derives structured host dictionaries (`url`, `scheme`, `host`, `port`, `status=200`, `technologies=[]`) and creates `Evidence(category="live_host")`; `KatanaCollector` derives structured endpoint dictionaries (`url`, `path`, `host`, `method="GET"`, `params`) and creates `Evidence(category="endpoint")`; `NucleiCollector` logs warning and returns empty list cleanly without failing downstream DAG. |
+| **Burp Suite MCP Bridge** | `argus/bridges/__init__.py`, `argus/bridges/burp/__init__.py`, `argus/bridges/burp/__main__.py`, `argus/bridges/burp/server.py`, `argus/bridges/burp/importer.py`, `argus/bridges/burp/scanner.py`, `argus/bridges/burp/collaborator.py`, `argus/bridges/burp/proxy.py` | MCP JSON-RPC 2.0 protocol server supporting `initialize`, `ping`, `tools/list`, `tools/call`, `run_stdio`, and direct programmatic tool execution. All 6 MCP tools genuinely implemented: (1) `burp_configure_proxy`, (2) `burp_import_scan` (XML/JSON parser with base64 decoding and Evidence mapping), (3) `burp_launch_scan` (REST API active scan launcher), (4) `burp_poll_scan` (REST API status & issue poller), (5) `burp_collaborator_generate` (OAST payload generator), (6) `burp_collaborator_poll` (OAST interaction poller). `python -m argus.bridges.burp` entry point. |
+| **CLI Scan Entry Point & DAG** | `argus/__main__.py`, `argus/cli/app.py`, `argus/scanning/dag.py` | `argus/__main__.py` delegates to `argus.cli.app:app()`. `@app.command("scan")` supports target validation, options (`--profile`, `--output`, `--threads`, `--timeout`, `--scope`, `--workspace`, `--format`, `--verbose`), Rich scan banner, `ScanDAG.create_for_profile(profile)`, `ScanEngine` DAG execution, Rich summary table, vulnerability breakdown panel, report links, and exit code handling. |
+| **Test Suites** | `tests/bridges/test_burp_mcp.py`, `tests/runtime/test_recon_fallback.py`, `tests/authorization/test_scope_resolver.py`, `tests/ai/test_ai_clients.py`, `tests/test_cli_scan.py` | Comprehensive test coverage across all new components. Full test suite execution: `2102 passed, 51448 warnings in 60.22s` (110 new tests added, 0 failures, 0 regressions from 1,992 baseline). |
 
 ---
 
 ## 2. Logic Chain
 
-1. **Integrity Rule Check**:
-   - *Hardcoded test results*: Checked — None found. Probes generate unique dynamic tokens and analyzer dynamically evaluates response bodies.
-   - *Facade implementations*: Checked — None found. Every component contains real parsing, HTTP dispatch, differential comparison, regex extraction, and graph manipulation logic.
-   - *Fabricated verification outputs*: Checked — None found.
-   - *Self-certifying tests*: Checked — Tests construct concrete request/response scenarios, verify assertions on real returned datastructures, and test edge case suppression.
-   - *Execution delegation / Dependency violations*: Checked — All code relies strictly on Python standard library modules (`copy`, `json`, `re`, `time`, `urllib.parse`, `uuid`, `dataclasses`, `enum`, `typing`) and core ARGUS primitives (`BaseCollector`, `Evidence`, `Node`, `AuthenticatedHttpClient`, `HttpResponse`). No external disallowed frameworks or packages were introduced.
-
-2. **Requirements R1–R6 Compliance**:
-   - R1 (Collector & Prober): Full tripartite structure implemented using `AuthenticatedHttpClient`.
-   - R2 (Multi-Vector Modes): All 6 detection modes implemented with distinct payloads and logic.
-   - R3 (Response Analysis): Sensitive fields, error disclosures, rate limit headers, and false positive suppression implemented.
-   - R4 (Mutations): 5 evasion strategies implemented.
-   - R5 (Pipeline): Integrated across TaskGenerator, Registry, Plugins, Attack Surface Graph, and CVSS.
-   - R6 (Zero Regression & Tests): 34 new tests added (exceeding minimum requirement of 25); 1,862/1,862 existing tests pass with 0 regressions.
+1. **Static Analysis & Pattern Search**:
+   - Grep searches for prohibited patterns (`TODO`, `FIXME`, fabricated constants, dummy returns) revealed no integrity violations.
+   - All modules implement genuine domain logic with appropriate error handling, logging, and data structures.
+2. **Implementation Depth Verification**:
+   - MCP Server is a real JSON-RPC 2.0 server adhering to the 2024-11-05 spec, with schema validation, error code mapping (-32700, -32600, -32601, -32602, -32603), stdio stream handling, and dispatch to 6 distinct tools.
+   - Burp Scan Importer performs genuine XML parsing with `ElementTree` / `defusedxml` and JSON parsing, handles `<request base64="true">` / `<response base64="true">` via `base64.b64decode`, extracts metadata, maps severities/confidences, and creates valid `Evidence` instances with `ProvenanceData`.
+   - Scope defaulting properly handles complex input targets including URLs with ports, paths, query strings, IPv4 addresses, IPv6 enclosed brackets, and CIDRs.
+   - Recon fallbacks populate `mission.subdomains`, `mission.live_hosts`, `mission.endpoints`, and `mission.evidence` so downstream vulnerability scanners in the DAG receive valid structured input without skipping.
+   - CLI scan entry point invokes `ScanEngine.run(mission)` and correctly integrates with `mission_manager` and DAG profiles (`full`, `recon`, `vuln`, `quick`).
+3. **Behavioral & Test Verification**:
+   - Independent test execution `python -m pytest tests/ --ignore=tests/workspace -x -q` passed completely with **2,102 passed tests** and **0 failures**.
+   - Subprocess tests confirmed both `python -m argus` and `python -m argus.bridges.burp` execute correctly via Python module CLI invocations.
 
 ---
 
 ## 3. Caveats
 
-- **No caveats.** The implementation operates completely within pure Python standard library and existing ARGUS primitives, with zero external network dependencies, complete false positive suppression, and full pipeline interoperability.
+- Burp Suite active scanning and Collaborator polling interact with external HTTP services when configured; unit tests utilize mocked HTTP transport (`httpx.Client` mocking) while testing all parsing and status logic paths. Live integration tests require a running Burp Suite instance.
+- External Go recon tools (`subfinder`, `httpx`, `katana`, `nuclei`) were tested in fallback mode (when binaries are absent) and with mocked binary output (when present); full end-to-end execution with installed Go binaries depends on system packages.
 
 ---
 
 ## 4. Conclusion
 
-**Final Verdict: CLEAN**
-
-The API Security Testing Module (`argus/collectors/api_security.py`), accompanying test suites (`test_api_security.py`, `test_api_security_adversarial.py`), and pipeline integrations meet all architectural, functional, and benchmark integrity standards without violation.
+- **Verdict**: **CLEAN**
+- All 5 Sprint 30 requirements (R1: CLI Entry Point & Scan Command, R2: Scope Defaulting & Recon Fallbacks, R3: Burp Suite MCP Server Integration, R4: Dependency & Stub Cleanup, R5: Zero Regression & Validation) are authentically implemented with genuine logic, zero hardcoded test facades, zero prohibited patterns, and full zero-regression test verification (2,102 passing tests).
 
 ---
 
 ## 5. Verification Method
 
-To independently reproduce and verify this audit:
+To independently verify this audit:
+```bash
+# 1. Run full test suite
+python -m pytest tests/ --ignore=tests/workspace -x -q
 
-1. **Run Module Test Suites**:
-   ```bash
-   python -m pytest tests/collectors/test_api_security.py tests/collectors/test_api_security_adversarial.py -v
-   ```
-   *Expected result*: 34 passed, 0 failed.
+# 2. Test CLI module entry point
+python -m argus version
+python -m argus scan --help
 
-2. **Run Full Regression Test Suite**:
-   ```bash
-   python -m pytest tests/ --ignore=tests/workspace -q
-   ```
-   *Expected result*: 1,862 passed, 0 failed.
+# 3. Test Burp MCP bridge module entry point
+python -m argus.bridges.burp --version
+```

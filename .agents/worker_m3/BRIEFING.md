@@ -1,55 +1,45 @@
-# BRIEFING — 2026-08-30T07:56:00Z
+# BRIEFING — 2026-09-03T00:26:00Z
 
 ## Mission
-Integrate XSS tool, planning templates, gap resolution, plugin fallback, and graph attack surface builder for Sprint 10 Milestone 3.
+Implement Milestone 3: Requirement R4 Enhanced Workspace Copilot Integration (Blended Context Ranker, vector semantic sources retrieval, assembler prompt extensions, test suite).
 
 ## 🔒 My Identity
-- Archetype: implementer
+- Archetype: worker_m3
 - Roles: implementer, qa, specialist
 - Working directory: /home/varun/argus/.agents/worker_m3
-- Original parent: 13346e46-f3a9-4e87-a9c0-df36c82fce1a
-- Milestone: Sprint 10 Milestone 3 (Pipeline & Graph Integration)
+- Original parent: a53acd93-0ea1-40be-815c-a20580966e3d
+- Milestone: Milestone 3 (Enhanced Workspace Copilot Integration)
 
 ## 🔒 Key Constraints
-- Exclusive file ownership:
-  - `argus/runtime/registry.py`
-  - `argus/runtime/plugins.py`
-  - `argus/planning/task_generator.py`
-  - `argus/graph/attack_surface.py`
-- DO NOT CHEAT: Genuine implementation, no hardcoded values/facades.
-- Must run test suites and ensure zero regressions.
+- Genuine implementation only, no cheating/facades/hardcoded outputs.
+- 100% backward compatibility: when vector score is absent or 0, w_lex defaults to 1.0.
+- Project & mission isolation during vector retrieval.
+- Zero regressions in existing workspace and full test suites.
+- Silence during execution: no intermediate messages, communicate only upon completion.
 
 ## Current Parent
-- Conversation ID: 13346e46-f3a9-4e87-a9c0-df36c82fce1a
-- Updated: 2026-08-30T07:56:00Z
+- Conversation ID: a53acd93-0ea1-40be-815c-a20580966e3d
+- Updated: 2026-09-03T00:26:00Z
 
 ## Task Summary
-- **What to build**: XSS tool registration in registry.py, plugin fallback in plugins.py, task generator templates and gap resolution in task_generator.py, and attack surface graph builder support for XSS in attack_surface.py.
-- **Success criteria**: All specified files updated correctly, tests passing with zero regressions (979 passed).
-- **Interface contracts**: PROJECT.md, survey_pipeline_explorer/handoff.md
-- **Code layout**: argus/runtime, argus/planning, argus/graph
+- **What to build**:
+  1. `argus/workspace/context/models.py`: vector_score field, semantic statuses and source types.
+  2. `argus/workspace/context/ranker.py`: Blended Context Ranker with hybrid scoring and backward-compatible lexical fallback.
+  3. `argus/workspace/context/engine.py`: Semantic vector source queries (VectorStore, FindingSemanticSearchEngine, CVEKnowledgeBase) in ResearchContextEngine.
+  4. `argus/workspace/context/assembler.py`: Render CVE & memory prompt sections.
+  5. `tests/workspace/test_blended_context.py`: Comprehensive unit and integration tests.
+- **Success criteria**: All tests in `tests/workspace/` and wider test suite pass cleanly.
+- **Code layout**: `argus/workspace/context/`
 
 ## Change Tracker
-- **Files modified**:
-  - `argus/runtime/registry.py`: Registered `xss` tool and added alias lookup for `cross_site_scripting`.
-  - `argus/runtime/plugins.py`: Added `XSSCollector` fallback instantiation for `xss` and `cross_site_scripting`.
-  - `argus/planning/task_generator.py`: Added `"xss"` template in `_RECON_TEMPLATES`, gap resolution logic in `_resolve_template_for_gap`, and input resolution in `from_gaps`.
-  - `argus/graph/attack_surface.py`: Added XSS evidence processing with severity mapping (Stored -> critical, Reflected -> high, DOM/Header -> medium) and graph edges (`HAS_ENDPOINT`, `HAS_VULNERABILITY`).
-  - `tests/planning/test_task_generator.py`: Created unit tests for XSS planning and registry/plugin fallback.
-  - `tests/graph/test_attack_surface_builder.py`: Added graph reconstruction and severity mapping tests for XSS.
-- **Build status**: 979 passed, 0 failures.
-- **Pending issues**: None.
+- **Files modified**: None yet
+- **Build status**: Pending
+- **Pending issues**: None
 
 ## Quality Status
-- **Build/test result**: 979 passed, 0 failures across the entire test suite.
-- **Lint status**: Clean.
-- **Tests added/modified**: `tests/planning/test_task_generator.py` (new), `tests/graph/test_attack_surface_builder.py` (augmented).
+- **Build/test result**: Pending
+- **Lint status**: Clean
+- **Tests added/modified**: Pending
 
-## Key Decisions Made
-- Handled default `ev.severity == "info"` gracefully in `AttackSurfaceGraphBuilder` to ensure accurate severity mapping from `xss_type` when `ev.severity` is not explicitly set.
-- Ensured alias `cross_site_scripting` seamlessly resolves to `xss` tool in `ToolRegistry.get`.
-
-## Artifact Index
-- `/home/varun/argus/.agents/worker_m3/DISPATCH.md` — Assignment dispatch
-- `/home/varun/argus/.agents/worker_m3/progress.md` — Progress tracker
-- `/home/varun/argus/.agents/worker_m3/handoff.md` — Final handoff report
+## Loaded Skills
+- None

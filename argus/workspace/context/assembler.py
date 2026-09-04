@@ -25,10 +25,12 @@ class ContextAssembler:
         
         # Group sources
         observations = [s for s in result.sources if s.semantic_status == "OBSERVATION"]
-        evidence = [s for s in result.sources if s.semantic_status == "EVIDENCE"]
+        evidence = [s for s in result.sources if s.semantic_status in ["EVIDENCE", "VECTOR_EVIDENCE"]]
         hypotheses = [s for s in result.sources if s.semantic_status == "HYPOTHESIS"]
-        findings = [s for s in result.sources if s.semantic_status == "FINDING"]
+        findings = [s for s in result.sources if s.semantic_status in ["FINDING", "VECTOR_FINDING"]]
         graph = [s for s in result.sources if s.semantic_status == "KNOWLEDGE_GRAPH"]
+        cve_knowledge = [s for s in result.sources if s.semantic_status == "CVE_KNOWLEDGE"]
+        historical_memories = [s for s in result.sources if s.semantic_status == "HISTORICAL_MEMORY"]
         
         # New semantic states
         mission_states = [s for s in result.sources if s.semantic_status == "MISSION_STATE"]
@@ -66,7 +68,8 @@ class ContextAssembler:
                 prov = e.metadata.get("provenance", "UNKNOWN")
                 rel = e.metadata.get("relationship", "NONE")
                 parts.append(f"- [Evidence #{e.source_id}] {e.title}: {e.content}")
-                parts.append(f"  - Quality: {qual} | Provenance: {prov} | Relationship: {rel}")
+                if "strength" in e.metadata or "provenance" in e.metadata or "relationship" in e.metadata:
+                    parts.append(f"  - Quality: {qual} | Provenance: {prov} | Relationship: {rel}")
             parts.append("\n")
             
         if hypotheses:
@@ -86,7 +89,50 @@ class ContextAssembler:
             for g in graph:
                 parts.append(f"- [{g.source_id}] {g.title}: {g.content}")
             parts.append("\n")
-            
+
+        if cve_knowledge:
+            parts.append("### RELEVANT CVE & VULNERABILITY KNOWLEDGE")
+            for cve in cve_knowledge:
+                cve_id = cve.metadata.get("cve_id") or cve.source_id
+                title = cve.title or cve_id
+                if not title.startswith(cve_id):
+                    header = f"- [{cve_id}] {title}"
+                else:
+                    header = f"- [{cve_id}]" if title == cve_id else f"- {title}"
+                parts.append(header)
+
+                details = []
+                sev = cve.metadata.get("severity")
+                if sev:
+                    details.append(f"Severity: {str(sev).upper()}")
+                cvss = cve.metadata.get("cvss_score")
+                if cvss is not None and cvss != 0.0:
+                    details.append(f"CVSS: {cvss}")
+                cwes = cve.metadata.get("cwes")
+                if cwes:
+                    cwe_str = ", ".join(cwes) if isinstance(cwes, list) else str(cwes)
+                    details.append(f"CWE: {cwe_str}")
+                prods = cve.metadata.get("affected_products")
+                if prods:
+                    prod_str = ", ".join(prods) if isinstance(prods, list) else str(prods)
+                    details.append(f"Affected: {prod_str}")
+
+                if details:
+                    parts.append(f"  - {' | '.join(details)}")
+                if cve.content:
+                    parts.append(f"  - Description: {cve.content}")
+            parts.append("\n")
+
+        if historical_memories:
+            parts.append("### RECALLED MEMORIES & HISTORICAL PATTERNS")
+            for mem in historical_memories:
+                m_type = mem.metadata.get("memory_type") or mem.metadata.get("type", "")
+                type_suffix = f" ({m_type})" if m_type else ""
+                parts.append(f"- [Memory #{mem.source_id}]{type_suffix} {mem.title}")
+                if mem.content:
+                    parts.append(f"  - {mem.content}")
+            parts.append("\n")
+
         parts.append("=========================================================")
         
         return "\n".join(parts)

@@ -1,42 +1,45 @@
-# BRIEFING — 2026-09-01T17:02:15Z
+# BRIEFING — 2026-09-03T01:55:50Z
 
 ## Mission
-Investigate TaskGenerator DAG scheduling, Tool registry, endpoint context flow, and collector configuration in ARGUS.
+Investigate ARGUS codebase for Scan Evidence, Findings lifecycle & CVE Knowledge Base (Requirements R2 & R3) for Sprint 31 Vector RAG.
 
 ## 🔒 My Identity
 - Archetype: explorer
-- Roles: codebase investigation, pipeline/registry/DAG architecture analysis
+- Roles: Scan Evidence, Findings & CVE Knowledge Base Specialist
 - Working directory: /home/varun/argus/.agents/explorer_2
-- Original parent: b6dd75c1-18cb-43c3-9b6f-79b50b7005a1
-- Milestone: Sprint 25 CORS & HTTP Security Header Audit exploration
+- Original parent: a53acd93-0ea1-40be-815c-a20580966e3d
+- Milestone: Sprint 31 Discovery & Architecture
 
 ## 🔒 Key Constraints
-- Read-only investigation — do NOT implement / modify project code
-- Detailed report written to /home/varun/argus/.agents/explorer_2/handoff.md
-- Use send_message only when 100% complete
+- Read-only investigation — do NOT modify application source code directly
+- Focus on R2 (Scan Evidence & Findings semantic indexing/search) and R3 (CVE & Vulnerability Knowledge Base ingestion/search/correlation)
+- Produce comprehensive handoff.md following 5-component protocol
+- Maintain progress.md heartbeat
 
 ## Current Parent
-- Conversation ID: b6dd75c1-18cb-43c3-9b6f-79b50b7005a1
-- Updated: 2026-09-01T17:02:15Z
+- Conversation ID: a53acd93-0ea1-40be-815c-a20580966e3d
+- Updated: 2026-09-03T01:55:50Z
 
 ## Investigation State
 - **Explored paths**:
-  - `argus/planning/task_generator.py`, `research_planner.py`, `gap_analysis.py`, `planner.py`, `steps.py`
-  - `argus/scanning/dag.py`, `engine.py`
-  - `argus/runtime/registry.py`, `models.py`, `plugins.py`, `dispatcher.py`, `executor.py`, `orchestrator.py`
-  - `argus/collectors/` (`base.py`, `__init__.py`, `cache_security.py`, etc.)
-  - `argus/http/client.py` (`AuthenticatedHttpClient`, `HttpResponse`)
-  - `argus/graph/attack_surface.py` (`HAS_VULNERABILITY`, `HAS_ENDPOINT`)
-  - `argus/reporting/cvss.py` (`CWE_DATABASE`, `_get_preset_vector`)
-  - `argus/cli/tools_cli.py`
-- **Key findings**: Complete mapping of the 9 integration touchpoints for Sprint 25 CORS & Security Headers Module.
-- **Unexplored areas**: None for this exploratory scope.
+  - `argus/evidence/` (`model.py`, `store.py`, `manager.py`)
+  - `argus/reporting/` (`models.py`, `processor.py`, `generator.py`, `json.py`, `markdown.py`, `cvss.py`, `queue.py`)
+  - `argus/knowledge/` (`models.py`, `base.py`, `manager.py`, `importers.py`)
+  - `argus/scanning/` (`engine.py`, `dag.py`, `models.py`)
+  - `argus/runtime/` (`events.py`, `mission_runtime.py`, `lifecycle.py`, `manager.py`, `executor.py`)
+  - `argus/correlation/` (`engine.py`, `fusion.py`, `models.py`, `observation.py`)
+  - `argus/workspace/context/` (`engine.py`, `models.py`, `ranker.py`, `assembler.py`)
+- **Key findings**:
+  - Detailed the full pipeline from raw evidence collection to Finding deduplication and report generation.
+  - Formulated vector schemas and composite embedding strategies for Findings, Evidence, and Historical Reports (R2).
+  - Designed CVE models, JSON feed ingesters, vector search, and hybrid correlation suggestion algorithms (R3).
+  - Specified clean API interfaces and non-intrusive scan lifecycle hook points.
+- **Unexplored areas**: None within the scope of R2 and R3.
 
 ## Key Decisions Made
-- Exploration report formatted according to the 5-component protocol and stored in `handoff.md`.
+- Architecture and schemas documented in `/home/varun/argus/.agents/explorer_2/handoff.md`.
 
 ## Artifact Index
-- /home/varun/argus/.agents/explorer_2/DISPATCH.md — Dispatch instructions
-- /home/varun/argus/.agents/explorer_2/BRIEFING.md — Memory and state
-- /home/varun/argus/.agents/explorer_2/progress.md — Progress log
-- /home/varun/argus/.agents/explorer_2/handoff.md — Final investigation report
+- `/home/varun/argus/.agents/explorer_2/handoff.md` — Final handoff report
+- `/home/varun/argus/.agents/explorer_2/progress.md` — Progress tracker
+- `/home/varun/argus/.agents/explorer_2/DISPATCH.md` — Dispatch record

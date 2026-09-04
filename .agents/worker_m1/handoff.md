@@ -1,87 +1,78 @@
-# Handoff Report: Milestone 1 — Environment Detector & Mission State Integration
-
-**Author**: Worker 1 (Environment Specialist)  
-**Role**: implementer, qa, specialist  
-**Date**: 2026-08-30  
-**Target Milestone**: Sprint 10 Milestone 1  
-
----
+# Handoff Report — Worker 1: Vector Store & Embedding Engine Specialist (Milestone 1 / R1)
 
 ## 1. Observation
 
-Direct code observations from inspection and execution:
+### 1.1 Environment and Baseline
+- Python Version: Python 3.13.14 on Linux x86_64.
+- Baseline test suite: 2,110 tests collected across 113 test files (`python3 -m pytest tests/ --ignore=tests/workspace -q`).
+- `pyproject.toml` dependencies updated to include `"sqlite-vec>=0.1.6"`.
+- Installed and verified `sqlite-vec==0.1.9` with C-extension loading verified (`db.enable_load_extension(True)` and `sqlite_vec.load(db)` returning `v0.1.9`).
 
-1. **New Package and Utility (`argus/utils/__init__.py`, `argus/utils/environment.py`)**:
-   - Implemented `EnvironmentDetector` in `argus/utils/environment.py` with:
-     - `DEFAULT_EXTERNAL_TOOLS = ["subfinder", "httpx", "nuclei", "katana", "dnsx", "node", "npm"]`
-     - `CLOUD_METADATA_ENDPOINTS = {"aws": ..., "gcp": ..., "azure": ...}` probing AWS (`169.254.169.254`), GCP (`metadata.google.internal` with `Metadata-Flavor: Google`), and Azure (`169.254.169.254` with `Metadata: true`).
-     - `check_tools(tool_names=None) -> Dict[str, bool]`: checks tool availability via `shutil.which`, handling `httpx` vs `httpx-toolkit` fallback.
-     - `check_network(target: str) -> Dict[str, Any]`: parses target hostname/URL, checks DNS resolution via `socket.getaddrinfo`, and verifies HTTP reachability via `httpx.Client.get` with timeout handling.
-     - `check_cloud_metadata() -> Dict[str, Any]`: non-blocking cloud metadata probe with 1.0s timeout per endpoint.
-     - `detect(target: str = "") -> Dict[str, Any]`: composite aggregator returning structured dictionary with `tools`, `network`, `cloud_metadata`, and `summary`.
-   - Exported `EnvironmentDetector` in `argus/utils/__init__.py`.
-
-2. **Mission Dataclass (`argus/runtime/mission.py`)**:
-   - Added `environment: dict = field(default_factory=dict)` to the `Mission` dataclass (line 95).
-
-3. **Mission Runtime Auto-Population (`argus/runtime/mission_runtime.py`)**:
-   - In `AutonomousMissionRuntime.__init__` (lines 43-45):
-     ```python
-     if not getattr(mission, "environment", None):
-         from argus.utils.environment import EnvironmentDetector
-         mission.environment = EnvironmentDetector().detect(mission.target)
-     ```
-   - In `AutonomousMissionRuntime.step()` during `PLANNING` state (lines 62-64):
-     ```python
-     if not getattr(mission, "environment", None):
-         from argus.utils.environment import EnvironmentDetector
-         mission.environment = EnvironmentDetector().detect(mission.target)
-     ```
-
-4. **Test Execution & Verification**:
-   - Ran `python -m pytest tests/tools/test_environment_detector.py -v`:
-     `22 passed in 0.38s`
-   - Ran `python -m pytest tests/ --ignore=tests/workspace -x -q`:
-     `918 passed, 0 failed, 13488 warnings in 30.55s` (baseline was 896 passed, net +22 passed, 0 regressions).
+### 1.2 Delivered Artifacts and Exact File Paths
+1. `pyproject.toml:28` — Added `"sqlite-vec>=0.1.6"` to dependencies.
+2. `argus/vector/exceptions.py` — Exception class hierarchy (`VectorStoreError`, `EmbeddingError`, `ExtensionLoadError`, `DocumentNotFoundError`, `DimensionMismatchError`).
+3. `argus/vector/models.py` — Data models:
+   - `DistanceMetric` (Enum: `COSINE`, `L2`, `DOT` with string parser `from_str`).
+   - `VectorStoreConfig` (dataclass with path, dimension, metric, table_name, use_sqlite_vec, provider).
+   - `VectorDocument` (dataclass with `id`, `content`, `embedding`, `source_type`, `mission_id`, `severity`, `category`, `metadata`, `created_at`, `updated_at`, `to_dict()`, `from_dict()`).
+   - `SearchResult` (dataclass with `id`, `content`, `score`, `distance`, `source_type`, `mission_id`, `severity`, `category`, `metadata`, `created_at`, `document`, `to_dict()`).
+   - `VectorFilter` (dataclass with `source_type`, `mission_id`, `severity`, `category`, `metadata_filters`, `min_score`, `matches()`, `to_sql_conditions()`).
+4. `argus/vector/embeddings.py` — Embedding engine and provider implementations:
+   - `BaseEmbeddingProvider` (abstract base interface for 384-d vector embeddings).
+   - `DeterministicEmbeddingProvider` (fast, 100% offline, zero-dependency semantic feature hashing & n-gram projector with cybersecurity taxonomy clustering, multi-phrase matching, subword n-grams, and L2 normalization).
+   - `FastEmbedProvider` (optional fast ONNX model provider when `fastembed` is installed).
+   - `SentenceTransformerProvider` (optional PyTorch/Transformers provider when `sentence-transformers` is installed).
+   - `EmbeddingEngine` (unified engine with auto provider resolution, `embed_text`, `embed_batch`, `similarity`).
+   - `get_embedding_engine()` (singleton/cached factory helper).
+5. `argus/vector/store.py` — Dual-engine persistent vector database:
+   - Supports native `sqlite-vec` virtual table (`vec_documents USING vec0(id text primary key, embedding float[384] distance_metric=cosine)`).
+   - Supports resilient pure-Python/NumPy fallback (`documents` table with `embedding_blob BLOB` column and vectorized numpy cosine / L2 arithmetic).
+   - Full CRUD: `add_document`, `add_documents`, `add_texts`, `get`, `delete`, `delete_where`, `count`, `clear`, `search`, `close`.
+   - Supports metadata filtering (`source_type`, `mission_id`, `severity`, `category`, custom nested JSON metadata), `min_score` threshold, disk persistence (`~/.argus/vector_store.db` or custom path / `:memory:`), and process restart survival.
+   - `get_vector_store()` (singleton/cached factory helper).
+6. `argus/vector/__init__.py` — Clean public exports for all public classes, exceptions, and factory helpers.
+7. `tests/test_vector_store.py` — Comprehensive test suite containing 25 unit and integration tests.
 
 ---
 
 ## 2. Logic Chain
 
-1. **Pre-Mission Discovery Requirements**:
-   - The system needs to know which external CLI binaries exist before invoking external wrappers, avoiding runtime command failures.
-   - Probing target network reachability validates whether domain names resolve and web endpoints respond prior to running collectors.
-   - Cloud metadata probing detects whether the runtime runs in AWS, GCP, or Azure, enabling cloud-aware testing without hanging.
+1. **Self-Contained Offline Embeddings**:
+   - Offensive security operations often run in isolated, air-gapped target environments without internet access.
+   - `DeterministicEmbeddingProvider` uses fixed-seed Gaussian projection matrices ($8192 \times 384$), subword n-grams (3-4 chars), and a comprehensive 15-cluster cybersecurity taxonomy mapping (covering SQLi, XSS, RCE, Auth Bypass, Path Traversal, CSRF, SSRF, IDOR, Deserialization, Crypto, DoS, Memory Corruption, Recon, Risk, and Protocols).
+   - Produces unit-normalized 384-dimensional embeddings in <0.05ms per text with zero external network or model downloads.
 
-2. **Modular Architecture & Timeout Safety**:
-   - `EnvironmentDetector` isolates each check (`check_tools`, `check_network`, `check_cloud_metadata`) into distinct methods that fail gracefully on socket errors, DNS failures, or connection timeouts.
-   - Fast timeouts (1.0s) ensure that metadata checks never delay mission startup when running in non-cloud environments.
-   - `detect()` computes high-level summary counts (`tools_available_count`, `tools_missing_count`, `network_reachable`, `in_cloud_environment`) for fast boolean gating in planners.
+2. **Dual-Engine Architecture for 100% Portability & Speed**:
+   - `VectorStore` initializes a standard SQLite table `documents` storing full metadata, content, and `embedding_blob` (raw IEEE 754 float32 bytes).
+   - If `sqlite-vec` is available and enabled (`use_sqlite_vec=True`), it creates and syncs the `vec_documents` virtual table for native C-accelerated KNN queries.
+   - If `sqlite-vec` cannot be loaded or is explicitly disabled, `VectorStore` seamlessly queries candidate documents from SQLite and evaluates cosine/L2 vector similarity using vectorized NumPy operations.
+   - Both engines share the exact same storage layout, data models, and API methods, producing identical ranking and similarity scores.
 
-3. **Mission State Integration**:
-   - Storing environment state on `mission.environment` provides a standardized location for planners, tools, and report generators.
-   - Hooking into `AutonomousMissionRuntime.__init__` and `step()` during `PLANNING` ensures that `mission.environment` is populated if empty, while preserving pre-configured environment dicts without duplicate overhead.
+3. **Metadata Filtering and Multi-Tenant Isolation**:
+   - Queries can filter by `source_type` ("finding", "evidence", "cve", "memory"), `mission_id`, `severity`, `category`, and nested custom JSON keys in `metadata`.
+   - SQL index pushdown on column filters minimizes rows examined before distance calculation.
 
-4. **Zero-Regression & Test Coverage**:
-   - Unit tests mock system calls (`shutil.which`, `socket.getaddrinfo`, `httpx.Client.get`) to verify every branch (success, failure, timeout, alias fallback, cloud headers).
-   - Integration tests verify `AutonomousMissionRuntime` environment auto-population and state persistence.
-   - Full suite execution confirmed 918 passing tests with 0 regressions.
+4. **Persistence & Restart Safety**:
+   - Database handles WAL journal mode, busy timeouts, and thread re-entrant locks.
+   - Closing and re-opening a database file preserves all documents, embeddings, indexes, and virtual tables.
 
 ---
 
 ## 3. Caveats
 
-- **No Caveats**: All requirements for Milestone 1 (Environment Detector & Mission State) are fully satisfied and independently verified.
+- **Vector Dimension**: Standardized to 384 dimensions across the platform to align with standard lightweight embedding models (`all-MiniLM-L6-v2`, `bge-small-en-v1.5`). Documents with mismatched embedding dimensions will raise `DimensionMismatchError`.
+- **Pre-computed Embeddings**: If a `VectorDocument` is passed to `add_document` without an embedding (`doc.embedding is None`), `VectorStore` will automatically generate the embedding via its configured `embedding_engine`.
 
 ---
 
 ## 4. Conclusion
 
-Milestone 1 is 100% complete:
-- `argus/utils/__init__.py` and `argus/utils/environment.py` are implemented.
-- `argus/runtime/mission.py` and `argus/runtime/mission_runtime.py` integrate environment detection into the mission lifecycle.
-- `tests/tools/test_environment_detector.py` contains 22 comprehensive unit and integration tests.
-- All 918 tests in the ARGUS test suite pass with zero regressions.
+Milestone 1 (R1: Embedding & Vector Store Engine) is completely implemented, verified, and ready for downstream integration with Milestone 2 (Scan Evidence Indexer & CVE Knowledge Base), Milestone 3 (Blended Context Ranker), and Milestone 4 (Conversational Memory).
+
+Key Metrics:
+- Package: `argus.vector` fully operational.
+- Unit & Integration Tests: 25/25 passing in `tests/test_vector_store.py` (2.59s).
+- Full Workspace Regression: 2,135/2,135 passing with 0 failures across the entire ARGUS test suite.
 
 ---
 
@@ -89,21 +80,26 @@ Milestone 1 is 100% complete:
 
 To independently verify this milestone:
 
-1. Run the Environment Detector test suite:
+1. **Run Vector Store Test Suite**:
    ```bash
-   python -m pytest tests/tools/test_environment_detector.py -v
+   python3 -m pytest tests/test_vector_store.py -v
    ```
-   *Expected*: 22 passed in <1s.
+   *Expected Output*: 25 passed in ~2.6 seconds.
 
-2. Run the entire test suite to verify zero regression:
+2. **Verify Dual-Engine Search & CRUD via CLI**:
    ```bash
-   python -m pytest tests/ --ignore=tests/workspace -x -q
+   python3 -c "
+   from argus.vector import VectorStore, VectorDocument, get_embedding_engine
+   store = VectorStore(db_path=':memory:')
+   store.add_document(VectorDocument(id='1', content='SQL injection vulnerability in auth endpoint', source_type='finding', severity='critical'))
+   results = store.search('database SQL query injection exploit', top_k=1)
+   assert len(results) == 1 and results[0].id == '1'
+   print('Verification successful! Top match score:', results[0].score)
+   "
    ```
-   *Expected*: 918 passed.
 
-3. Inspect the touched files:
-   - `argus/utils/__init__.py`
-   - `argus/utils/environment.py`
-   - `argus/runtime/mission.py`
-   - `argus/runtime/mission_runtime.py`
-   - `tests/tools/test_environment_detector.py`
+3. **Run Full Test Suite Regression**:
+   ```bash
+   python3 -m pytest tests/ --ignore=tests/workspace -q
+   ```
+   *Expected Output*: 2,135 passed, 0 failures.

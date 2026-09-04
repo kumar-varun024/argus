@@ -475,7 +475,7 @@ class OAuthAnalyzer:
         manipulated_host = parsed_manipulated.hostname or ""
 
         # 1. Check HTTP Redirect (301, 302, 303, 307, 308)
-        if 300 <= status < 400 and location:
+        if status is not None and 300 <= status < 400 and location:
             parsed_loc = urllib.parse.urlparse(location)
             loc_host = parsed_loc.hostname or ""
 
@@ -558,7 +558,7 @@ class OAuthAnalyzer:
             return None
 
         # If server issues 302 redirect containing code without state parameter, or accepts static state
-        if 300 <= status < 400 and ("code=" in location or "access_token=" in location or "id_token=" in location):
+        if status is not None and 300 <= status < 400 and ("code=" in location or "access_token=" in location or "id_token=" in location):
             snippet = f"HTTP {status} Redirect containing auth code without CSRF state enforcement: {location[:200]}"
             return {
                 "vulnerable": True,
@@ -669,7 +669,7 @@ class TokenValidationAnalyzer:
         body = response.body or response.raw_body or ""
 
         # Endpoint returning 200 OK with authenticated data indicates vulnerability
-        if 200 <= status < 300:
+        if status is not None and 200 <= status < 300:
             # Check for authentic/success indicators
             if any(k in body.lower() for k in ["admin", "user", "profile", "success", "secret", "authorized", "role", "email", "superuser", "ok", "authenticated"]):
                 snippet = f"HTTP {status} OK accepting unsigned alg:none JWT. Response: {body[:250]}"
@@ -701,7 +701,7 @@ class TokenValidationAnalyzer:
         status = response.status_code
         body = response.body or response.raw_body or ""
 
-        if 200 <= status < 300:
+        if status is not None and 200 <= status < 300:
             if any(k in body.lower() for k in ["admin", "user", "profile", "success", "secret", "authorized", "role", "email", "superuser", "ok", "authenticated"]):
                 snippet = f"HTTP {status} OK accepting forged/invalid JWT signature. Response: {body[:250]}"
                 return {
@@ -732,7 +732,7 @@ class TokenValidationAnalyzer:
         status = response.status_code
         body = response.body or response.raw_body or ""
 
-        if 200 <= status < 300:
+        if status is not None and 200 <= status < 300:
             if any(k in body.lower() for k in ["admin", "user", "profile", "success", "secret", "authorized", "role", "email", "superuser", "ok", "authenticated"]):
                 snippet = f"HTTP {status} OK accepting HS256 token signed with RSA public key. Response: {body[:250]}"
                 return {
@@ -768,7 +768,7 @@ class TokenValidationAnalyzer:
         status = response.status_code
         body = response.body or response.raw_body or ""
 
-        if 200 <= status < 300:
+        if status is not None and 200 <= status < 300:
             if any(k in body.lower() for k in ["admin", "user", "profile", "success", "secret", "authorized", "role", "email", "superuser", "ok", "authenticated"]):
                 severity_map = {
                     "exp": "high",
@@ -807,7 +807,7 @@ class TokenValidationAnalyzer:
         status = response.status_code
         body = response.body or response.raw_body or ""
 
-        if 200 <= status < 300:
+        if status is not None and 200 <= status < 300:
             if any(k in body.lower() for k in ["admin", "superuser", "privileged", "manage", "billing", "all", "success", "ok"]):
                 snippet = f"HTTP {status} OK accepting modified scope claims. Response: {body[:250]}"
                 return {
@@ -949,7 +949,7 @@ class SessionSecurityAnalyzer:
         body = post_logout_protected_response.body or post_logout_protected_response.raw_body or ""
 
         # If protected endpoint returns 200 OK after logout with authenticated content, session was not invalidated
-        if 200 <= status < 300:
+        if status is not None and 200 <= status < 300:
             if any(k in body.lower() for k in ["admin", "user", "profile", "success", "secret", "authorized", "role", "email", "superuser", "ok"]):
                 snippet = f"HTTP {status} OK accessing protected endpoint using session cookie/token after logout request: {body[:200]}"
                 return {

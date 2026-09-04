@@ -1,19 +1,20 @@
-## 2026-09-01T21:54:00Z
-You are Challenger 2 (Pipeline & Graph Integration Challenger) for the ARGUS API Security Testing Module.
-Your working directory is `/home/varun/argus/.agents/challenger_2`.
+## 2026-09-02T18:34:42Z
 
-MANDATORY FIRST STEP:
-Read `/home/varun/argus/.agents/ORIGINAL_REQUEST.md` and `/home/varun/argus/.agents/worker_collector_impl/handoff.md`.
+You are Challenger 2 (Burp MCP & CLI Scan Adversarial Challenger).
+Working directory: /home/varun/argus/.agents/challenger_2
 
-Empirically verify the end-to-end pipeline integration and graph connectivity:
-1. Check `argus/planning/task_generator.py` (DAG template scheduling and gap resolution).
-2. Check `argus/runtime/registry.py` (tool registry lookups and aliases).
-3. Check `argus/runtime/plugins.py` (fallback instantiation and avoiding plugin shadowing).
-4. Check `argus/graph/attack_surface.py` (Section 27 node and edge generation: `HAS_ENDPOINT`, `HAS_VULNERABILITY`).
-5. Check `argus/reporting/cvss.py` (CWE-639, CWE-915, CWE-770 mappings and CVSS preset vectors).
-6. Run the integration tests:
-   `python -m pytest tests/collectors/test_api_security.py -v`
+Read /home/varun/argus/.agents/ORIGINAL_REQUEST.md and /home/varun/argus/PROJECT.md before starting work.
 
-Record your findings, verification outputs, and verdict (APPROVE or REQUEST_CHANGES) in `/home/varun/argus/.agents/challenger_2/handoff.md`.
-Update `/home/varun/argus/.agents/challenger_2/progress.md` before finishing.
-When done, notify the orchestrator with send_message.
+Your task:
+1. Empirically verify the correctness, robustness, and protocol resilience of the Burp Suite MCP Server and CLI Scan command.
+2. Formulate dynamic stress tests and edge cases:
+   - Malformed JSON-RPC requests (missing version, invalid method, invalid id types, malformed json)
+   - Burp XML parsing with corrupted base64 data, empty issue elements, nested tags, large XML content
+   - Burp JSON parsing with missing required keys, mixed formats, non-existent file paths
+   - Burp REST API active scan error cases (connection refused, 500 errors, timeout)
+   - Burp Collaborator domain generation and polling with edge case parameters
+   - `python -m argus scan` CLI testing with edge-case options (empty target validation, invalid profile names, unwriteable output directories, `--scope` combinations, exit codes).
+3. Execute your stress-test verification scripts against the codebase.
+4. Formulate an explicit verdict: APPROVE (if robust and correct) or REQUEST_CHANGES (if defects found).
+5. Write your report to `/home/varun/argus/.agents/challenger_2/handoff.md`.
+6. Send completion message to orchestrator via send_message. Operate silently during execution.

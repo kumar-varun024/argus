@@ -1,6 +1,10 @@
-# Progress Log
-- 2026-08-30T20:21:53Z: Fixed test_mutation_strategy_gzip_compression in tests/collectors/test_deserialization.py.
-- 2026-08-30T20:22:15Z: Deserialization test suite passed (45/45 passed). Launched full regression test suite.
-- 2026-08-30T20:23:04Z: Full test suite completed: 1,352 passed, 0 failures, 0 regressions.
-- 2026-08-30T20:23:14Z: Updated sprint16_deserialization/handoff.md and generated worker_fix/handoff.md. Ready for final report.
-Last visited: 2026-08-30T20:23:15Z
+# Progress Log — worker_fix
+
+Last visited: 2026-09-02T18:42:50Z
+
+## Current Status
+- Fixed Defect 1: Updated `_derive_default_scope` in `argus/runtime/mission.py` to extract IPv6 address within brackets `[::1]:9000` -> `::1`.
+- Fixed Defect 2: Updated `_derive_host_dict` in `argus/collectors/httpx.py` and `_derive_endpoint_dict` in `argus/collectors/katana.py` to correctly handle bracketed IPv6 with ports, normalize scheme-less hosts, and prevent path duplication.
+- Fixed Defect 3: Guarded all 8 status code comparisons in `argus/collectors/oauth.py` with `if status is not None and ...` to handle `NoneType` status codes gracefully.
+- Fixed Defect 4: Registered `mission` into `mission_manager._active_missions[mission.id] = mission` in `ScanEngine.run` in `argus/scanning/engine.py`.
+- Running verification tests: `tests/authorization/test_adversarial_scope_recon.py`.

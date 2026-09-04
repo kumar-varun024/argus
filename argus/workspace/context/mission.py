@@ -18,6 +18,9 @@ class MissionContextResolver:
         except Exception as e:
             logger.error(f"Failed to load mission {query.mission_id}: {e}")
             return []
+
+        if not mission:
+            return []
             
         sources = []
         

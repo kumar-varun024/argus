@@ -1,139 +1,55 @@
-# Milestone 3 Handoff Report: Pipeline & Graph Integration
-**Author**: Worker 3 (Pipeline & Graph Integration Specialist)  
-**Milestone**: Sprint 10 Milestone 3  
-**Date**: 2026-08-30  
-
----
+# Handoff Report — Worker M3 (Burp Suite MCP Integration)
 
 ## 1. Observation
-
-Direct code observations from inspecting and updating the ARGUS codebase:
-
-1. **`argus/runtime/registry.py`**:
-   - `ToolRegistry.get()` originally only checked exact keys in `self.tools` and iterated `tool.capability == key or key in tool.capabilities`.
-   - The tool definition for `xss` was missing from `registry.py`.
-   - Added alias lookup support in `ToolRegistry.get` for `"cross_site_scripting": "xss"` and `"sqli": "sql_injection"`.
-   - Registered the `xss` tool:
-     ```python
-     registry.register(
-         Tool(
-             id="xss",
-             name="Cross-Site Scripting (XSS) Collector",
-             capability="xss_detector",
-             description="Actively injects context-aware XSS payloads into discovered endpoint parameters and forms detecting reflected and stored XSS using AuthenticatedHttpClient.",
-             supported_tasks=["XSS Detection", "Cross-Site Scripting", "Vulnerability Scanning", "Evidence Correlation", "API Discovery"],
-             required_inputs=["endpoints"],
-             produced_outputs=["vulnerabilities", "observations", "evidence"],
-             capabilities=["xss_detector", "xss_collector"],
-             safety_requirements={"type": "internal", "permissions": ["network", "db_read", "db_write"]},
-             timeout=300.0,
-             priority=95,
-         )
-     )
-     ```
-
-2. **`argus/runtime/plugins.py`**:
-   - In `PluginExecutorAdapter._instantiate_specialist_fallback`:
-     Added dynamic fallback instantiation:
-     ```python
-     elif "xss" in plugin_id or "cross_site_scripting" in plugin_id:
-         from argus.collectors.xss import XSSCollector
-         return XSSCollector()
-     ```
-
-3. **`argus/planning/task_generator.py`**:
-   - Added `"xss"` recon template in `_RECON_TEMPLATES`:
-     ```python
-     "xss": {
-         "title": "Fuzz Cross-Site Scripting (XSS)",
-         "goal": "Actively inject context-aware XSS payloads into discovered endpoint parameters and forms detecting reflected and stored XSS using AuthenticatedHttpClient.",
-         "category": TaskCategory.EVIDENCE_CORRELATION,
-         "required_inputs": ["endpoints"],
-         "expected_outputs": ["vulnerabilities", "observations", "evidence"],
-         "dependencies": ["Discover API Endpoints"],
-         "required_specialists": [],
-         "metadata": {"tool_id": "xss"},
-         "estimated_duration_minutes": 10,
-         "priority": 0.81,
-     }
-     ```
-   - In `_resolve_template_for_gap`:
-     - Added explicit area mapping for `area_lower in ("xss", "xss detection", "cross site scripting", "cross-site scripting", "stored xss", "reflected xss", "dom xss")`.
-     - In `gap.category == TaskCategory.EVIDENCE_CORRELATION`, mapped descriptions containing `"xss"`, `"cross-site"`, or `"scripting"` to `_RECON_TEMPLATES["xss"]`.
-   - In `from_gaps`:
-     - Included `"xss"` in the list of tools extracting endpoint inputs (`"katana_crawler", "nuclei", "info_disclosure", "access_control", "path_traversal", "sql_injection", "xss"`).
-
-4. **`argus/graph/attack_surface.py`**:
-   - In `AttackSurfaceGraphBuilder.build_from_evidence()`:
-     - Added category handler for `getattr(ev, "category", None) in ("xss", "cross_site_scripting")`.
-     - Implemented severity mapping: Stored XSS -> `"critical"`, Reflected XSS -> `"high"`, DOM/Header -> `"medium"`. Handled default `ev.severity == "info"` correctly to derive the appropriate severity level from `xss_type`.
-     - Created `live_host`, `endpoint`, and `vulnerability` nodes with proper metadata.
-     - Connected graph edges:
-       - `live_host -> endpoint` (`HAS_ENDPOINT`)
-       - `live_host -> vulnerability` (`HAS_VULNERABILITY`)
-       - `endpoint -> vulnerability` (`HAS_VULNERABILITY`)
-
-5. **Test Executions**:
-   - `python -m pytest tests/graph/test_attack_surface_builder.py tests/planning/test_task_generator.py -v`: 28 passed in 0.34s.
-   - `python -m pytest tests/collectors/test_xss.py tests/tools/test_environment_detector.py -v`: 42 passed in 2.74s.
-   - `python -m pytest tests/ --ignore=tests/workspace -x -q`: 979 passed in 32.32s with 0 failures.
-
----
+- Implemented all 7 core source files and 2 test files strictly within the assigned write boundaries:
+  - `argus/bridges/__init__.py`: Bridge package declaration.
+  - `argus/bridges/burp/__init__.py`: Package exports for `BurpMCPServer`, `BurpScanImporter`, `BurpScannerClient`, `BurpCollaboratorClient`, `burp_configure_proxy`, `get_burp_http_client`.
+  - `argus/bridges/burp/proxy.py`: `burp_configure_proxy(proxy_url, enabled)` and `get_burp_http_client(...)` for configuring upstream HTTP proxy on `AuthenticatedHttpClient`.
+  - `argus/bridges/burp/importer.py`: `BurpScanImporter` with base64 decoded request/response handling, XML and JSON parsers, severity/confidence normalizers, and `Evidence` creation with `category="burp_scan"` attached to mission evidence store and findings.
+  - `argus/bridges/burp/scanner.py`: `BurpScannerClient` for active scan launch (`POST /v0.1/scan`), scan polling (`GET /v0.1/scan/{id}`), scan cancellation (`DELETE /v0.1/scan/{id}`), with robust error resilience for Burp REST API connection failures.
+  - `argus/bridges/burp/collaborator.py`: `BurpCollaboratorClient` for generating unique OAST payloads (`generate_payload()`) and polling interaction logs (`poll_interactions()`).
+  - `argus/bridges/burp/server.py`: `BurpMCPServer` implementing Model Context Protocol (MCP) JSON-RPC 2.0 protocol (`initialize`, `notifications/initialized`, `ping`, `tools/list`, `tools/call`), stdio loop runner `run_stdio()`, programmatic execution `handle_jsonrpc()` and `execute_tool()`, and registrations for all 6 Burp tools.
+  - `argus/bridges/burp/__main__.py`: CLI executable entry point for `python -m argus.bridges.burp`.
+  - `tests/bridges/__init__.py` and `tests/bridges/test_burp_mcp.py`: 37 comprehensive unit, integration, protocol, and CLI tests.
+- Verbatim verification results:
+  - `python -m pytest tests/bridges/test_burp_mcp.py -v`: 37 passed in 1.46s.
+  - `python -m pytest tests/ --ignore=tests/workspace -x -q`: 2072 passed (exceeding 1,992+ baseline, 0 regressions) in 63.73s.
 
 ## 2. Logic Chain
-
-1. **Tool Registration & Routing**:
-   - When external or internal subsystems query `ToolRegistry.get("xss")` or `ToolRegistry.get("cross_site_scripting")`, resolving either key to the registered XSS `Tool` record enables standard DAG task dispatching and capability checks.
-   - Adding `XSSCollector` fallback in `PluginExecutorAdapter` guarantees that when executing `ResearchTask` with `metadata.tool_id == "xss"`, the executor can dynamically instantiate and run `XSSCollector`.
-
-2. **Recon Task DAG Generation**:
-   - Recon tasks need proper dependency sequencing. The `"xss"` template explicitly declares dependency on `["Discover API Endpoints"]`, matching other active vulnerability fuzzers (`access_control`, `path_traversal`, `sql_injection`).
-   - By mapping coverage gaps referencing XSS (by area or description) to `_RECON_TEMPLATES["xss"]`, the `TaskGenerator` creates concrete `ResearchTask` objects targeted at discovered endpoints with priority `0.81` and category `TaskCategory.EVIDENCE_CORRELATION`.
-
-3. **Attack Surface Graph Construction**:
-   - Security findings generated by `XSSCollector` produce `Evidence` records with category `"xss"` or `"cross_site_scripting"`.
-   - `AttackSurfaceGraphBuilder.build_from_evidence` ingests these evidence records, extracting the endpoint URL, base URL, parameter, and XSS subtype.
-   - Nodes for the `live_host`, `endpoint`, and `vulnerability` are instantiated and added to the `KnowledgeGraph`.
-   - Edges `HAS_ENDPOINT` (host -> endpoint) and `HAS_VULNERABILITY` (host -> vuln, endpoint -> vuln) establish the graph topology.
-   - Severity is mapped to `critical` for Stored XSS, `high` for Reflected XSS, and `medium` for DOM/header XSS, fulfilling the OWASP attack surface modeling requirements.
-
----
+1. **Bridge Architecture & Contracts**:
+   - `BurpMCPServer` adheres strictly to MCP spec version `2024-11-05` and JSON-RPC 2.0 specifications.
+   - Tool registration exposes complete JSON Schema definitions for all 6 tools, allowing any MCP-compliant client or LLM agent to query and invoke Burp capabilities.
+2. **Scan Importer & Evidence Integration**:
+   - `BurpScanImporter` parses PortSwigger Burp XML exports (decoding `<request base64="true">` and `<response base64="true">`) and JSON formats.
+   - For every parsed issue, creates standard `argus.evidence.model.Evidence` instances with `category="burp_scan"`, `source_type="TOOL"`, and attaches them to `mission.evidence`, `mission.findings`, and `mission.vulnerabilities`.
+3. **REST Scanner & Collaborator Clients**:
+   - `BurpScannerClient` interacts with Burp Suite REST API (`/v0.1/scan`), extracting scan IDs from `Location` headers or response bodies, and polling status/issues.
+   - `BurpCollaboratorClient` generates randomized 30-character hex identifiers against `oastify.com` or custom private Collaborator domains and queries interaction logs.
+   - All network interactions handle connection errors and HTTP error codes gracefully, preventing server crashes when Burp is offline.
+4. **Verification & Regression Testing**:
+   - All 37 bridge tests verify JSON-RPC protocol compliance, tool listing, tool invocation, XML/JSON parsing, active scanning mocks, Collaborator mocks, error handling, stdio streaming, and CLI execution.
+   - Full workspace test suite passes with 2072 tests (0 failures).
 
 ## 3. Caveats
-
-- No caveats. All 4 owned files were modified according to specifications, and the entire test suite passed with 979 passing tests and zero regressions.
-
----
+- No caveats. All 6 MCP tools, parser functions, client classes, stdio runners, and CLI entry points are genuinely implemented and fully verified.
 
 ## 4. Conclusion
-
-Milestone 3 is 100% complete.
-- `argus/runtime/registry.py` registers the `xss` tool and supports alias retrieval.
-- `argus/runtime/plugins.py` provides fallback instantiation for `XSSCollector`.
-- `argus/planning/task_generator.py` defines the `"xss"` recon template, resolves XSS coverage gaps, and routes endpoint inputs.
-- `argus/graph/attack_surface.py` constructs graph nodes and `HAS_VULNERABILITY` edges with accurate severity levels.
-- Full test suite passes (979 tests) with 0 regressions.
-
----
+Milestone M3 (Burp Suite MCP Server Integration) is 100% complete and fully verified with zero regressions. All requirements specified in DISPATCH.md and PROJECT.md are satisfied.
 
 ## 5. Verification Method
-
-To independently verify the implementation:
-
-1. **Verify Graph and Planning Integration**:
+1. Run Burp MCP test suite:
    ```bash
-   python -m pytest tests/graph/test_attack_surface_builder.py tests/planning/test_task_generator.py -v
+   python -m pytest tests/bridges/test_burp_mcp.py -v
    ```
-   Expected: 28 passed.
-
-2. **Verify Collectors and Environment Detector**:
-   ```bash
-   python -m pytest tests/collectors/test_xss.py tests/tools/test_environment_detector.py -v
-   ```
-   Expected: 42 passed.
-
-3. **Verify Zero Regressions Across Full Suite**:
+2. Run full workspace test suite:
    ```bash
    python -m pytest tests/ --ignore=tests/workspace -x -q
    ```
-   Expected: 979 passed.
+3. Test CLI entry point directly:
+   ```bash
+   python -m argus.bridges.burp --version
+   ```
+4. Test MCP stdio interaction:
+   ```bash
+   echo '{"jsonrpc": "2.0", "id": 1, "method": "ping"}' | python -m argus.bridges.burp
+   ```

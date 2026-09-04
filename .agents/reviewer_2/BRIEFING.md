@@ -1,69 +1,60 @@
-# BRIEFING — 2026-09-02T03:26:00Z
+# BRIEFING — 2026-09-02T18:38:00Z
 
 ## Mission
-Audit strict specification conformance of the ARGUS API Security Testing Module against requirements R1 through R6, verify integrity, run independent test verification, and issue a clear verdict.
+Conduct rigorous code review and adversarial stress-testing for Milestone M3 (Burp Suite MCP Server Integration) and Milestone M4 (CLI Entry Point & Scan Command), ensuring 100% test passing, schema accuracy, JSON-RPC 2.0 compliance, rich UI rendering, and zero integrity violations.
 
 ## 🔒 My Identity
-- Archetype: reviewer / critic
-- Roles: reviewer, critic (Reviewer 2: Specification Conformance Reviewer)
+- Archetype: reviewer_critic
+- Roles: reviewer, critic
 - Working directory: /home/varun/argus/.agents/reviewer_2
-- Original parent: fbd25589-2cf3-4a0d-b7b4-71b26863ee78
-- Milestone: ARGUS API Security Testing Module Conformance Review
+- Original parent: c840a6e7-7995-410b-be38-a0d3f999b401
+- Milestone: M3 & M4 Review
 - Instance: 1 of 1
 
 ## 🔒 Key Constraints
-- Review-only — do NOT modify implementation code
-- Audit compliance with R1-R6
-- Adversarial integrity checks (dummy logic, hardcoding, bypasses, facade implementations)
-- Run independent test verification suites
+- Review-only — do NOT modify implementation code directly (report findings)
+- Adversarial integrity check: detect hardcoded outputs, fake implementations, skipped logic, or facade patterns
+- Structured handoff to handoff.md with Observation, Logic Chain, Caveats, Conclusion, Verification Method
+- Silent execution until completion
 
 ## Current Parent
-- Conversation ID: fbd25589-2cf3-4a0d-b7b4-71b26863ee78
-- Updated: 2026-09-02T03:26:00Z
+- Conversation ID: c840a6e7-7995-410b-be38-a0d3f999b401
+- Updated: 2026-09-02T18:38:00Z
 
 ## Review Scope
-- **Files to review**:
-  - `src/argus/collectors/api_security.py`
-  - `src/argus/collectors/registry.py`
-  - `src/argus/orchestration/task_generator.py`
-  - `src/argus/analysis/cvss.py`
-  - `src/argus/models/attack_surface.py`
-  - `tests/collectors/test_api_security.py`
-  - `tests/collectors/test_api_security_adversarial.py`
-  - `.agents/ORIGINAL_REQUEST.md`
-  - `.agents/worker_collector_impl/handoff.md`
-- **Interface contracts**: BaseCollector, AuthenticatedHttpClient, AttackSurfaceGraph, TaskGenerator DAG
-- **Review criteria**: Specification Conformance (R1-R6), Correctness, Quality, Adversarial Robustness, Integrity
-
-## Key Decisions Made
-- Audited R1-R6 compliance: all requirements satisfied.
-- Verified test suite independently: 34 API security tests passed, 1,862 full suite tests passed with 0 regressions.
-- Confirmed zero integrity violations (no dummy logic, no hardcoding).
-- Issued verdict: APPROVE.
-
-## Artifact Index
-- `/home/varun/argus/.agents/reviewer_2/DISPATCH.md` — Dispatch log
-- `/home/varun/argus/.agents/reviewer_2/BRIEFING.md` — Working memory
-- `/home/varun/argus/.agents/reviewer_2/progress.md` — Progress tracker
-- `/home/varun/argus/.agents/reviewer_2/handoff.md` — Final review report
+- **Files reviewed**:
+  - M3: `argus/bridges/__init__.py`, `argus/bridges/burp/__init__.py`, `argus/bridges/burp/server.py`, `argus/bridges/burp/importer.py`, `argus/bridges/burp/scanner.py`, `argus/bridges/burp/collaborator.py`, `argus/bridges/burp/proxy.py`, `argus/bridges/burp/__main__.py`, `tests/bridges/test_burp_mcp.py`
+  - M4: `argus/__main__.py`, `argus/cli/app.py`, `argus/scanning/dag.py`, `tests/test_cli_scan.py`
+- **Interface contracts**: PROJECT.md, ORIGINAL_REQUEST.md
+- **Review criteria**: JSON-RPC 2.0 compliance, schema correctness, Base64 decoding fidelity, REST API resilience, DAG profile filtering, Rich UI output formatting, exit codes, zero regression.
 
 ## Review Checklist
 - **Items reviewed**:
-  - `argus/collectors/api_security.py` (Tripartite engine, Quadruple State Publishing, 6 modes, 5 mutations)
-  - `argus/planning/task_generator.py` (DAG template & gap resolution)
-  - `argus/runtime/registry.py` (Tool definition and 16 aliases)
-  - `argus/runtime/plugins.py` (Fallback instantiation)
-  - `argus/graph/attack_surface.py` (Section 27 AttackSurfaceGraphBuilder)
-  - `argus/reporting/cvss.py` (CWE-639, CWE-915, CWE-770, CWE-602, CWE-200, CWE-650)
-  - `tests/collectors/test_api_security.py` (22 tests)
-  - `tests/collectors/test_api_security_adversarial.py` (12 tests)
+  - MCP JSON-RPC 2.0 protocol engine & 6 tools (`server.py`)
+  - Burp XML/JSON Scan Importer & base64 decoder (`importer.py`)
+  - Burp Active Scanner REST API client (`scanner.py`)
+  - Burp Collaborator / OAST client (`collaborator.py`)
+  - AuthenticatedHttpClient upstream proxy bridge (`proxy.py`)
+  - CLI `scan` Typer command & Rich UI panels/tables (`app.py`)
+  - ScanDAG profiles (`full`, `recon`, `vuln`, `quick`) & Kahn ordering (`dag.py`)
+  - Entry point `argus/__main__.py` (`python -m argus`)
+  - Burp entry point `argus/bridges/burp/__main__.py` (`python -m argus.bridges.burp`)
 - **Verdict**: APPROVE
-- **Unverified claims**: None
+- **Unverified claims**: None. Full test suite (2,102 passed) independently verified.
 
 ## Attack Surface
 - **Hypotheses tested**:
-  - False positive suppression on benign baselines, HTTP 400/401/403/404/405/422 rejections, properly throttled burst requests, and stripped mass assignment parameters.
-  - Regex detection on sensitive credentials, tokens, PII, and multi-language stack traces.
-  - Network error and timeout resilience.
-- **Vulnerabilities found**: 0 defects in implementation.
-- **Untested angles**: None within specified review boundaries.
+  - Malformed JSON / invalid JSON-RPC requests -> Returns valid JSON-RPC 2.0 error objects (-32700, -32600, -32601, -32602)
+  - Missing/empty URLs or parameters in tool dispatch -> Caught and converted to MCP error responses
+  - Base64 request/response decode failures -> Fallback to raw text without crashing
+  - Missing/malformed XML tags -> Handled with error response without crashing
+  - CLI empty target / engine failure -> Gracefully exits with exit code 1
+  - Unknown profile in DAG -> Safely falls back to full profile
+- **Vulnerabilities found**: 0 blocking issues.
+- **Untested angles**: None.
+
+## Artifact Index
+- /home/varun/argus/.agents/reviewer_2/BRIEFING.md — Working memory
+- /home/varun/argus/.agents/reviewer_2/DISPATCH.md — Dispatch log
+- /home/varun/argus/.agents/reviewer_2/progress.md — Liveness & progress tracking
+- /home/varun/argus/.agents/reviewer_2/handoff.md — Final handoff report

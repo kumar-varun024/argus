@@ -1,0 +1,683 @@
+{
+  "report_id": "6028aa60-f641-4360-8195-46a431563feb",
+  "mission_id": "c7d2ca48-4d66-4046-b612-fc660efbb746",
+  "target": "http://api.example.com:8080/test",
+  "generated_at": "2026-09-02T18:35:57.936837+00:00",
+  "generator_version": "1.0.0",
+  "summary": {
+    "total_findings": 4,
+    "total_evidence_items": 4,
+    "deduplicated_count": 0,
+    "severity_counts": {
+      "critical": 0,
+      "high": 1,
+      "medium": 0,
+      "low": 0,
+      "info": 3
+    },
+    "category_counts": {
+      "vulnerability": 1,
+      "endpoint": 1,
+      "subdomain": 1,
+      "live_host": 1
+    },
+    "host_counts": {
+      "api.example.com:8080": 2,
+      "http://api.example.com:8080": 1,
+      "api.example.com": 1
+    }
+  },
+  "findings": [
+    {
+      "id": "04867eae-9d57-4b30-8a48-e57cb872f0e1",
+      "title": "SQLi Found",
+      "category": "vulnerability",
+      "severity": "high",
+      "cvss": {
+        "score": 7.5,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "severity_rating": "High",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "H",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-699",
+        "name": "Software Development Security Issue"
+      },
+      "host": "api.example.com:8080",
+      "endpoint": "/",
+      "parameter": null,
+      "parameter_type": null,
+      "payload": null,
+      "description": "During security analysis of `api.example.com:8080`, a Vulnerability vulnerability was identified at endpoint `/`.",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/` on host `api.example.com:8080`.",
+        "Send a crafted HTTP request to `/`.",
+        "Observe the anomalous response behavior confirming vulnerability."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with high impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+      "confidence": 1.0,
+      "status": "UNVERIFIED",
+      "evidence_ids": [
+        "c806046d-f5f7-4c76-9ad4-b60c86080208"
+      ],
+      "duplicate_count": 1,
+      "tags": [],
+      "references": [],
+      "metadata": {}
+    },
+    {
+      "id": "275e7af2-b1ef-4f91-828a-8a7cc62da881",
+      "title": "Discovered Endpoint: http://api.example.com:8080/test",
+      "category": "endpoint",
+      "severity": "info",
+      "cvss": {
+        "score": 0.0,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+        "severity_rating": "None",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "N",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-699",
+        "name": "Software Development Security Issue"
+      },
+      "host": "http://api.example.com:8080",
+      "endpoint": "/test",
+      "parameter": null,
+      "parameter_type": null,
+      "payload": null,
+      "description": "Discovered endpoint /test on http://api.example.com:8080",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/test` on host `http://api.example.com:8080`.",
+        "Send a crafted HTTP request to `/test`.",
+        "Observe the anomalous response behavior confirming endpoint."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+      "confidence": 1.0,
+      "status": "UNVERIFIED",
+      "evidence_ids": [
+        "0c2f6c39-aca6-4e0f-9855-980f61022889"
+      ],
+      "duplicate_count": 1,
+      "tags": [],
+      "references": [],
+      "metadata": {
+        "url": "http://api.example.com:8080/test",
+        "path": "/test",
+        "host": "http://api.example.com:8080",
+        "method": "GET",
+        "params": {},
+        "evidence_value": "{'url': 'http://api.example.com:8080/test', 'path': '/test', 'host': 'http://api.example.com:8080', 'method': 'GET', 'params': {}}",
+        "source": "katana"
+      }
+    },
+    {
+      "id": "94bbb155-3fd1-468c-8fff-ac1f3b2ccf7e",
+      "title": "Discovered Subdomain: api.example.com",
+      "category": "subdomain",
+      "severity": "info",
+      "cvss": {
+        "score": 0.0,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+        "severity_rating": "None",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "N",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-942",
+        "name": "Permissive Cross-domain Policy with Untrusted Domains"
+      },
+      "host": "api.example.com:8080",
+      "endpoint": "/",
+      "parameter": null,
+      "parameter_type": null,
+      "payload": null,
+      "description": "Subdomain api.example.com identified for target http://api.example.com:8080/test",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/` on host `api.example.com:8080`.",
+        "Send a crafted HTTP request to `/`.",
+        "Observe the anomalous response behavior confirming subdomain."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-942).",
+      "confidence": 1.0,
+      "status": "UNVERIFIED",
+      "evidence_ids": [
+        "a6d5148f-2b28-4992-840b-b84b84ac4d6f"
+      ],
+      "duplicate_count": 1,
+      "tags": [],
+      "references": [],
+      "metadata": {
+        "subdomain": "api.example.com",
+        "evidence_value": "{'subdomain': 'api.example.com'}",
+        "source": "subfinder"
+      }
+    },
+    {
+      "id": "88dcaf27-9ee7-4ae9-a8fe-c5537b3bb625",
+      "title": "Live Host: http://api.example.com:8080",
+      "category": "live_host",
+      "severity": "info",
+      "cvss": {
+        "score": 0.0,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+        "severity_rating": "None",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "N",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-699",
+        "name": "Software Development Security Issue"
+      },
+      "host": "api.example.com",
+      "endpoint": "/",
+      "parameter": null,
+      "parameter_type": null,
+      "payload": null,
+      "description": "Live host detected at http://api.example.com:8080 (status: 200)",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/` on host `api.example.com`.",
+        "Send a crafted HTTP request to `/`.",
+        "Observe the anomalous response behavior confirming live host."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+      "confidence": 1.0,
+      "status": "UNVERIFIED",
+      "evidence_ids": [
+        "c9a0a480-9330-495a-b05d-85f0568ccf36"
+      ],
+      "duplicate_count": 1,
+      "tags": [],
+      "references": [],
+      "metadata": {
+        "url": "http://api.example.com:8080",
+        "scheme": "http",
+        "host": "api.example.com",
+        "port": 8080,
+        "status": 200,
+        "title": "",
+        "server": "",
+        "technologies": [],
+        "evidence_value": "{'url': 'http://api.example.com:8080', 'scheme': 'http', 'host': 'api.example.com', 'port': 8080, 'status': 200, 'title': '', 'server': '', 'technologies': []}",
+        "source": "httpx"
+      }
+    }
+  ],
+  "grouped_by_category": {
+    "vulnerability": [
+      {
+        "id": "04867eae-9d57-4b30-8a48-e57cb872f0e1",
+        "title": "SQLi Found",
+        "category": "vulnerability",
+        "severity": "high",
+        "cvss": {
+          "score": 7.5,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "severity_rating": "High",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "H",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "api.example.com:8080",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "During security analysis of `api.example.com:8080`, a Vulnerability vulnerability was identified at endpoint `/`.",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `api.example.com:8080`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming vulnerability."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with high impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "c806046d-f5f7-4c76-9ad4-b60c86080208"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {}
+      }
+    ],
+    "endpoint": [
+      {
+        "id": "275e7af2-b1ef-4f91-828a-8a7cc62da881",
+        "title": "Discovered Endpoint: http://api.example.com:8080/test",
+        "category": "endpoint",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/test",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Discovered endpoint /test on http://api.example.com:8080",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/test` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/test`.",
+          "Observe the anomalous response behavior confirming endpoint."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "0c2f6c39-aca6-4e0f-9855-980f61022889"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/test",
+          "path": "/test",
+          "host": "http://api.example.com:8080",
+          "method": "GET",
+          "params": {},
+          "evidence_value": "{'url': 'http://api.example.com:8080/test', 'path': '/test', 'host': 'http://api.example.com:8080', 'method': 'GET', 'params': {}}",
+          "source": "katana"
+        }
+      }
+    ],
+    "subdomain": [
+      {
+        "id": "94bbb155-3fd1-468c-8fff-ac1f3b2ccf7e",
+        "title": "Discovered Subdomain: api.example.com",
+        "category": "subdomain",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-942",
+          "name": "Permissive Cross-domain Policy with Untrusted Domains"
+        },
+        "host": "api.example.com:8080",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Subdomain api.example.com identified for target http://api.example.com:8080/test",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `api.example.com:8080`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming subdomain."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-942).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "a6d5148f-2b28-4992-840b-b84b84ac4d6f"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "subdomain": "api.example.com",
+          "evidence_value": "{'subdomain': 'api.example.com'}",
+          "source": "subfinder"
+        }
+      }
+    ],
+    "live_host": [
+      {
+        "id": "88dcaf27-9ee7-4ae9-a8fe-c5537b3bb625",
+        "title": "Live Host: http://api.example.com:8080",
+        "category": "live_host",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "api.example.com",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Live host detected at http://api.example.com:8080 (status: 200)",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `api.example.com`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming live host."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "c9a0a480-9330-495a-b05d-85f0568ccf36"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080",
+          "scheme": "http",
+          "host": "api.example.com",
+          "port": 8080,
+          "status": 200,
+          "title": "",
+          "server": "",
+          "technologies": [],
+          "evidence_value": "{'url': 'http://api.example.com:8080', 'scheme': 'http', 'host': 'api.example.com', 'port': 8080, 'status': 200, 'title': '', 'server': '', 'technologies': []}",
+          "source": "httpx"
+        }
+      }
+    ]
+  },
+  "grouped_by_host": {
+    "api.example.com:8080": [
+      {
+        "id": "04867eae-9d57-4b30-8a48-e57cb872f0e1",
+        "title": "SQLi Found",
+        "category": "vulnerability",
+        "severity": "high",
+        "cvss": {
+          "score": 7.5,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "severity_rating": "High",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "H",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "api.example.com:8080",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "During security analysis of `api.example.com:8080`, a Vulnerability vulnerability was identified at endpoint `/`.",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `api.example.com:8080`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming vulnerability."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with high impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "c806046d-f5f7-4c76-9ad4-b60c86080208"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {}
+      },
+      {
+        "id": "94bbb155-3fd1-468c-8fff-ac1f3b2ccf7e",
+        "title": "Discovered Subdomain: api.example.com",
+        "category": "subdomain",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-942",
+          "name": "Permissive Cross-domain Policy with Untrusted Domains"
+        },
+        "host": "api.example.com:8080",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Subdomain api.example.com identified for target http://api.example.com:8080/test",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `api.example.com:8080`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming subdomain."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-942).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "a6d5148f-2b28-4992-840b-b84b84ac4d6f"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "subdomain": "api.example.com",
+          "evidence_value": "{'subdomain': 'api.example.com'}",
+          "source": "subfinder"
+        }
+      }
+    ],
+    "http://api.example.com:8080": [
+      {
+        "id": "275e7af2-b1ef-4f91-828a-8a7cc62da881",
+        "title": "Discovered Endpoint: http://api.example.com:8080/test",
+        "category": "endpoint",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/test",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Discovered endpoint /test on http://api.example.com:8080",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/test` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/test`.",
+          "Observe the anomalous response behavior confirming endpoint."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "0c2f6c39-aca6-4e0f-9855-980f61022889"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/test",
+          "path": "/test",
+          "host": "http://api.example.com:8080",
+          "method": "GET",
+          "params": {},
+          "evidence_value": "{'url': 'http://api.example.com:8080/test', 'path': '/test', 'host': 'http://api.example.com:8080', 'method': 'GET', 'params': {}}",
+          "source": "katana"
+        }
+      }
+    ],
+    "api.example.com": [
+      {
+        "id": "88dcaf27-9ee7-4ae9-a8fe-c5537b3bb625",
+        "title": "Live Host: http://api.example.com:8080",
+        "category": "live_host",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "api.example.com",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Live host detected at http://api.example.com:8080 (status: 200)",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `api.example.com`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming live host."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "c9a0a480-9330-495a-b05d-85f0568ccf36"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080",
+          "scheme": "http",
+          "host": "api.example.com",
+          "port": 8080,
+          "status": 200,
+          "title": "",
+          "server": "",
+          "technologies": [],
+          "evidence_value": "{'url': 'http://api.example.com:8080', 'scheme': 'http', 'host': 'api.example.com', 'port': 8080, 'status': 200, 'title': '', 'server': '', 'technologies': []}",
+          "source": "httpx"
+        }
+      }
+    ]
+  }
+}

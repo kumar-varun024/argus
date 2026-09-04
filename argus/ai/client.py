@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Optional
 
 from argus.config import Config
 
@@ -12,9 +13,21 @@ class AIClient(ABC):
         raise NotImplementedError
 
 
-def get_ai_client():
+class NoOpAIClient(AIClient):
+    """Fallback client when AI provider is disabled or set to 'none'."""
 
-    provider = Config.AI_PROVIDER.lower()
+    def research(self, prompt: str) -> AIResponse:
+        return AIResponse(
+            executive_summary="AI analysis skipped: provider is set to 'none'.",
+            confidence="N/A",
+        )
+
+
+def get_ai_client(provider: Optional[str] = None) -> AIClient:
+    if provider is None:
+        provider = getattr(Config, "AI_PROVIDER", "none") or "none"
+
+    provider = str(provider).lower().strip()
 
     if provider == "github":
         from .github_client import GitHubClient
@@ -22,7 +35,6 @@ def get_ai_client():
         return GitHubClient()
 
     if provider == "gemini":
-        # pyrefly: ignore [missing-import]
         from .gemini_client import GeminiClient
 
         return GeminiClient()
@@ -32,6 +44,7 @@ def get_ai_client():
 
         return OpenAIClient()
 
-    raise ValueError(
-        f"Unknown AI provider: {provider}"
-    )
+    if provider in ("none", "", "disabled", "null"):
+        return NoOpAIClient()
+
+    raise ValueError(f"Unknown AI provider: {provider}")

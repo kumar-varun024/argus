@@ -56,6 +56,16 @@ class MissionLifecycle:
             import logging
             logging.getLogger(__name__).warning(f"Report generation failed during mission completion: {e}")
 
+        # Post-scan Vector RAG Indexing of Findings & Evidence
+        try:
+            from argus.reporting.vector_indexer import ScanEvidenceIndexer
+            indexer = ScanEvidenceIndexer()
+            indexer.index_mission(mission)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).debug(f"Post-scan vector indexing skipped: {e}")
+
+
 class TaskLifecycle:
     """Manages strict state machine transitions for a ScheduledTask."""
 

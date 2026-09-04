@@ -1,0 +1,2273 @@
+{
+  "report_id": "1846dfa3-d813-4ae0-9330-ad8d6b27ee12",
+  "mission_id": "7538f913-9bb6-42d4-b9d7-9a30edd47519",
+  "target": "http://api.example.com:8080/v1/users?id=1",
+  "generated_at": "2026-09-03T19:14:21.799556+00:00",
+  "generator_version": "1.0.0",
+  "summary": {
+    "total_findings": 11,
+    "total_evidence_items": 11,
+    "deduplicated_count": 0,
+    "severity_counts": {
+      "critical": 1,
+      "high": 4,
+      "medium": 3,
+      "low": 0,
+      "info": 3
+    },
+    "category_counts": {
+      "prototype_pollution": 6,
+      "api_security": 2,
+      "endpoint": 1,
+      "subdomain": 1,
+      "live_host": 1
+    },
+    "host_counts": {
+      "http://api.example.com:8080": 9,
+      "api.example.com:8080": 1,
+      "api.example.com": 1
+    }
+  },
+  "findings": [
+    {
+      "id": "8ce2fd21-f4ca-474b-b740-25fee37bcc04",
+      "title": "Client-Side Vulnerability: nodejs_child_process_rce_gadget on http://api.example.com:8080/v1/users",
+      "category": "prototype_pollution",
+      "severity": "critical",
+      "cvss": {
+        "score": 9.8,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "severity_rating": "Critical",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "H",
+          "I": "H",
+          "A": "H"
+        }
+      },
+      "cwe": {
+        "id": "CWE-1321",
+        "name": "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+      },
+      "host": "http://api.example.com:8080",
+      "endpoint": "/v1/users",
+      "parameter": "child_process.exec",
+      "parameter_type": null,
+      "payload": null,
+      "description": "Critical RCE Prototype Pollution Gadget confirmed on http://api.example.com:8080/v1/users. Pollution of child_process options allows arbitrary OS command execution. Parameter: child_process.exec, Strategy: standard, CWE: CWE-1321",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+        "Send a crafted HTTP request to `/v1/users`.",
+        "Observe the anomalous response behavior confirming prototype pollution."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with critical impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-1321).",
+      "confidence": 0.98,
+      "status": "CONFIRMED",
+      "evidence_ids": [
+        "b2cfa232-203f-4322-a471-4bbcf245ad5a"
+      ],
+      "duplicate_count": 1,
+      "tags": [
+        "prototype_pollution",
+        "client_side",
+        "PrototypePollutionVulnerabilityType.RCE_GADGET",
+        "standard"
+      ],
+      "references": [],
+      "metadata": {
+        "url": "http://api.example.com:8080/v1/users",
+        "host": "http://api.example.com:8080",
+        "template_id": "prototype-pollution-rce-gadget",
+        "technique": "nodejs_child_process_rce_gadget",
+        "vulnerability_type": "PrototypePollutionVulnerabilityType.RCE_GADGET",
+        "parameter": "child_process.exec",
+        "tested_parameter": "child_process.exec",
+        "mutation_strategy": "standard",
+        "strategy": "standard",
+        "gadget_framework": "nodejs_child_process",
+        "status_code": 200,
+        "evidence_snippet": "Node.js child_process options pollution accepted: NODE_OPTIONS",
+        "cwe_id": "CWE-1321",
+        "cvss_score": 9.8,
+        "is_valid_finding": true,
+        "framework": "nodejs_child_process",
+        "rce": true,
+        "evidence_value": "prototype_pollution:prototype-pollution-rce-gadget:http://api.example.com:8080/v1/users:child_process.exec",
+        "source": "prototype_pollution"
+      }
+    },
+    {
+      "id": "5055f52c-c7d8-4fe0-bb7d-9eda39d69acd",
+      "title": "Client-Side Vulnerability: express_framework_gadget_pollution on http://api.example.com:8080/v1/users",
+      "category": "prototype_pollution",
+      "severity": "high",
+      "cvss": {
+        "score": 8.2,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "severity_rating": "High",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "H",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-1321",
+        "name": "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+      },
+      "host": "http://api.example.com:8080",
+      "endpoint": "/v1/users",
+      "parameter": "express_view_options",
+      "parameter_type": null,
+      "payload": null,
+      "description": "Prototype Pollution Framework Gadget confirmed on http://api.example.com:8080/v1/users targeting EXPRESS. Injected gadget property express_view_options modifies framework configuration. Parameter: express_view_options, Strategy: standard, CWE: CWE-1321",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+        "Send a crafted HTTP request to `/v1/users`.",
+        "Observe the anomalous response behavior confirming prototype pollution."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with high impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-1321).",
+      "confidence": 0.93,
+      "status": "CONFIRMED",
+      "evidence_ids": [
+        "f973e737-6da8-4b8e-b37d-aa0afe229400"
+      ],
+      "duplicate_count": 1,
+      "tags": [
+        "prototype_pollution",
+        "client_side",
+        "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+        "standard"
+      ],
+      "references": [],
+      "metadata": {
+        "url": "http://api.example.com:8080/v1/users",
+        "host": "http://api.example.com:8080",
+        "template_id": "prototype-pollution-gadget-express",
+        "technique": "express_framework_gadget_pollution",
+        "vulnerability_type": "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+        "parameter": "express_view_options",
+        "tested_parameter": "express_view_options",
+        "mutation_strategy": "standard",
+        "strategy": "standard",
+        "gadget_framework": "express",
+        "status_code": 200,
+        "evidence_snippet": "Framework gadget property 'settings.view options' successfully processed by express",
+        "cwe_id": "CWE-1321",
+        "cvss_score": 8.2,
+        "is_valid_finding": true,
+        "framework": "express",
+        "evidence_value": "prototype_pollution:prototype-pollution-gadget-express:http://api.example.com:8080/v1/users:express_view_options",
+        "source": "prototype_pollution"
+      }
+    },
+    {
+      "id": "44d2ab09-e34d-4274-bbc9-ad942f0a051f",
+      "title": "Client-Side Vulnerability: handlebars_framework_gadget_pollution on http://api.example.com:8080/v1/users",
+      "category": "prototype_pollution",
+      "severity": "high",
+      "cvss": {
+        "score": 8.2,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "severity_rating": "High",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "H",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-1321",
+        "name": "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+      },
+      "host": "http://api.example.com:8080",
+      "endpoint": "/v1/users",
+      "parameter": "handlebars_compiler",
+      "parameter_type": null,
+      "payload": null,
+      "description": "Prototype Pollution Framework Gadget confirmed on http://api.example.com:8080/v1/users targeting HANDLEBARS. Injected gadget property handlebars_compiler modifies framework configuration. Parameter: handlebars_compiler, Strategy: standard, CWE: CWE-1321",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+        "Send a crafted HTTP request to `/v1/users`.",
+        "Observe the anomalous response behavior confirming prototype pollution."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with high impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-1321).",
+      "confidence": 0.93,
+      "status": "CONFIRMED",
+      "evidence_ids": [
+        "8eb38f46-932d-46e2-b199-b3c83b7b079a"
+      ],
+      "duplicate_count": 1,
+      "tags": [
+        "prototype_pollution",
+        "client_side",
+        "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+        "standard"
+      ],
+      "references": [],
+      "metadata": {
+        "url": "http://api.example.com:8080/v1/users",
+        "host": "http://api.example.com:8080",
+        "template_id": "prototype-pollution-gadget-handlebars",
+        "technique": "handlebars_framework_gadget_pollution",
+        "vulnerability_type": "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+        "parameter": "handlebars_compiler",
+        "tested_parameter": "handlebars_compiler",
+        "mutation_strategy": "standard",
+        "strategy": "standard",
+        "gadget_framework": "handlebars",
+        "status_code": 200,
+        "evidence_snippet": "Framework gadget property 'compiler.knownHelpers' successfully processed by handlebars",
+        "cwe_id": "CWE-1321",
+        "cvss_score": 8.2,
+        "is_valid_finding": true,
+        "framework": "handlebars",
+        "evidence_value": "prototype_pollution:prototype-pollution-gadget-handlebars:http://api.example.com:8080/v1/users:handlebars_compiler",
+        "source": "prototype_pollution"
+      }
+    },
+    {
+      "id": "b77b7b7b-73a2-4f92-b570-4740dd80435b",
+      "title": "Client-Side Vulnerability: jquery_framework_gadget_pollution on http://api.example.com:8080/v1/users",
+      "category": "prototype_pollution",
+      "severity": "high",
+      "cvss": {
+        "score": 8.2,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "severity_rating": "High",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "H",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-1321",
+        "name": "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+      },
+      "host": "http://api.example.com:8080",
+      "endpoint": "/v1/users",
+      "parameter": "jquery_htmlPrefilter",
+      "parameter_type": null,
+      "payload": null,
+      "description": "Prototype Pollution Framework Gadget confirmed on http://api.example.com:8080/v1/users targeting JQUERY. Injected gadget property jquery_htmlPrefilter modifies framework configuration. Parameter: jquery_htmlPrefilter, Strategy: standard, CWE: CWE-1321",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+        "Send a crafted HTTP request to `/v1/users`.",
+        "Observe the anomalous response behavior confirming prototype pollution."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with high impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-1321).",
+      "confidence": 0.93,
+      "status": "CONFIRMED",
+      "evidence_ids": [
+        "57a26e31-3e75-402e-9f11-11a19a9cdb62"
+      ],
+      "duplicate_count": 1,
+      "tags": [
+        "prototype_pollution",
+        "client_side",
+        "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+        "standard"
+      ],
+      "references": [],
+      "metadata": {
+        "url": "http://api.example.com:8080/v1/users",
+        "host": "http://api.example.com:8080",
+        "template_id": "prototype-pollution-gadget-jquery",
+        "technique": "jquery_framework_gadget_pollution",
+        "vulnerability_type": "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+        "parameter": "jquery_htmlPrefilter",
+        "tested_parameter": "jquery_htmlPrefilter",
+        "mutation_strategy": "standard",
+        "strategy": "standard",
+        "gadget_framework": "jquery",
+        "status_code": 200,
+        "evidence_snippet": "Framework gadget property 'htmlPrefilter' successfully processed by jquery",
+        "cwe_id": "CWE-1321",
+        "cvss_score": 8.2,
+        "is_valid_finding": true,
+        "framework": "jquery",
+        "evidence_value": "prototype_pollution:prototype-pollution-gadget-jquery:http://api.example.com:8080/v1/users:jquery_htmlPrefilter",
+        "source": "prototype_pollution"
+      }
+    },
+    {
+      "id": "ec892907-f3cf-496a-86cf-d6b9ba037c89",
+      "title": "Client-Side Vulnerability: lodash_framework_gadget_pollution on http://api.example.com:8080/v1/users",
+      "category": "prototype_pollution",
+      "severity": "high",
+      "cvss": {
+        "score": 8.2,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "severity_rating": "High",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "H",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-1321",
+        "name": "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+      },
+      "host": "http://api.example.com:8080",
+      "endpoint": "/v1/users",
+      "parameter": "lodash_templateSettings",
+      "parameter_type": null,
+      "payload": null,
+      "description": "Prototype Pollution Framework Gadget confirmed on http://api.example.com:8080/v1/users targeting LODASH. Injected gadget property lodash_templateSettings modifies framework configuration. Parameter: lodash_templateSettings, Strategy: standard, CWE: CWE-1321",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+        "Send a crafted HTTP request to `/v1/users`.",
+        "Observe the anomalous response behavior confirming prototype pollution."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with high impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-1321).",
+      "confidence": 0.93,
+      "status": "CONFIRMED",
+      "evidence_ids": [
+        "5c0e55ea-36d5-4652-afdc-01b36838ec65"
+      ],
+      "duplicate_count": 1,
+      "tags": [
+        "prototype_pollution",
+        "client_side",
+        "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+        "standard"
+      ],
+      "references": [],
+      "metadata": {
+        "url": "http://api.example.com:8080/v1/users",
+        "host": "http://api.example.com:8080",
+        "template_id": "prototype-pollution-gadget-lodash",
+        "technique": "lodash_framework_gadget_pollution",
+        "vulnerability_type": "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+        "parameter": "lodash_templateSettings",
+        "tested_parameter": "lodash_templateSettings",
+        "mutation_strategy": "standard",
+        "strategy": "standard",
+        "gadget_framework": "lodash",
+        "status_code": 200,
+        "evidence_snippet": "Framework gadget property 'templateSettings.interpolate' successfully processed by lodash",
+        "cwe_id": "CWE-1321",
+        "cvss_score": 8.2,
+        "is_valid_finding": true,
+        "framework": "lodash",
+        "evidence_value": "prototype_pollution:prototype-pollution-gadget-lodash:http://api.example.com:8080/v1/users:lodash_templateSettings",
+        "source": "prototype_pollution"
+      }
+    },
+    {
+      "id": "5678f097-34c4-4d6c-aa02-e91ec66979eb",
+      "title": "API Security Vulnerability: rate_limiting_bypass on http://api.example.com:8080/v1/users",
+      "category": "api_security",
+      "severity": "medium",
+      "cvss": {
+        "score": 5.3,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "severity_rating": "Medium",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "L",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-639",
+        "name": "Authorization Bypass Through User-Controlled Key"
+      },
+      "host": "http://api.example.com:8080",
+      "endpoint": "/v1/users",
+      "parameter": "rate_limiting",
+      "parameter_type": null,
+      "payload": null,
+      "description": "Missing API Rate Limiting detected on http://api.example.com:8080/v1/users. API allowed rapid burst sequence of 15 requests without throttling or rate limit headers. Parameter: rate_limiting, Strategy: standard, CWE: CWE-770",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+        "Send a crafted HTTP request to `/v1/users`.",
+        "Observe the anomalous response behavior confirming api security."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with medium impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-639).",
+      "confidence": 0.95,
+      "status": "CONFIRMED",
+      "evidence_ids": [
+        "a518f827-d6c7-440c-88e4-21dd3733f044"
+      ],
+      "duplicate_count": 1,
+      "tags": [
+        "api_security",
+        "rest_security",
+        "APIVulnerabilityType.RATE_LIMITING_BYPASS",
+        "standard"
+      ],
+      "references": [],
+      "metadata": {
+        "url": "http://api.example.com:8080/v1/users",
+        "host": "http://api.example.com:8080",
+        "template_id": "api-rate-limiting-bypass",
+        "technique": "rate_limiting_bypass",
+        "vulnerability_type": "APIVulnerabilityType.RATE_LIMITING_BYPASS",
+        "parameter": "rate_limiting",
+        "tested_parameter": "rate_limiting",
+        "mutation_strategy": "standard",
+        "strategy": "standard",
+        "status_code": null,
+        "evidence_snippet": "None",
+        "cwe_id": "CWE-770",
+        "cvss_score": 5.3,
+        "is_valid_finding": true,
+        "tampered_value": "None",
+        "sensitive_fields": [],
+        "error_disclosure": null,
+        "burst_count": 15,
+        "evidence_value": "api_security:api-rate-limiting-bypass:http://api.example.com:8080/v1/users:rate_limiting",
+        "source": "api_security"
+      }
+    },
+    {
+      "id": "03d7a757-129c-4f60-ade0-d738c430acaa",
+      "title": "API Security Vulnerability: rate_limiting_bypass on http://api.example.com:8080/v1/users",
+      "category": "api_security",
+      "severity": "medium",
+      "cvss": {
+        "score": 5.3,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "severity_rating": "Medium",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "L",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-639",
+        "name": "Authorization Bypass Through User-Controlled Key"
+      },
+      "host": "http://api.example.com:8080",
+      "endpoint": "/v1/users",
+      "parameter": "X-Forwarded-For",
+      "parameter_type": null,
+      "payload": null,
+      "description": "Rate Limiting Header Bypass detected on http://api.example.com:8080/v1/users. Throttling was bypassed by rotating client IP headers (X-Forwarded-For) during burst requests. Parameter: X-Forwarded-For, Strategy: header_auth_bypass, CWE: CWE-770",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+        "Send a crafted HTTP request to `/v1/users`.",
+        "Observe the anomalous response behavior confirming api security."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with medium impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-639).",
+      "confidence": 0.95,
+      "status": "CONFIRMED",
+      "evidence_ids": [
+        "129e406c-e07f-4048-92ef-f2c2fb546f21"
+      ],
+      "duplicate_count": 1,
+      "tags": [
+        "api_security",
+        "rest_security",
+        "APIVulnerabilityType.RATE_LIMITING_BYPASS",
+        "header_auth_bypass"
+      ],
+      "references": [],
+      "metadata": {
+        "url": "http://api.example.com:8080/v1/users",
+        "host": "http://api.example.com:8080",
+        "template_id": "api-rate-limiting-bypass",
+        "technique": "rate_limiting_bypass",
+        "vulnerability_type": "APIVulnerabilityType.RATE_LIMITING_BYPASS",
+        "parameter": "X-Forwarded-For",
+        "tested_parameter": "X-Forwarded-For",
+        "mutation_strategy": "header_auth_bypass",
+        "strategy": "header_auth_bypass",
+        "status_code": null,
+        "evidence_snippet": "None",
+        "cwe_id": "CWE-770",
+        "cvss_score": 5.3,
+        "is_valid_finding": true,
+        "tampered_value": "None",
+        "sensitive_fields": [],
+        "error_disclosure": null,
+        "burst_count": 15,
+        "evidence_value": "api_security:api-rate-limiting-bypass:http://api.example.com:8080/v1/users:X-Forwarded-For",
+        "source": "api_security"
+      }
+    },
+    {
+      "id": "6d95eff3-ec3b-42c3-bace-3ad5f7a5682c",
+      "title": "Client-Side Vulnerability: missing_anti_framing_protection on http://api.example.com:8080/v1/users",
+      "category": "prototype_pollution",
+      "severity": "medium",
+      "cvss": {
+        "score": 5.3,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+        "severity_rating": "Medium",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "L",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-1321",
+        "name": "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+      },
+      "host": "http://api.example.com:8080",
+      "endpoint": "/v1/users",
+      "parameter": "X-Frame-Options / frame-ancestors",
+      "parameter_type": null,
+      "payload": null,
+      "description": "Clickjacking / UI Redressing vulnerability detected on http://api.example.com:8080/v1/users. The sensitive page lacks X-Frame-Options and Content-Security-Policy frame-ancestors defenses, allowing external iframe embedding. Parameter: X-Frame-Options / frame-ancestors, Strategy: frame_busting_bypass, CWE: CWE-1021",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+        "Send a crafted HTTP request to `/v1/users`.",
+        "Observe the anomalous response behavior confirming prototype pollution."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with medium impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-1321).",
+      "confidence": 0.9,
+      "status": "CONFIRMED",
+      "evidence_ids": [
+        "a71a6344-bab0-4821-8bd5-03b02ef7bd85"
+      ],
+      "duplicate_count": 1,
+      "tags": [
+        "prototype_pollution",
+        "client_side",
+        "PrototypePollutionVulnerabilityType.CLICKJACKING",
+        "frame_busting_bypass"
+      ],
+      "references": [],
+      "metadata": {
+        "url": "http://api.example.com:8080/v1/users",
+        "host": "http://api.example.com:8080",
+        "template_id": "clickjacking-missing-frame-busting",
+        "technique": "missing_anti_framing_protection",
+        "vulnerability_type": "PrototypePollutionVulnerabilityType.CLICKJACKING",
+        "parameter": "X-Frame-Options / frame-ancestors",
+        "tested_parameter": "X-Frame-Options / frame-ancestors",
+        "mutation_strategy": "frame_busting_bypass",
+        "strategy": "frame_busting_bypass",
+        "gadget_framework": null,
+        "status_code": 200,
+        "evidence_snippet": "Missing X-Frame-Options and CSP frame-ancestors on sensitive endpoint http://api.example.com:8080/v1/users",
+        "cwe_id": "CWE-1021",
+        "cvss_score": 5.3,
+        "is_valid_finding": true,
+        "x_frame_options": "MISSING",
+        "csp": "MISSING",
+        "evidence_value": "prototype_pollution:clickjacking-missing-frame-busting:http://api.example.com:8080/v1/users:X-Frame-Options / frame-ancestors",
+        "source": "prototype_pollution"
+      }
+    },
+    {
+      "id": "94561f2f-5f1b-4eb3-bad6-7697c995bd09",
+      "title": "Discovered Endpoint: http://api.example.com:8080/v1/users",
+      "category": "endpoint",
+      "severity": "info",
+      "cvss": {
+        "score": 0.0,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+        "severity_rating": "None",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "N",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-699",
+        "name": "Software Development Security Issue"
+      },
+      "host": "http://api.example.com:8080",
+      "endpoint": "/v1/users",
+      "parameter": null,
+      "parameter_type": null,
+      "payload": null,
+      "description": "Discovered endpoint /v1/users on http://api.example.com:8080",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+        "Send a crafted HTTP request to `/v1/users`.",
+        "Observe the anomalous response behavior confirming endpoint."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+      "confidence": 1.0,
+      "status": "UNVERIFIED",
+      "evidence_ids": [
+        "ad09dc85-aae6-4bf4-bce5-d0d3cb59c026"
+      ],
+      "duplicate_count": 1,
+      "tags": [],
+      "references": [],
+      "metadata": {
+        "url": "http://api.example.com:8080/v1/users",
+        "path": "/v1/users",
+        "host": "http://api.example.com:8080",
+        "method": "GET",
+        "params": {
+          "id": "1"
+        },
+        "evidence_value": "{'url': 'http://api.example.com:8080/v1/users', 'path': '/v1/users', 'host': 'http://api.example.com:8080', 'method': 'GET', 'params': {'id': '1'}}",
+        "source": "katana"
+      }
+    },
+    {
+      "id": "b3de00b6-47d2-4e78-9f2b-a1cd9440ea98",
+      "title": "Discovered Subdomain: api.example.com",
+      "category": "subdomain",
+      "severity": "info",
+      "cvss": {
+        "score": 0.0,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+        "severity_rating": "None",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "N",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-942",
+        "name": "Permissive Cross-domain Policy with Untrusted Domains"
+      },
+      "host": "api.example.com:8080",
+      "endpoint": "/",
+      "parameter": null,
+      "parameter_type": null,
+      "payload": null,
+      "description": "Subdomain api.example.com identified for target http://api.example.com:8080/v1/users?id=1",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/` on host `api.example.com:8080`.",
+        "Send a crafted HTTP request to `/`.",
+        "Observe the anomalous response behavior confirming subdomain."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-942).",
+      "confidence": 1.0,
+      "status": "UNVERIFIED",
+      "evidence_ids": [
+        "3d43fc31-f9b5-429d-a540-27c5f8959398"
+      ],
+      "duplicate_count": 1,
+      "tags": [],
+      "references": [],
+      "metadata": {
+        "subdomain": "api.example.com",
+        "evidence_value": "{'subdomain': 'api.example.com'}",
+        "source": "subfinder"
+      }
+    },
+    {
+      "id": "8d92c013-3bb3-4c7d-96fa-b398b9450a13",
+      "title": "Live Host: http://api.example.com:8080",
+      "category": "live_host",
+      "severity": "info",
+      "cvss": {
+        "score": 0.0,
+        "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+        "severity_rating": "None",
+        "metrics": {
+          "AV": "N",
+          "AC": "L",
+          "PR": "N",
+          "UI": "N",
+          "S": "U",
+          "C": "N",
+          "I": "N",
+          "A": "N"
+        }
+      },
+      "cwe": {
+        "id": "CWE-699",
+        "name": "Software Development Security Issue"
+      },
+      "host": "api.example.com",
+      "endpoint": "/",
+      "parameter": null,
+      "parameter_type": null,
+      "payload": null,
+      "description": "Live host detected at http://api.example.com:8080 (status: 200)",
+      "steps_to_reproduce": [
+        "Navigate to the target endpoint `/` on host `api.example.com`.",
+        "Send a crafted HTTP request to `/`.",
+        "Observe the anomalous response behavior confirming live host."
+      ],
+      "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+      "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+      "confidence": 1.0,
+      "status": "UNVERIFIED",
+      "evidence_ids": [
+        "ff8bc3ff-8e5b-4bcc-9e11-8399de562d08"
+      ],
+      "duplicate_count": 1,
+      "tags": [],
+      "references": [],
+      "metadata": {
+        "url": "http://api.example.com:8080",
+        "scheme": "http",
+        "host": "api.example.com",
+        "port": 8080,
+        "status": 200,
+        "title": "",
+        "server": "",
+        "technologies": [],
+        "evidence_value": "{'url': 'http://api.example.com:8080', 'scheme': 'http', 'host': 'api.example.com', 'port': 8080, 'status': 200, 'title': '', 'server': '', 'technologies': []}",
+        "source": "httpx"
+      }
+    }
+  ],
+  "grouped_by_category": {
+    "prototype_pollution": [
+      {
+        "id": "8ce2fd21-f4ca-474b-b740-25fee37bcc04",
+        "title": "Client-Side Vulnerability: nodejs_child_process_rce_gadget on http://api.example.com:8080/v1/users",
+        "category": "prototype_pollution",
+        "severity": "critical",
+        "cvss": {
+          "score": 9.8,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+          "severity_rating": "Critical",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "H",
+            "I": "H",
+            "A": "H"
+          }
+        },
+        "cwe": {
+          "id": "CWE-1321",
+          "name": "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/v1/users",
+        "parameter": "child_process.exec",
+        "parameter_type": null,
+        "payload": null,
+        "description": "Critical RCE Prototype Pollution Gadget confirmed on http://api.example.com:8080/v1/users. Pollution of child_process options allows arbitrary OS command execution. Parameter: child_process.exec, Strategy: standard, CWE: CWE-1321",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming prototype pollution."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with critical impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-1321).",
+        "confidence": 0.98,
+        "status": "CONFIRMED",
+        "evidence_ids": [
+          "b2cfa232-203f-4322-a471-4bbcf245ad5a"
+        ],
+        "duplicate_count": 1,
+        "tags": [
+          "prototype_pollution",
+          "client_side",
+          "PrototypePollutionVulnerabilityType.RCE_GADGET",
+          "standard"
+        ],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/v1/users",
+          "host": "http://api.example.com:8080",
+          "template_id": "prototype-pollution-rce-gadget",
+          "technique": "nodejs_child_process_rce_gadget",
+          "vulnerability_type": "PrototypePollutionVulnerabilityType.RCE_GADGET",
+          "parameter": "child_process.exec",
+          "tested_parameter": "child_process.exec",
+          "mutation_strategy": "standard",
+          "strategy": "standard",
+          "gadget_framework": "nodejs_child_process",
+          "status_code": 200,
+          "evidence_snippet": "Node.js child_process options pollution accepted: NODE_OPTIONS",
+          "cwe_id": "CWE-1321",
+          "cvss_score": 9.8,
+          "is_valid_finding": true,
+          "framework": "nodejs_child_process",
+          "rce": true,
+          "evidence_value": "prototype_pollution:prototype-pollution-rce-gadget:http://api.example.com:8080/v1/users:child_process.exec",
+          "source": "prototype_pollution"
+        }
+      },
+      {
+        "id": "5055f52c-c7d8-4fe0-bb7d-9eda39d69acd",
+        "title": "Client-Side Vulnerability: express_framework_gadget_pollution on http://api.example.com:8080/v1/users",
+        "category": "prototype_pollution",
+        "severity": "high",
+        "cvss": {
+          "score": 8.2,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "severity_rating": "High",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "H",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-1321",
+          "name": "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/v1/users",
+        "parameter": "express_view_options",
+        "parameter_type": null,
+        "payload": null,
+        "description": "Prototype Pollution Framework Gadget confirmed on http://api.example.com:8080/v1/users targeting EXPRESS. Injected gadget property express_view_options modifies framework configuration. Parameter: express_view_options, Strategy: standard, CWE: CWE-1321",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming prototype pollution."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with high impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-1321).",
+        "confidence": 0.93,
+        "status": "CONFIRMED",
+        "evidence_ids": [
+          "f973e737-6da8-4b8e-b37d-aa0afe229400"
+        ],
+        "duplicate_count": 1,
+        "tags": [
+          "prototype_pollution",
+          "client_side",
+          "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+          "standard"
+        ],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/v1/users",
+          "host": "http://api.example.com:8080",
+          "template_id": "prototype-pollution-gadget-express",
+          "technique": "express_framework_gadget_pollution",
+          "vulnerability_type": "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+          "parameter": "express_view_options",
+          "tested_parameter": "express_view_options",
+          "mutation_strategy": "standard",
+          "strategy": "standard",
+          "gadget_framework": "express",
+          "status_code": 200,
+          "evidence_snippet": "Framework gadget property 'settings.view options' successfully processed by express",
+          "cwe_id": "CWE-1321",
+          "cvss_score": 8.2,
+          "is_valid_finding": true,
+          "framework": "express",
+          "evidence_value": "prototype_pollution:prototype-pollution-gadget-express:http://api.example.com:8080/v1/users:express_view_options",
+          "source": "prototype_pollution"
+        }
+      },
+      {
+        "id": "44d2ab09-e34d-4274-bbc9-ad942f0a051f",
+        "title": "Client-Side Vulnerability: handlebars_framework_gadget_pollution on http://api.example.com:8080/v1/users",
+        "category": "prototype_pollution",
+        "severity": "high",
+        "cvss": {
+          "score": 8.2,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "severity_rating": "High",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "H",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-1321",
+          "name": "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/v1/users",
+        "parameter": "handlebars_compiler",
+        "parameter_type": null,
+        "payload": null,
+        "description": "Prototype Pollution Framework Gadget confirmed on http://api.example.com:8080/v1/users targeting HANDLEBARS. Injected gadget property handlebars_compiler modifies framework configuration. Parameter: handlebars_compiler, Strategy: standard, CWE: CWE-1321",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming prototype pollution."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with high impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-1321).",
+        "confidence": 0.93,
+        "status": "CONFIRMED",
+        "evidence_ids": [
+          "8eb38f46-932d-46e2-b199-b3c83b7b079a"
+        ],
+        "duplicate_count": 1,
+        "tags": [
+          "prototype_pollution",
+          "client_side",
+          "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+          "standard"
+        ],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/v1/users",
+          "host": "http://api.example.com:8080",
+          "template_id": "prototype-pollution-gadget-handlebars",
+          "technique": "handlebars_framework_gadget_pollution",
+          "vulnerability_type": "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+          "parameter": "handlebars_compiler",
+          "tested_parameter": "handlebars_compiler",
+          "mutation_strategy": "standard",
+          "strategy": "standard",
+          "gadget_framework": "handlebars",
+          "status_code": 200,
+          "evidence_snippet": "Framework gadget property 'compiler.knownHelpers' successfully processed by handlebars",
+          "cwe_id": "CWE-1321",
+          "cvss_score": 8.2,
+          "is_valid_finding": true,
+          "framework": "handlebars",
+          "evidence_value": "prototype_pollution:prototype-pollution-gadget-handlebars:http://api.example.com:8080/v1/users:handlebars_compiler",
+          "source": "prototype_pollution"
+        }
+      },
+      {
+        "id": "b77b7b7b-73a2-4f92-b570-4740dd80435b",
+        "title": "Client-Side Vulnerability: jquery_framework_gadget_pollution on http://api.example.com:8080/v1/users",
+        "category": "prototype_pollution",
+        "severity": "high",
+        "cvss": {
+          "score": 8.2,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "severity_rating": "High",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "H",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-1321",
+          "name": "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/v1/users",
+        "parameter": "jquery_htmlPrefilter",
+        "parameter_type": null,
+        "payload": null,
+        "description": "Prototype Pollution Framework Gadget confirmed on http://api.example.com:8080/v1/users targeting JQUERY. Injected gadget property jquery_htmlPrefilter modifies framework configuration. Parameter: jquery_htmlPrefilter, Strategy: standard, CWE: CWE-1321",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming prototype pollution."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with high impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-1321).",
+        "confidence": 0.93,
+        "status": "CONFIRMED",
+        "evidence_ids": [
+          "57a26e31-3e75-402e-9f11-11a19a9cdb62"
+        ],
+        "duplicate_count": 1,
+        "tags": [
+          "prototype_pollution",
+          "client_side",
+          "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+          "standard"
+        ],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/v1/users",
+          "host": "http://api.example.com:8080",
+          "template_id": "prototype-pollution-gadget-jquery",
+          "technique": "jquery_framework_gadget_pollution",
+          "vulnerability_type": "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+          "parameter": "jquery_htmlPrefilter",
+          "tested_parameter": "jquery_htmlPrefilter",
+          "mutation_strategy": "standard",
+          "strategy": "standard",
+          "gadget_framework": "jquery",
+          "status_code": 200,
+          "evidence_snippet": "Framework gadget property 'htmlPrefilter' successfully processed by jquery",
+          "cwe_id": "CWE-1321",
+          "cvss_score": 8.2,
+          "is_valid_finding": true,
+          "framework": "jquery",
+          "evidence_value": "prototype_pollution:prototype-pollution-gadget-jquery:http://api.example.com:8080/v1/users:jquery_htmlPrefilter",
+          "source": "prototype_pollution"
+        }
+      },
+      {
+        "id": "ec892907-f3cf-496a-86cf-d6b9ba037c89",
+        "title": "Client-Side Vulnerability: lodash_framework_gadget_pollution on http://api.example.com:8080/v1/users",
+        "category": "prototype_pollution",
+        "severity": "high",
+        "cvss": {
+          "score": 8.2,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "severity_rating": "High",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "H",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-1321",
+          "name": "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/v1/users",
+        "parameter": "lodash_templateSettings",
+        "parameter_type": null,
+        "payload": null,
+        "description": "Prototype Pollution Framework Gadget confirmed on http://api.example.com:8080/v1/users targeting LODASH. Injected gadget property lodash_templateSettings modifies framework configuration. Parameter: lodash_templateSettings, Strategy: standard, CWE: CWE-1321",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming prototype pollution."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with high impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-1321).",
+        "confidence": 0.93,
+        "status": "CONFIRMED",
+        "evidence_ids": [
+          "5c0e55ea-36d5-4652-afdc-01b36838ec65"
+        ],
+        "duplicate_count": 1,
+        "tags": [
+          "prototype_pollution",
+          "client_side",
+          "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+          "standard"
+        ],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/v1/users",
+          "host": "http://api.example.com:8080",
+          "template_id": "prototype-pollution-gadget-lodash",
+          "technique": "lodash_framework_gadget_pollution",
+          "vulnerability_type": "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+          "parameter": "lodash_templateSettings",
+          "tested_parameter": "lodash_templateSettings",
+          "mutation_strategy": "standard",
+          "strategy": "standard",
+          "gadget_framework": "lodash",
+          "status_code": 200,
+          "evidence_snippet": "Framework gadget property 'templateSettings.interpolate' successfully processed by lodash",
+          "cwe_id": "CWE-1321",
+          "cvss_score": 8.2,
+          "is_valid_finding": true,
+          "framework": "lodash",
+          "evidence_value": "prototype_pollution:prototype-pollution-gadget-lodash:http://api.example.com:8080/v1/users:lodash_templateSettings",
+          "source": "prototype_pollution"
+        }
+      },
+      {
+        "id": "6d95eff3-ec3b-42c3-bace-3ad5f7a5682c",
+        "title": "Client-Side Vulnerability: missing_anti_framing_protection on http://api.example.com:8080/v1/users",
+        "category": "prototype_pollution",
+        "severity": "medium",
+        "cvss": {
+          "score": 5.3,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+          "severity_rating": "Medium",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "L",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-1321",
+          "name": "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/v1/users",
+        "parameter": "X-Frame-Options / frame-ancestors",
+        "parameter_type": null,
+        "payload": null,
+        "description": "Clickjacking / UI Redressing vulnerability detected on http://api.example.com:8080/v1/users. The sensitive page lacks X-Frame-Options and Content-Security-Policy frame-ancestors defenses, allowing external iframe embedding. Parameter: X-Frame-Options / frame-ancestors, Strategy: frame_busting_bypass, CWE: CWE-1021",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming prototype pollution."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with medium impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-1321).",
+        "confidence": 0.9,
+        "status": "CONFIRMED",
+        "evidence_ids": [
+          "a71a6344-bab0-4821-8bd5-03b02ef7bd85"
+        ],
+        "duplicate_count": 1,
+        "tags": [
+          "prototype_pollution",
+          "client_side",
+          "PrototypePollutionVulnerabilityType.CLICKJACKING",
+          "frame_busting_bypass"
+        ],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/v1/users",
+          "host": "http://api.example.com:8080",
+          "template_id": "clickjacking-missing-frame-busting",
+          "technique": "missing_anti_framing_protection",
+          "vulnerability_type": "PrototypePollutionVulnerabilityType.CLICKJACKING",
+          "parameter": "X-Frame-Options / frame-ancestors",
+          "tested_parameter": "X-Frame-Options / frame-ancestors",
+          "mutation_strategy": "frame_busting_bypass",
+          "strategy": "frame_busting_bypass",
+          "gadget_framework": null,
+          "status_code": 200,
+          "evidence_snippet": "Missing X-Frame-Options and CSP frame-ancestors on sensitive endpoint http://api.example.com:8080/v1/users",
+          "cwe_id": "CWE-1021",
+          "cvss_score": 5.3,
+          "is_valid_finding": true,
+          "x_frame_options": "MISSING",
+          "csp": "MISSING",
+          "evidence_value": "prototype_pollution:clickjacking-missing-frame-busting:http://api.example.com:8080/v1/users:X-Frame-Options / frame-ancestors",
+          "source": "prototype_pollution"
+        }
+      }
+    ],
+    "api_security": [
+      {
+        "id": "5678f097-34c4-4d6c-aa02-e91ec66979eb",
+        "title": "API Security Vulnerability: rate_limiting_bypass on http://api.example.com:8080/v1/users",
+        "category": "api_security",
+        "severity": "medium",
+        "cvss": {
+          "score": 5.3,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+          "severity_rating": "Medium",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "L",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-639",
+          "name": "Authorization Bypass Through User-Controlled Key"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/v1/users",
+        "parameter": "rate_limiting",
+        "parameter_type": null,
+        "payload": null,
+        "description": "Missing API Rate Limiting detected on http://api.example.com:8080/v1/users. API allowed rapid burst sequence of 15 requests without throttling or rate limit headers. Parameter: rate_limiting, Strategy: standard, CWE: CWE-770",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming api security."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with medium impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-639).",
+        "confidence": 0.95,
+        "status": "CONFIRMED",
+        "evidence_ids": [
+          "a518f827-d6c7-440c-88e4-21dd3733f044"
+        ],
+        "duplicate_count": 1,
+        "tags": [
+          "api_security",
+          "rest_security",
+          "APIVulnerabilityType.RATE_LIMITING_BYPASS",
+          "standard"
+        ],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/v1/users",
+          "host": "http://api.example.com:8080",
+          "template_id": "api-rate-limiting-bypass",
+          "technique": "rate_limiting_bypass",
+          "vulnerability_type": "APIVulnerabilityType.RATE_LIMITING_BYPASS",
+          "parameter": "rate_limiting",
+          "tested_parameter": "rate_limiting",
+          "mutation_strategy": "standard",
+          "strategy": "standard",
+          "status_code": null,
+          "evidence_snippet": "None",
+          "cwe_id": "CWE-770",
+          "cvss_score": 5.3,
+          "is_valid_finding": true,
+          "tampered_value": "None",
+          "sensitive_fields": [],
+          "error_disclosure": null,
+          "burst_count": 15,
+          "evidence_value": "api_security:api-rate-limiting-bypass:http://api.example.com:8080/v1/users:rate_limiting",
+          "source": "api_security"
+        }
+      },
+      {
+        "id": "03d7a757-129c-4f60-ade0-d738c430acaa",
+        "title": "API Security Vulnerability: rate_limiting_bypass on http://api.example.com:8080/v1/users",
+        "category": "api_security",
+        "severity": "medium",
+        "cvss": {
+          "score": 5.3,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+          "severity_rating": "Medium",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "L",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-639",
+          "name": "Authorization Bypass Through User-Controlled Key"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/v1/users",
+        "parameter": "X-Forwarded-For",
+        "parameter_type": null,
+        "payload": null,
+        "description": "Rate Limiting Header Bypass detected on http://api.example.com:8080/v1/users. Throttling was bypassed by rotating client IP headers (X-Forwarded-For) during burst requests. Parameter: X-Forwarded-For, Strategy: header_auth_bypass, CWE: CWE-770",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming api security."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with medium impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-639).",
+        "confidence": 0.95,
+        "status": "CONFIRMED",
+        "evidence_ids": [
+          "129e406c-e07f-4048-92ef-f2c2fb546f21"
+        ],
+        "duplicate_count": 1,
+        "tags": [
+          "api_security",
+          "rest_security",
+          "APIVulnerabilityType.RATE_LIMITING_BYPASS",
+          "header_auth_bypass"
+        ],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/v1/users",
+          "host": "http://api.example.com:8080",
+          "template_id": "api-rate-limiting-bypass",
+          "technique": "rate_limiting_bypass",
+          "vulnerability_type": "APIVulnerabilityType.RATE_LIMITING_BYPASS",
+          "parameter": "X-Forwarded-For",
+          "tested_parameter": "X-Forwarded-For",
+          "mutation_strategy": "header_auth_bypass",
+          "strategy": "header_auth_bypass",
+          "status_code": null,
+          "evidence_snippet": "None",
+          "cwe_id": "CWE-770",
+          "cvss_score": 5.3,
+          "is_valid_finding": true,
+          "tampered_value": "None",
+          "sensitive_fields": [],
+          "error_disclosure": null,
+          "burst_count": 15,
+          "evidence_value": "api_security:api-rate-limiting-bypass:http://api.example.com:8080/v1/users:X-Forwarded-For",
+          "source": "api_security"
+        }
+      }
+    ],
+    "endpoint": [
+      {
+        "id": "94561f2f-5f1b-4eb3-bad6-7697c995bd09",
+        "title": "Discovered Endpoint: http://api.example.com:8080/v1/users",
+        "category": "endpoint",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/v1/users",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Discovered endpoint /v1/users on http://api.example.com:8080",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming endpoint."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "ad09dc85-aae6-4bf4-bce5-d0d3cb59c026"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/v1/users",
+          "path": "/v1/users",
+          "host": "http://api.example.com:8080",
+          "method": "GET",
+          "params": {
+            "id": "1"
+          },
+          "evidence_value": "{'url': 'http://api.example.com:8080/v1/users', 'path': '/v1/users', 'host': 'http://api.example.com:8080', 'method': 'GET', 'params': {'id': '1'}}",
+          "source": "katana"
+        }
+      }
+    ],
+    "subdomain": [
+      {
+        "id": "b3de00b6-47d2-4e78-9f2b-a1cd9440ea98",
+        "title": "Discovered Subdomain: api.example.com",
+        "category": "subdomain",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-942",
+          "name": "Permissive Cross-domain Policy with Untrusted Domains"
+        },
+        "host": "api.example.com:8080",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Subdomain api.example.com identified for target http://api.example.com:8080/v1/users?id=1",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `api.example.com:8080`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming subdomain."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-942).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "3d43fc31-f9b5-429d-a540-27c5f8959398"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "subdomain": "api.example.com",
+          "evidence_value": "{'subdomain': 'api.example.com'}",
+          "source": "subfinder"
+        }
+      }
+    ],
+    "live_host": [
+      {
+        "id": "8d92c013-3bb3-4c7d-96fa-b398b9450a13",
+        "title": "Live Host: http://api.example.com:8080",
+        "category": "live_host",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "api.example.com",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Live host detected at http://api.example.com:8080 (status: 200)",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `api.example.com`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming live host."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "ff8bc3ff-8e5b-4bcc-9e11-8399de562d08"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080",
+          "scheme": "http",
+          "host": "api.example.com",
+          "port": 8080,
+          "status": 200,
+          "title": "",
+          "server": "",
+          "technologies": [],
+          "evidence_value": "{'url': 'http://api.example.com:8080', 'scheme': 'http', 'host': 'api.example.com', 'port': 8080, 'status': 200, 'title': '', 'server': '', 'technologies': []}",
+          "source": "httpx"
+        }
+      }
+    ]
+  },
+  "grouped_by_host": {
+    "http://api.example.com:8080": [
+      {
+        "id": "8ce2fd21-f4ca-474b-b740-25fee37bcc04",
+        "title": "Client-Side Vulnerability: nodejs_child_process_rce_gadget on http://api.example.com:8080/v1/users",
+        "category": "prototype_pollution",
+        "severity": "critical",
+        "cvss": {
+          "score": 9.8,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+          "severity_rating": "Critical",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "H",
+            "I": "H",
+            "A": "H"
+          }
+        },
+        "cwe": {
+          "id": "CWE-1321",
+          "name": "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/v1/users",
+        "parameter": "child_process.exec",
+        "parameter_type": null,
+        "payload": null,
+        "description": "Critical RCE Prototype Pollution Gadget confirmed on http://api.example.com:8080/v1/users. Pollution of child_process options allows arbitrary OS command execution. Parameter: child_process.exec, Strategy: standard, CWE: CWE-1321",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming prototype pollution."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with critical impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-1321).",
+        "confidence": 0.98,
+        "status": "CONFIRMED",
+        "evidence_ids": [
+          "b2cfa232-203f-4322-a471-4bbcf245ad5a"
+        ],
+        "duplicate_count": 1,
+        "tags": [
+          "prototype_pollution",
+          "client_side",
+          "PrototypePollutionVulnerabilityType.RCE_GADGET",
+          "standard"
+        ],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/v1/users",
+          "host": "http://api.example.com:8080",
+          "template_id": "prototype-pollution-rce-gadget",
+          "technique": "nodejs_child_process_rce_gadget",
+          "vulnerability_type": "PrototypePollutionVulnerabilityType.RCE_GADGET",
+          "parameter": "child_process.exec",
+          "tested_parameter": "child_process.exec",
+          "mutation_strategy": "standard",
+          "strategy": "standard",
+          "gadget_framework": "nodejs_child_process",
+          "status_code": 200,
+          "evidence_snippet": "Node.js child_process options pollution accepted: NODE_OPTIONS",
+          "cwe_id": "CWE-1321",
+          "cvss_score": 9.8,
+          "is_valid_finding": true,
+          "framework": "nodejs_child_process",
+          "rce": true,
+          "evidence_value": "prototype_pollution:prototype-pollution-rce-gadget:http://api.example.com:8080/v1/users:child_process.exec",
+          "source": "prototype_pollution"
+        }
+      },
+      {
+        "id": "5055f52c-c7d8-4fe0-bb7d-9eda39d69acd",
+        "title": "Client-Side Vulnerability: express_framework_gadget_pollution on http://api.example.com:8080/v1/users",
+        "category": "prototype_pollution",
+        "severity": "high",
+        "cvss": {
+          "score": 8.2,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "severity_rating": "High",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "H",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-1321",
+          "name": "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/v1/users",
+        "parameter": "express_view_options",
+        "parameter_type": null,
+        "payload": null,
+        "description": "Prototype Pollution Framework Gadget confirmed on http://api.example.com:8080/v1/users targeting EXPRESS. Injected gadget property express_view_options modifies framework configuration. Parameter: express_view_options, Strategy: standard, CWE: CWE-1321",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming prototype pollution."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with high impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-1321).",
+        "confidence": 0.93,
+        "status": "CONFIRMED",
+        "evidence_ids": [
+          "f973e737-6da8-4b8e-b37d-aa0afe229400"
+        ],
+        "duplicate_count": 1,
+        "tags": [
+          "prototype_pollution",
+          "client_side",
+          "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+          "standard"
+        ],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/v1/users",
+          "host": "http://api.example.com:8080",
+          "template_id": "prototype-pollution-gadget-express",
+          "technique": "express_framework_gadget_pollution",
+          "vulnerability_type": "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+          "parameter": "express_view_options",
+          "tested_parameter": "express_view_options",
+          "mutation_strategy": "standard",
+          "strategy": "standard",
+          "gadget_framework": "express",
+          "status_code": 200,
+          "evidence_snippet": "Framework gadget property 'settings.view options' successfully processed by express",
+          "cwe_id": "CWE-1321",
+          "cvss_score": 8.2,
+          "is_valid_finding": true,
+          "framework": "express",
+          "evidence_value": "prototype_pollution:prototype-pollution-gadget-express:http://api.example.com:8080/v1/users:express_view_options",
+          "source": "prototype_pollution"
+        }
+      },
+      {
+        "id": "44d2ab09-e34d-4274-bbc9-ad942f0a051f",
+        "title": "Client-Side Vulnerability: handlebars_framework_gadget_pollution on http://api.example.com:8080/v1/users",
+        "category": "prototype_pollution",
+        "severity": "high",
+        "cvss": {
+          "score": 8.2,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "severity_rating": "High",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "H",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-1321",
+          "name": "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/v1/users",
+        "parameter": "handlebars_compiler",
+        "parameter_type": null,
+        "payload": null,
+        "description": "Prototype Pollution Framework Gadget confirmed on http://api.example.com:8080/v1/users targeting HANDLEBARS. Injected gadget property handlebars_compiler modifies framework configuration. Parameter: handlebars_compiler, Strategy: standard, CWE: CWE-1321",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming prototype pollution."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with high impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-1321).",
+        "confidence": 0.93,
+        "status": "CONFIRMED",
+        "evidence_ids": [
+          "8eb38f46-932d-46e2-b199-b3c83b7b079a"
+        ],
+        "duplicate_count": 1,
+        "tags": [
+          "prototype_pollution",
+          "client_side",
+          "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+          "standard"
+        ],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/v1/users",
+          "host": "http://api.example.com:8080",
+          "template_id": "prototype-pollution-gadget-handlebars",
+          "technique": "handlebars_framework_gadget_pollution",
+          "vulnerability_type": "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+          "parameter": "handlebars_compiler",
+          "tested_parameter": "handlebars_compiler",
+          "mutation_strategy": "standard",
+          "strategy": "standard",
+          "gadget_framework": "handlebars",
+          "status_code": 200,
+          "evidence_snippet": "Framework gadget property 'compiler.knownHelpers' successfully processed by handlebars",
+          "cwe_id": "CWE-1321",
+          "cvss_score": 8.2,
+          "is_valid_finding": true,
+          "framework": "handlebars",
+          "evidence_value": "prototype_pollution:prototype-pollution-gadget-handlebars:http://api.example.com:8080/v1/users:handlebars_compiler",
+          "source": "prototype_pollution"
+        }
+      },
+      {
+        "id": "b77b7b7b-73a2-4f92-b570-4740dd80435b",
+        "title": "Client-Side Vulnerability: jquery_framework_gadget_pollution on http://api.example.com:8080/v1/users",
+        "category": "prototype_pollution",
+        "severity": "high",
+        "cvss": {
+          "score": 8.2,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "severity_rating": "High",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "H",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-1321",
+          "name": "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/v1/users",
+        "parameter": "jquery_htmlPrefilter",
+        "parameter_type": null,
+        "payload": null,
+        "description": "Prototype Pollution Framework Gadget confirmed on http://api.example.com:8080/v1/users targeting JQUERY. Injected gadget property jquery_htmlPrefilter modifies framework configuration. Parameter: jquery_htmlPrefilter, Strategy: standard, CWE: CWE-1321",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming prototype pollution."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with high impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-1321).",
+        "confidence": 0.93,
+        "status": "CONFIRMED",
+        "evidence_ids": [
+          "57a26e31-3e75-402e-9f11-11a19a9cdb62"
+        ],
+        "duplicate_count": 1,
+        "tags": [
+          "prototype_pollution",
+          "client_side",
+          "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+          "standard"
+        ],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/v1/users",
+          "host": "http://api.example.com:8080",
+          "template_id": "prototype-pollution-gadget-jquery",
+          "technique": "jquery_framework_gadget_pollution",
+          "vulnerability_type": "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+          "parameter": "jquery_htmlPrefilter",
+          "tested_parameter": "jquery_htmlPrefilter",
+          "mutation_strategy": "standard",
+          "strategy": "standard",
+          "gadget_framework": "jquery",
+          "status_code": 200,
+          "evidence_snippet": "Framework gadget property 'htmlPrefilter' successfully processed by jquery",
+          "cwe_id": "CWE-1321",
+          "cvss_score": 8.2,
+          "is_valid_finding": true,
+          "framework": "jquery",
+          "evidence_value": "prototype_pollution:prototype-pollution-gadget-jquery:http://api.example.com:8080/v1/users:jquery_htmlPrefilter",
+          "source": "prototype_pollution"
+        }
+      },
+      {
+        "id": "ec892907-f3cf-496a-86cf-d6b9ba037c89",
+        "title": "Client-Side Vulnerability: lodash_framework_gadget_pollution on http://api.example.com:8080/v1/users",
+        "category": "prototype_pollution",
+        "severity": "high",
+        "cvss": {
+          "score": 8.2,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+          "severity_rating": "High",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "H",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-1321",
+          "name": "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/v1/users",
+        "parameter": "lodash_templateSettings",
+        "parameter_type": null,
+        "payload": null,
+        "description": "Prototype Pollution Framework Gadget confirmed on http://api.example.com:8080/v1/users targeting LODASH. Injected gadget property lodash_templateSettings modifies framework configuration. Parameter: lodash_templateSettings, Strategy: standard, CWE: CWE-1321",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming prototype pollution."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with high impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-1321).",
+        "confidence": 0.93,
+        "status": "CONFIRMED",
+        "evidence_ids": [
+          "5c0e55ea-36d5-4652-afdc-01b36838ec65"
+        ],
+        "duplicate_count": 1,
+        "tags": [
+          "prototype_pollution",
+          "client_side",
+          "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+          "standard"
+        ],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/v1/users",
+          "host": "http://api.example.com:8080",
+          "template_id": "prototype-pollution-gadget-lodash",
+          "technique": "lodash_framework_gadget_pollution",
+          "vulnerability_type": "PrototypePollutionVulnerabilityType.GADGET_POLLUTION",
+          "parameter": "lodash_templateSettings",
+          "tested_parameter": "lodash_templateSettings",
+          "mutation_strategy": "standard",
+          "strategy": "standard",
+          "gadget_framework": "lodash",
+          "status_code": 200,
+          "evidence_snippet": "Framework gadget property 'templateSettings.interpolate' successfully processed by lodash",
+          "cwe_id": "CWE-1321",
+          "cvss_score": 8.2,
+          "is_valid_finding": true,
+          "framework": "lodash",
+          "evidence_value": "prototype_pollution:prototype-pollution-gadget-lodash:http://api.example.com:8080/v1/users:lodash_templateSettings",
+          "source": "prototype_pollution"
+        }
+      },
+      {
+        "id": "5678f097-34c4-4d6c-aa02-e91ec66979eb",
+        "title": "API Security Vulnerability: rate_limiting_bypass on http://api.example.com:8080/v1/users",
+        "category": "api_security",
+        "severity": "medium",
+        "cvss": {
+          "score": 5.3,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+          "severity_rating": "Medium",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "L",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-639",
+          "name": "Authorization Bypass Through User-Controlled Key"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/v1/users",
+        "parameter": "rate_limiting",
+        "parameter_type": null,
+        "payload": null,
+        "description": "Missing API Rate Limiting detected on http://api.example.com:8080/v1/users. API allowed rapid burst sequence of 15 requests without throttling or rate limit headers. Parameter: rate_limiting, Strategy: standard, CWE: CWE-770",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming api security."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with medium impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-639).",
+        "confidence": 0.95,
+        "status": "CONFIRMED",
+        "evidence_ids": [
+          "a518f827-d6c7-440c-88e4-21dd3733f044"
+        ],
+        "duplicate_count": 1,
+        "tags": [
+          "api_security",
+          "rest_security",
+          "APIVulnerabilityType.RATE_LIMITING_BYPASS",
+          "standard"
+        ],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/v1/users",
+          "host": "http://api.example.com:8080",
+          "template_id": "api-rate-limiting-bypass",
+          "technique": "rate_limiting_bypass",
+          "vulnerability_type": "APIVulnerabilityType.RATE_LIMITING_BYPASS",
+          "parameter": "rate_limiting",
+          "tested_parameter": "rate_limiting",
+          "mutation_strategy": "standard",
+          "strategy": "standard",
+          "status_code": null,
+          "evidence_snippet": "None",
+          "cwe_id": "CWE-770",
+          "cvss_score": 5.3,
+          "is_valid_finding": true,
+          "tampered_value": "None",
+          "sensitive_fields": [],
+          "error_disclosure": null,
+          "burst_count": 15,
+          "evidence_value": "api_security:api-rate-limiting-bypass:http://api.example.com:8080/v1/users:rate_limiting",
+          "source": "api_security"
+        }
+      },
+      {
+        "id": "03d7a757-129c-4f60-ade0-d738c430acaa",
+        "title": "API Security Vulnerability: rate_limiting_bypass on http://api.example.com:8080/v1/users",
+        "category": "api_security",
+        "severity": "medium",
+        "cvss": {
+          "score": 5.3,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+          "severity_rating": "Medium",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "L",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-639",
+          "name": "Authorization Bypass Through User-Controlled Key"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/v1/users",
+        "parameter": "X-Forwarded-For",
+        "parameter_type": null,
+        "payload": null,
+        "description": "Rate Limiting Header Bypass detected on http://api.example.com:8080/v1/users. Throttling was bypassed by rotating client IP headers (X-Forwarded-For) during burst requests. Parameter: X-Forwarded-For, Strategy: header_auth_bypass, CWE: CWE-770",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming api security."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with medium impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-639).",
+        "confidence": 0.95,
+        "status": "CONFIRMED",
+        "evidence_ids": [
+          "129e406c-e07f-4048-92ef-f2c2fb546f21"
+        ],
+        "duplicate_count": 1,
+        "tags": [
+          "api_security",
+          "rest_security",
+          "APIVulnerabilityType.RATE_LIMITING_BYPASS",
+          "header_auth_bypass"
+        ],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/v1/users",
+          "host": "http://api.example.com:8080",
+          "template_id": "api-rate-limiting-bypass",
+          "technique": "rate_limiting_bypass",
+          "vulnerability_type": "APIVulnerabilityType.RATE_LIMITING_BYPASS",
+          "parameter": "X-Forwarded-For",
+          "tested_parameter": "X-Forwarded-For",
+          "mutation_strategy": "header_auth_bypass",
+          "strategy": "header_auth_bypass",
+          "status_code": null,
+          "evidence_snippet": "None",
+          "cwe_id": "CWE-770",
+          "cvss_score": 5.3,
+          "is_valid_finding": true,
+          "tampered_value": "None",
+          "sensitive_fields": [],
+          "error_disclosure": null,
+          "burst_count": 15,
+          "evidence_value": "api_security:api-rate-limiting-bypass:http://api.example.com:8080/v1/users:X-Forwarded-For",
+          "source": "api_security"
+        }
+      },
+      {
+        "id": "6d95eff3-ec3b-42c3-bace-3ad5f7a5682c",
+        "title": "Client-Side Vulnerability: missing_anti_framing_protection on http://api.example.com:8080/v1/users",
+        "category": "prototype_pollution",
+        "severity": "medium",
+        "cvss": {
+          "score": 5.3,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N",
+          "severity_rating": "Medium",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "L",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-1321",
+          "name": "Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/v1/users",
+        "parameter": "X-Frame-Options / frame-ancestors",
+        "parameter_type": null,
+        "payload": null,
+        "description": "Clickjacking / UI Redressing vulnerability detected on http://api.example.com:8080/v1/users. The sensitive page lacks X-Frame-Options and Content-Security-Policy frame-ancestors defenses, allowing external iframe embedding. Parameter: X-Frame-Options / frame-ancestors, Strategy: frame_busting_bypass, CWE: CWE-1021",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming prototype pollution."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with medium impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-1321).",
+        "confidence": 0.9,
+        "status": "CONFIRMED",
+        "evidence_ids": [
+          "a71a6344-bab0-4821-8bd5-03b02ef7bd85"
+        ],
+        "duplicate_count": 1,
+        "tags": [
+          "prototype_pollution",
+          "client_side",
+          "PrototypePollutionVulnerabilityType.CLICKJACKING",
+          "frame_busting_bypass"
+        ],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/v1/users",
+          "host": "http://api.example.com:8080",
+          "template_id": "clickjacking-missing-frame-busting",
+          "technique": "missing_anti_framing_protection",
+          "vulnerability_type": "PrototypePollutionVulnerabilityType.CLICKJACKING",
+          "parameter": "X-Frame-Options / frame-ancestors",
+          "tested_parameter": "X-Frame-Options / frame-ancestors",
+          "mutation_strategy": "frame_busting_bypass",
+          "strategy": "frame_busting_bypass",
+          "gadget_framework": null,
+          "status_code": 200,
+          "evidence_snippet": "Missing X-Frame-Options and CSP frame-ancestors on sensitive endpoint http://api.example.com:8080/v1/users",
+          "cwe_id": "CWE-1021",
+          "cvss_score": 5.3,
+          "is_valid_finding": true,
+          "x_frame_options": "MISSING",
+          "csp": "MISSING",
+          "evidence_value": "prototype_pollution:clickjacking-missing-frame-busting:http://api.example.com:8080/v1/users:X-Frame-Options / frame-ancestors",
+          "source": "prototype_pollution"
+        }
+      },
+      {
+        "id": "94561f2f-5f1b-4eb3-bad6-7697c995bd09",
+        "title": "Discovered Endpoint: http://api.example.com:8080/v1/users",
+        "category": "endpoint",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "http://api.example.com:8080",
+        "endpoint": "/v1/users",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Discovered endpoint /v1/users on http://api.example.com:8080",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/v1/users` on host `http://api.example.com:8080`.",
+          "Send a crafted HTTP request to `/v1/users`.",
+          "Observe the anomalous response behavior confirming endpoint."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "ad09dc85-aae6-4bf4-bce5-d0d3cb59c026"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080/v1/users",
+          "path": "/v1/users",
+          "host": "http://api.example.com:8080",
+          "method": "GET",
+          "params": {
+            "id": "1"
+          },
+          "evidence_value": "{'url': 'http://api.example.com:8080/v1/users', 'path': '/v1/users', 'host': 'http://api.example.com:8080', 'method': 'GET', 'params': {'id': '1'}}",
+          "source": "katana"
+        }
+      }
+    ],
+    "api.example.com:8080": [
+      {
+        "id": "b3de00b6-47d2-4e78-9f2b-a1cd9440ea98",
+        "title": "Discovered Subdomain: api.example.com",
+        "category": "subdomain",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-942",
+          "name": "Permissive Cross-domain Policy with Untrusted Domains"
+        },
+        "host": "api.example.com:8080",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Subdomain api.example.com identified for target http://api.example.com:8080/v1/users?id=1",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `api.example.com:8080`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming subdomain."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-942).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "3d43fc31-f9b5-429d-a540-27c5f8959398"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "subdomain": "api.example.com",
+          "evidence_value": "{'subdomain': 'api.example.com'}",
+          "source": "subfinder"
+        }
+      }
+    ],
+    "api.example.com": [
+      {
+        "id": "8d92c013-3bb3-4c7d-96fa-b398b9450a13",
+        "title": "Live Host: http://api.example.com:8080",
+        "category": "live_host",
+        "severity": "info",
+        "cvss": {
+          "score": 0.0,
+          "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N",
+          "severity_rating": "None",
+          "metrics": {
+            "AV": "N",
+            "AC": "L",
+            "PR": "N",
+            "UI": "N",
+            "S": "U",
+            "C": "N",
+            "I": "N",
+            "A": "N"
+          }
+        },
+        "cwe": {
+          "id": "CWE-699",
+          "name": "Software Development Security Issue"
+        },
+        "host": "api.example.com",
+        "endpoint": "/",
+        "parameter": null,
+        "parameter_type": null,
+        "payload": null,
+        "description": "Live host detected at http://api.example.com:8080 (status: 200)",
+        "steps_to_reproduce": [
+          "Navigate to the target endpoint `/` on host `api.example.com`.",
+          "Send a crafted HTTP request to `/`.",
+          "Observe the anomalous response behavior confirming live host."
+        ],
+        "impact": "Successful exploitation could compromise the confidentiality, integrity, or availability of the application with info impact.",
+        "remediation": "Apply input validation, output encoding, and principle of least privilege to remediate the underlying flaw (CWE-699).",
+        "confidence": 1.0,
+        "status": "UNVERIFIED",
+        "evidence_ids": [
+          "ff8bc3ff-8e5b-4bcc-9e11-8399de562d08"
+        ],
+        "duplicate_count": 1,
+        "tags": [],
+        "references": [],
+        "metadata": {
+          "url": "http://api.example.com:8080",
+          "scheme": "http",
+          "host": "api.example.com",
+          "port": 8080,
+          "status": 200,
+          "title": "",
+          "server": "",
+          "technologies": [],
+          "evidence_value": "{'url': 'http://api.example.com:8080', 'scheme': 'http', 'host': 'api.example.com', 'port': 8080, 'status': 200, 'title': '', 'server': '', 'technologies': []}",
+          "source": "httpx"
+        }
+      }
+    ]
+  }
+}

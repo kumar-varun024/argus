@@ -1,18 +1,17 @@
-# Progress — Challenger 2 (Pipeline & Graph Integration)
+# Progress
 
-Last visited: 2026-09-02T03:30:00+05:30
-Status: Complete
+Last visited: 2026-09-03T00:05:00+05:30
 
-## Tasks
-- [x] Workspace initialization and BRIEFING setup
-- [x] Read ORIGINAL_REQUEST.md and worker handoff.md
-- [x] Inspect DAG template scheduling and gap resolution in `argus/planning/task_generator.py`
-- [x] Inspect tool registry lookups & aliases in `argus/runtime/registry.py`
-- [x] Inspect fallback instantiation & plugin shadowing in `argus/runtime/plugins.py`
-- [x] Inspect Graph node/edge generation in `argus/graph/attack_surface.py`
-- [x] Inspect CVSS mappings & vectors in `argus/reporting/cvss.py`
-- [x] Run pytest integration test suite `python -m pytest tests/collectors/test_api_security.py -v` (22 passed)
-- [x] Run adversarial unit test suite `python -m pytest tests/collectors/test_api_security_adversarial.py -v` (12 passed)
-- [x] Write empirical verification stress tests / harnesses to challenge edge cases (All 6 layers verified)
-- [x] Run full repository regression test suite `python -m pytest tests/ --ignore=tests/workspace -q` (1,862 passed, 0 failed)
-- [x] Generate `handoff.md` and report verdict to parent
+- [x] Initialized workspace and briefing
+- [ ] Read ORIGINAL_REQUEST.md and PROJECT.md
+- [ ] Locate and inspect Burp MCP Server, Burp parsers, REST API / Collaborator modules, and CLI Scan implementation
+- [ ] Run existing tests related to Burp MCP and CLI Scan
+- [ ] Construct and execute stress tests:
+  - Malformed JSON-RPC requests
+  - Burp XML parsing with corrupted base64 data, empty elements, nested tags, large XML content
+  - Burp JSON parsing with missing required keys, mixed formats, non-existent file paths
+  - Burp REST API active scan error cases (connection refused, 500 errors, timeout)
+  - Burp Collaborator domain generation and polling with edge case parameters
+  - `python -m argus scan` CLI testing with edge-case options
+- [ ] Evaluate findings & assemble handoff report
+- [ ] Issue verdict (APPROVE / REQUEST_CHANGES)

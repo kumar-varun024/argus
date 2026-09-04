@@ -1,14 +1,14 @@
-# Progress — Worker 1 (Environment Specialist)
+# Progress Log - Worker M1 (Vector Store & Embedding Engine Specialist)
 
-Last visited: 2026-08-30T07:16:00Z
-
-## Status
-- [x] Baseline test verification (896 passed)
-- [x] Environment and codebase analysis
-- [x] Implement `argus/utils/__init__.py` and `argus/utils/environment.py` (`EnvironmentDetector`)
-- [x] Update `argus/runtime/mission.py` with `environment` field on `Mission` dataclass
-- [x] Update `argus/runtime/mission_runtime.py` with environment detection auto-population
-- [x] Create comprehensive tests in `tests/tools/test_environment_detector.py` (22 passed)
-- [x] Run test suite & zero regression audit (918 passed, 0 regressions)
-- [x] Write handoff report (`.agents/worker_m1/handoff.md`)
-- [ ] Send completion message
+- Last visited: 2026-09-02T23:48:00Z
+- Status: COMPLETED.
+- Implementation Summary:
+  1. Updated `pyproject.toml` with `"sqlite-vec>=0.1.6"`.
+  2. Created `argus/vector/exceptions.py` with custom vector exception hierarchy.
+  3. Created `argus/vector/models.py` with `VectorDocument`, `SearchResult`, `VectorFilter`, `VectorStoreConfig`, `DistanceMetric`.
+  4. Created `argus/vector/embeddings.py` with 384-d `DeterministicEmbeddingProvider` (fast, 100% offline, zero-dependency semantic feature hashing & n-gram projector with L2 normalization), `FastEmbedProvider`, `SentenceTransformerProvider`, and `EmbeddingEngine`.
+  5. Created `argus/vector/store.py` with `VectorStore` dual-engine architecture supporting native `sqlite-vec` virtual table acceleration AND resilient pure-Python/NumPy fallback over relational SQLite blobs, with full CRUD, metadata filtering, min_score threshold, and disk persistence.
+  6. Created `argus/vector/__init__.py` with clean public API exports.
+  7. Created `tests/test_vector_store.py` with 25 comprehensive test cases covering CRUD, embeddings, semantic similarity, ranking, multi-field metadata filtering, custom JSON metadata filters, disk persistence / restart survival, dual-engine fallback parity, and singleton helpers.
+  8. Verified 100% test pass on `tests/test_vector_store.py` (25/25 passed).
+  9. Ran full test suite regression: 2,135 passed (25 new tests + 2,110 baseline tests), 0 failures.
