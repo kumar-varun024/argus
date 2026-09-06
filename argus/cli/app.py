@@ -14,7 +14,6 @@ from argus.cli.queue_cli import app as queue_app
 from argus.cli.workflow_cli import app as workflow_app
 from argus.cli.auth_cli import app as auth_app
 from argus.cli.agent_cli import app as agent_app
-from argus.cli.execution_cli import app as execution_app
 from argus.cli.plugin_cli import app as plugin_app
 from argus.cli.provenance_cli import app as provenance_app
 from argus.cli.mission_cli import app as mission_app
@@ -31,8 +30,6 @@ from argus.correlation.cli import app as correlation_app
 from argus.correlation.cli import correlations_app
 from argus.cli.benchmark_cli import app as benchmark_app
 from argus.cli.workspace_cli import app as workspace_app
-from argus.cli.execution_cli import get_dummy_registry, get_dummy_plan
-from argus.execution.engine import ExecutionEngine
 
 app = typer.Typer(help="Argus - Autonomous Offensive Security Platform")
 app.add_typer(knowledge_app, name="knowledge")
@@ -40,7 +37,6 @@ app.add_typer(queue_app, name="queue")
 app.add_typer(workflow_app, name="workflow")
 app.add_typer(auth_app, name="auth")
 app.add_typer(agent_app, name="agent")
-app.add_typer(execution_app, name="execution")
 app.add_typer(plugin_app, name="plugin")
 app.add_typer(provenance_app, name="provenance")
 app.add_typer(mission_app, name="mission")
@@ -92,32 +88,6 @@ console = Console()
 
 
 @app.command()
-def execute(plan_id: str = typer.Argument(default="dummy")):
-    """Execute a deterministic investigation plan."""
-    registry = get_dummy_registry()
-    engine = ExecutionEngine(registry)
-    plan = get_dummy_plan()
-    mission = Mission("test")
-    
-    console.print(f"\n[bold green]Executing Plan: {plan.title}[/bold green]\n")
-    
-    result = engine.execute_plan(plan, mission)
-    
-    table = Table(title="Execution Steps")
-    table.add_column("Order")
-    table.add_column("Agent")
-    table.add_column("Status")
-    table.add_column("Time (ms)")
-    
-    for sr in result.step_results:
-        table.add_row(str(sr.step_order), sr.agent, str(sr.status), f"{sr.execution_time_ms:.2f}")
-        
-    console.print(table)
-    console.print(f"\n[bold]Plan Final Status:[/bold] {result.status}")
-    console.print(f"[bold]Total Time:[/bold] {result.total_execution_time_ms:.2f} ms\n")
-
-
-@app.command()
 def trace(artifact_id: str):
     """Outputs a structured JSON of the provenance graph for an artifact."""
     import json
@@ -145,9 +115,9 @@ def scan(
     import logging
     from argus.runtime.mission import Mission
     from argus.runtime.manager import mission_manager
-    from argus.scanning.dag import ScanDAG
-    from argus.scanning.engine import ScanEngine
-    from argus.scanning.models import CollectorStatus
+    from argus.runtime.pipeline.dag import ScanDAG
+    from argus.runtime.pipeline.scan_pipeline import ScanEngine
+    from argus.runtime.pipeline.models import CollectorStatus
 
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
