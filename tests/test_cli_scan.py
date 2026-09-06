@@ -23,7 +23,7 @@ def test_cli_help():
     assert result.exit_code == 0
     assert "scan" in result.output
     assert "version" in result.output
-    assert "execute" in result.output
+    assert "mission" in result.output
 
 
 def test_cli_version():
