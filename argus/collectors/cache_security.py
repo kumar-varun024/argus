@@ -49,6 +49,7 @@ from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 from argus.collectors.base import BaseCollector
+from argus.collectors.toolkit.enums import Severity
 from argus.evidence.model import Evidence, ProvenanceData
 from argus.graph.node import Node
 from argus.http.client import AuthenticatedHttpClient, HttpResponse
@@ -126,13 +127,8 @@ CacheMutationStrategy.HEADER_CLOAKING = CacheMutationStrategy.HEADER_PARAMETERIZ
 CacheMutationStrategy.RULE_PROBE = CacheMutationStrategy.CACHE_RULE_PROBE_VARIATIONS  # type: ignore[attr-defined]
 
 
-class CacheSecuritySeverity(str, Enum):
-    """Vulnerability severity levels."""
-    CRITICAL = "critical"
-    HIGH = "high"
-    MEDIUM = "medium"
-    LOW = "low"
-    INFO = "info"
+# Canonical severity scale (see argus.collectors.toolkit.enums.Severity).
+CacheSecuritySeverity = Severity
 
 
 # Compatibility alias
