@@ -25,7 +25,14 @@ dependencies = [
     "openai>=1.0.0",
     "beautifulsoup4>=4.12.0",
     "python-dateutil>=2.8.2",
-    "sqlite-vec>=0.1.6"
+    "sqlite-vec>=0.1.6",
+    "numpy>=1.26"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.0"
 ]
 
 [project.scripts]
@@ -34,3 +41,14 @@ argus = "argus.cli.app:app"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["argus*"]
+# Do not ship test modules inside the installed package. This also prevents
+# in-package test files (e.g. argus/plugins/graphql/tests/test_graphql.py)
+# from colliding with tests/ during collection.
+exclude = ["*.tests", "*.tests.*", "argus.*.tests", "argus.*.tests.*"]
+
+[tool.pytest.ini_options]
+# Only collect the top-level test suite, and use importlib import mode so that
+# duplicate test-file basenames across directories do not raise
+# "import file mismatch" collection errors.
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"

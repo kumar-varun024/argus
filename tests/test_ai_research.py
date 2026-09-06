@@ -44,9 +44,12 @@ def test_prompt_builder():
     assert "https://example.com" in prompt
     assert "business_objects" in prompt
 
-def test_github_client_parsing():
-    # Mocking OpenAI response parsing
-    client = GitHubClient()
+@patch("argus.ai.github_client.OpenAI")
+def test_github_client_parsing(mock_openai_cls):
+    # Patch the OpenAI SDK class so GitHubClient() never constructs a real
+    # client. This keeps the test hermetic and order-independent: it no longer
+    # depends on GITHUB_TOKEN being present in the environment (which leaked
+    # between tests and caused an OpenAIError during __init__).
     mock_response = MagicMock()
     mock_response.choices = [MagicMock()]
     mock_response.choices[0].message.content = '''{
@@ -54,15 +57,17 @@ def test_github_client_parsing():
         "business_objects": ["BO1", "BO2"],
         "confidence": "High"
     }'''
-    
-    with patch.object(client, "client") as mock_openai:
-        mock_openai.chat.completions.create.return_value = mock_response
-        response = client.research("test prompt")
-        
-        assert response.executive_summary == "Test Summary"
-        assert "BO1" in response.business_objects
-        assert response.confidence == "High"
-        assert response.high_value_assets == []
+
+    mock_client = mock_openai_cls.return_value
+    mock_client.chat.completions.create.return_value = mock_response
+
+    client = GitHubClient()
+    response = client.research("test prompt")
+
+    assert response.executive_summary == "Test Summary"
+    assert "BO1" in response.business_objects
+    assert response.confidence == "High"
+    assert response.high_value_assets == []
 
 @patch('argus.ai.researcher.get_ai_client')
 def test_researcher_integration(mock_get_ai_client):
