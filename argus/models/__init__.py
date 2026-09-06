@@ -1,7 +1,7 @@
 from typing import Any
 from .authentication import AuthenticationModel
 from .test_identity import TestIdentity, AuthType
-from argus.scanning.models import ScanResult, CollectorResult, CollectorStatus
+from argus.runtime.pipeline.models import ScanResult, CollectorResult, CollectorStatus
 
 __all__ = [
     "AuthenticationModel",

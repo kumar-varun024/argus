@@ -145,9 +145,9 @@ def scan(
     import logging
     from argus.runtime.mission import Mission
     from argus.runtime.manager import mission_manager
-    from argus.scanning.dag import ScanDAG
-    from argus.scanning.engine import ScanEngine
-    from argus.scanning.models import CollectorStatus
+    from argus.runtime.pipeline.dag import ScanDAG
+    from argus.runtime.pipeline.scan_pipeline import ScanEngine
+    from argus.runtime.pipeline.models import CollectorStatus
 
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
