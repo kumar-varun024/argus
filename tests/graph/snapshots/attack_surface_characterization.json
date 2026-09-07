@@ -1,0 +1,4241 @@
+{
+  "broad_sweep": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:www.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:www.example.com",
+        "target": "live_host:https://www.example.com",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "technology:nginx",
+        "type": "RUNS_TECHNOLOGY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "technology:php",
+        "type": "RUNS_TECHNOLOGY"
+      },
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:api.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:api.example.com",
+        "target": "live_host:https://api.example.com",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "technology:Express",
+        "type": "RUNS_TECHNOLOGY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "technology:Apache",
+        "type": "RUNS_TECHNOLOGY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/login",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:generic-1",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:old.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:old.example.com",
+        "target": "vulnerability:subdomain-takeover-heroku:old.example.com",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:old.example.com",
+        "target": "cname:svc.herokudns.com",
+        "type": "POINTS_TO_CNAME"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/.git/config",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:info-disclosure:https://www.example.com/.git/config",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/.git/config",
+        "target": "vulnerability:info-disclosure:https://www.example.com/.git/config",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "vulnerability:info-disclosure:https://www.example.com/.git/config",
+        "target": "secret:api_key:0:https://www.example.com/.git/config",
+        "type": "EXPOSES_SECRET"
+      },
+      {
+        "metadata": {},
+        "source": "vulnerability:info-disclosure:https://www.example.com/.git/config",
+        "target": "secret:secret:1:https://www.example.com/.git/config",
+        "type": "EXPOSES_SECRET"
+      },
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:internal.corp.local",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "vulnerability:info-disclosure:https://www.example.com/.git/config",
+        "target": "subdomain:internal.corp.local",
+        "type": "DISCLOSED_SUBDOMAIN"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/admin/1",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:broken-access-control:https://www.example.com/admin/1",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/admin/1",
+        "target": "vulnerability:broken-access-control:https://www.example.com/admin/1",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/download?f=../../etc/passwd",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:path-traversal:https://www.example.com/download?f=../../etc/passwd",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/download?f=../../etc/passwd",
+        "target": "vulnerability:path-traversal:https://www.example.com/download?f=../../etc/passwd",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/search",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:sqli:https://www.example.com/search:q",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/search",
+        "target": "vulnerability:sqli:https://www.example.com/search:q",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/comment",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:xss:https://www.example.com/comment:msg",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/comment",
+        "target": "vulnerability:xss:https://www.example.com/comment:msg",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/ping",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:cmdi:https://api.example.com/ping:host",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/ping",
+        "target": "vulnerability:cmdi:https://api.example.com/ping:host",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/fetch",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:ssrf:https://api.example.com/fetch:url",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/fetch",
+        "target": "vulnerability:ssrf:https://api.example.com/fetch:url",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/oauth/callback",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:oauth-misconfiguration:https://www.example.com/oauth/callback",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/oauth/callback",
+        "target": "vulnerability:oauth-misconfiguration:https://www.example.com/oauth/callback",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/xml",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:xxe:https://api.example.com/xml",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/xml",
+        "target": "vulnerability:xxe:https://api.example.com/xml",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/load",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:deserialization:https://api.example.com/load",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/load",
+        "target": "vulnerability:deserialization:https://api.example.com/load",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/graphql",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:graphql-security:https://api.example.com/graphql",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/graphql",
+        "target": "vulnerability:graphql-security:https://api.example.com/graphql",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/ws",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:websocket-security:https://api.example.com/ws",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/ws",
+        "target": "vulnerability:websocket-security:https://api.example.com/ws",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:request-smuggling:https://www.example.com/",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/",
+        "target": "vulnerability:request-smuggling:https://www.example.com/",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/redeem",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:race-conditions:https://api.example.com/redeem",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/redeem",
+        "target": "vulnerability:race-conditions:https://api.example.com/redeem",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/checkout",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:business-logic:https://api.example.com/checkout",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/checkout",
+        "target": "vulnerability:business-logic:https://api.example.com/checkout",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/render",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:ssti:https://www.example.com/render:template",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/render",
+        "target": "vulnerability:ssti:https://www.example.com/render:template",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:web-cache-poisoning:https://www.example.com/",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/",
+        "target": "vulnerability:web-cache-poisoning:https://www.example.com/",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/data",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:cors-security-finding:https://api.example.com/data",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/data",
+        "target": "vulnerability:cors-security-finding:https://api.example.com/data",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/upload",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:file-upload-finding:https://www.example.com/upload:shell.php.jpg",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/upload",
+        "target": "vulnerability:file-upload-finding:https://www.example.com/upload:shell.php.jpg",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/users/1",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:api-security-finding:https://api.example.com/users/1",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/users/1",
+        "target": "vulnerability:api-security-finding:https://api.example.com/users/1",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:auth-bypass-finding:https://www.example.com/login",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/login",
+        "target": "vulnerability:auth-bypass-finding:https://www.example.com/login",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/merge",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:prototype-pollution-finding:https://api.example.com/merge",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/merge",
+        "target": "vulnerability:prototype-pollution-finding:https://api.example.com/merge",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "cname:svc.herokudns.com": {
+        "metadata": {
+          "cname": "svc.herokudns.com",
+          "service": "Heroku"
+        },
+        "type": "cname",
+        "value": "svc.herokudns.com"
+      },
+      "endpoint:https://api.example.com/checkout": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/checkout"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/checkout"
+      },
+      "endpoint:https://api.example.com/data": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/data"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/data"
+      },
+      "endpoint:https://api.example.com/fetch": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/fetch"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/fetch"
+      },
+      "endpoint:https://api.example.com/graphql": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/graphql"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/graphql"
+      },
+      "endpoint:https://api.example.com/load": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/load"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/load"
+      },
+      "endpoint:https://api.example.com/merge": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/merge"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/merge"
+      },
+      "endpoint:https://api.example.com/ping": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/ping"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/ping"
+      },
+      "endpoint:https://api.example.com/redeem": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/redeem"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/redeem"
+      },
+      "endpoint:https://api.example.com/users/1": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/users/1"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/users/1"
+      },
+      "endpoint:https://api.example.com/ws": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/ws"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/ws"
+      },
+      "endpoint:https://api.example.com/xml": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/xml"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/xml"
+      },
+      "endpoint:https://www.example.com/": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://www.example.com/"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/"
+      },
+      "endpoint:https://www.example.com/.git/config": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://www.example.com/.git/config"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/.git/config"
+      },
+      "endpoint:https://www.example.com/admin/1": {
+        "metadata": {
+          "url": "https://www.example.com/admin/1"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/admin/1"
+      },
+      "endpoint:https://www.example.com/comment": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://www.example.com/comment"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/comment"
+      },
+      "endpoint:https://www.example.com/download?f=../../etc/passwd": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://www.example.com/download?f=../../etc/passwd"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/download?f=../../etc/passwd"
+      },
+      "endpoint:https://www.example.com/login": {
+        "metadata": {
+          "host": "www.example.com",
+          "url": "https://www.example.com/login"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/login"
+      },
+      "endpoint:https://www.example.com/oauth/callback": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://www.example.com/oauth/callback"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/oauth/callback"
+      },
+      "endpoint:https://www.example.com/render": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://www.example.com/render"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/render"
+      },
+      "endpoint:https://www.example.com/search": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://www.example.com/search"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/search"
+      },
+      "endpoint:https://www.example.com/upload": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://www.example.com/upload"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/upload"
+      },
+      "live_host:https://api.example.com": {
+        "metadata": {
+          "host": "api.example.com",
+          "technologies": [
+            "Express"
+          ],
+          "url": "https://api.example.com"
+        },
+        "type": "live_host",
+        "value": "https://api.example.com"
+      },
+      "live_host:https://www.example.com": {
+        "metadata": {
+          "host": "www.example.com",
+          "technologies": "nginx, php",
+          "url": "https://www.example.com"
+        },
+        "type": "live_host",
+        "value": "https://www.example.com"
+      },
+      "secret:api_key:0:https://www.example.com/.git/config": {
+        "metadata": {
+          "type": "api_key",
+          "value": "abcd"
+        },
+        "type": "secret",
+        "value": "abcd"
+      },
+      "secret:secret:1:https://www.example.com/.git/config": {
+        "metadata": {
+          "value": "raw-secret"
+        },
+        "type": "secret",
+        "value": "raw-secret"
+      },
+      "subdomain:api.example.com": {
+        "metadata": {
+          "hostname": "api.example.com",
+          "source": ""
+        },
+        "type": "subdomain",
+        "value": "api.example.com"
+      },
+      "subdomain:example.com": {
+        "metadata": {
+          "hostname": "example.com",
+          "source": ""
+        },
+        "type": "subdomain",
+        "value": "example.com"
+      },
+      "subdomain:internal.corp.local": {
+        "metadata": {
+          "hostname": "internal.corp.local",
+          "source": "https://www.example.com/.git/config"
+        },
+        "type": "subdomain",
+        "value": "internal.corp.local"
+      },
+      "subdomain:old.example.com": {
+        "metadata": {
+          "hostname": "old.example.com"
+        },
+        "type": "subdomain",
+        "value": "old.example.com"
+      },
+      "subdomain:www.example.com": {
+        "metadata": {
+          "hostname": "www.example.com",
+          "source": "subfinder"
+        },
+        "type": "subdomain",
+        "value": "www.example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "technology:Apache": {
+        "metadata": {
+          "name": "Apache",
+          "url": "https://www.example.com"
+        },
+        "type": "technology",
+        "value": "Apache"
+      },
+      "technology:Express": {
+        "metadata": {
+          "name": "Express"
+        },
+        "type": "technology",
+        "value": "Express"
+      },
+      "technology:nginx": {
+        "metadata": {
+          "name": "nginx"
+        },
+        "type": "technology",
+        "value": "nginx"
+      },
+      "technology:php": {
+        "metadata": {
+          "name": "php"
+        },
+        "type": "technology",
+        "value": "php"
+      },
+      "vulnerability:api-security-finding:https://api.example.com/users/1": {
+        "metadata": {
+          "name": "API Security Vulnerability (api_security)",
+          "severity": "info",
+          "url": "https://api.example.com/users/1"
+        },
+        "type": "vulnerability",
+        "value": "API Security Vulnerability (api_security)"
+      },
+      "vulnerability:auth-bypass-finding:https://www.example.com/login": {
+        "metadata": {
+          "name": "Authentication Vulnerability (auth_bypass)",
+          "severity": "info",
+          "url": "https://www.example.com/login"
+        },
+        "type": "vulnerability",
+        "value": "Authentication Vulnerability (auth_bypass)"
+      },
+      "vulnerability:broken-access-control:https://www.example.com/admin/1": {
+        "metadata": {
+          "name": "Broken Access Control (IDOR)",
+          "severity": "info",
+          "url": "https://www.example.com/admin/1"
+        },
+        "type": "vulnerability",
+        "value": "Broken Access Control (IDOR)"
+      },
+      "vulnerability:business-logic:https://api.example.com/checkout": {
+        "metadata": {
+          "name": "Business Logic Vulnerability (business_logic)",
+          "severity": "info",
+          "url": "https://api.example.com/checkout"
+        },
+        "type": "vulnerability",
+        "value": "Business Logic Vulnerability (business_logic)"
+      },
+      "vulnerability:cmdi:https://api.example.com/ping:host": {
+        "metadata": {
+          "name": "Command Injection (result_based)",
+          "parameter": "host",
+          "severity": "info",
+          "url": "https://api.example.com/ping"
+        },
+        "type": "vulnerability",
+        "value": "Command Injection (result_based)"
+      },
+      "vulnerability:cors-security-finding:https://api.example.com/data": {
+        "metadata": {
+          "name": "CORS / Security Header (cors_security)",
+          "severity": "info",
+          "url": "https://api.example.com/data"
+        },
+        "type": "vulnerability",
+        "value": "CORS / Security Header (cors_security)"
+      },
+      "vulnerability:deserialization:https://api.example.com/load": {
+        "metadata": {
+          "name": "Insecure Deserialization (deserialization)",
+          "severity": "info",
+          "url": "https://api.example.com/load"
+        },
+        "type": "vulnerability",
+        "value": "Insecure Deserialization (deserialization)"
+      },
+      "vulnerability:file-upload-finding:https://www.example.com/upload:shell.php.jpg": {
+        "metadata": {
+          "filename": "shell.php.jpg",
+          "name": "File Upload Vulnerability (file_upload)",
+          "severity": "info",
+          "url": "https://www.example.com/upload"
+        },
+        "type": "vulnerability",
+        "value": "File Upload Vulnerability (file_upload)"
+      },
+      "vulnerability:generic-1": {
+        "metadata": {
+          "host": "www.example.com",
+          "name": "generic-1",
+          "severity": "high",
+          "template_id": "generic-1"
+        },
+        "type": "vulnerability",
+        "value": "generic-1"
+      },
+      "vulnerability:graphql-security:https://api.example.com/graphql": {
+        "metadata": {
+          "name": "GraphQL Security (security_misconfiguration)",
+          "severity": "info",
+          "url": "https://api.example.com/graphql"
+        },
+        "type": "vulnerability",
+        "value": "GraphQL Security (security_misconfiguration)"
+      },
+      "vulnerability:info-disclosure:https://www.example.com/.git/config": {
+        "metadata": {
+          "host": "https://www.example.com",
+          "internal_domains": [
+            "internal.corp.local"
+          ],
+          "name": "Git Config Exposure",
+          "path": "/.git/config",
+          "secrets": [
+            {
+              "type": "api_key",
+              "value": "abcd"
+            },
+            "raw-secret"
+          ],
+          "severity": "info",
+          "url": "https://www.example.com/.git/config"
+        },
+        "type": "vulnerability",
+        "value": "Git Config Exposure"
+      },
+      "vulnerability:oauth-misconfiguration:https://www.example.com/oauth/callback": {
+        "metadata": {
+          "name": "OAuth / Stateful Auth Vulnerability (authentication)",
+          "severity": "info",
+          "url": "https://www.example.com/oauth/callback"
+        },
+        "type": "vulnerability",
+        "value": "OAuth / Stateful Auth Vulnerability (authentication)"
+      },
+      "vulnerability:path-traversal:https://www.example.com/download?f=../../etc/passwd": {
+        "metadata": {
+          "name": "Path Traversal",
+          "severity": "info",
+          "url": "https://www.example.com/download?f=../../etc/passwd"
+        },
+        "type": "vulnerability",
+        "value": "Path Traversal"
+      },
+      "vulnerability:prototype-pollution-finding:https://api.example.com/merge": {
+        "metadata": {
+          "name": "Client-Side Attack Vulnerability (prototype_pollution)",
+          "severity": "info",
+          "url": "https://api.example.com/merge"
+        },
+        "type": "vulnerability",
+        "value": "Client-Side Attack Vulnerability (prototype_pollution)"
+      },
+      "vulnerability:race-conditions:https://api.example.com/redeem": {
+        "metadata": {
+          "name": "Race Condition (race_condition)",
+          "severity": "info",
+          "url": "https://api.example.com/redeem"
+        },
+        "type": "vulnerability",
+        "value": "Race Condition (race_condition)"
+      },
+      "vulnerability:request-smuggling:https://www.example.com/": {
+        "metadata": {
+          "name": "HTTP Request Smuggling (request_smuggling)",
+          "severity": "info",
+          "url": "https://www.example.com/"
+        },
+        "type": "vulnerability",
+        "value": "HTTP Request Smuggling (request_smuggling)"
+      },
+      "vulnerability:sqli:https://www.example.com/search:q": {
+        "metadata": {
+          "name": "SQL Injection",
+          "parameter": "q",
+          "severity": "info",
+          "url": "https://www.example.com/search"
+        },
+        "type": "vulnerability",
+        "value": "SQL Injection"
+      },
+      "vulnerability:ssrf:https://api.example.com/fetch:url": {
+        "metadata": {
+          "name": "Server-Side Request Forgery (cloud_metadata)",
+          "parameter": "url",
+          "severity": "info",
+          "url": "https://api.example.com/fetch"
+        },
+        "type": "vulnerability",
+        "value": "Server-Side Request Forgery (cloud_metadata)"
+      },
+      "vulnerability:ssti:https://www.example.com/render:template": {
+        "metadata": {
+          "name": "Server-Side Template Injection (template_injection)",
+          "parameter": "template",
+          "severity": "info",
+          "url": "https://www.example.com/render"
+        },
+        "type": "vulnerability",
+        "value": "Server-Side Template Injection (template_injection)"
+      },
+      "vulnerability:subdomain-takeover-heroku:old.example.com": {
+        "metadata": {
+          "cname": "svc.herokudns.com",
+          "name": "Subdomain Takeover (Heroku)",
+          "service": "Heroku",
+          "severity": "info",
+          "subdomain": "old.example.com"
+        },
+        "type": "vulnerability",
+        "value": "Subdomain Takeover (Heroku)"
+      },
+      "vulnerability:web-cache-poisoning:https://www.example.com/": {
+        "metadata": {
+          "name": "Web Cache Security (cache_security)",
+          "severity": "info",
+          "url": "https://www.example.com/"
+        },
+        "type": "vulnerability",
+        "value": "Web Cache Security (cache_security)"
+      },
+      "vulnerability:websocket-security:https://api.example.com/ws": {
+        "metadata": {
+          "name": "WebSocket Security (security_misconfiguration)",
+          "severity": "info",
+          "url": "https://api.example.com/ws"
+        },
+        "type": "vulnerability",
+        "value": "WebSocket Security (security_misconfiguration)"
+      },
+      "vulnerability:xss:https://www.example.com/comment:msg": {
+        "metadata": {
+          "name": "Cross-Site Scripting (Stored)",
+          "parameter": "msg",
+          "severity": "critical",
+          "url": "https://www.example.com/comment",
+          "xss_type": "stored"
+        },
+        "type": "vulnerability",
+        "value": "Cross-Site Scripting (Stored)"
+      },
+      "vulnerability:xxe:https://api.example.com/xml": {
+        "metadata": {
+          "name": "XML Parser Misconfiguration (external_entity)",
+          "severity": "info",
+          "url": "https://api.example.com/xml"
+        },
+        "type": "vulnerability",
+        "value": "XML Parser Misconfiguration (external_entity)"
+      }
+    }
+  },
+  "build::attach_exception_swallowed": {
+    "edges": [],
+    "nodes": {
+      "target:immutable.example.com": {
+        "metadata": {
+          "target": "immutable.example.com"
+        },
+        "type": "target",
+        "value": "immutable.example.com"
+      }
+    }
+  },
+  "build::endpoint_fallback_host_match": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:epfallback.example.com",
+        "target": "subdomain:epfallback.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:epfallback.example.com",
+        "target": "live_host:https://epfallback.example.com",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://epfallback.example.com",
+        "target": "endpoint:https://different-prefix.example.com/api",
+        "type": "HAS_ENDPOINT"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://different-prefix.example.com/api": {
+        "metadata": {
+          "host": "epfallback.example.com",
+          "url": "https://different-prefix.example.com/api"
+        },
+        "type": "endpoint",
+        "value": "https://different-prefix.example.com/api"
+      },
+      "live_host:https://epfallback.example.com": {
+        "metadata": {
+          "host": "epfallback.example.com",
+          "url": "https://epfallback.example.com"
+        },
+        "type": "live_host",
+        "value": "https://epfallback.example.com"
+      },
+      "subdomain:epfallback.example.com": {
+        "metadata": {
+          "hostname": "epfallback.example.com"
+        },
+        "type": "subdomain",
+        "value": "epfallback.example.com"
+      },
+      "target:epfallback.example.com": {
+        "metadata": {
+          "target": "epfallback.example.com"
+        },
+        "type": "target",
+        "value": "epfallback.example.com"
+      }
+    }
+  },
+  "build::endpoint_single_live_host_fallback": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:epsolo.example.com",
+        "target": "subdomain:epsolo.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:epsolo.example.com",
+        "target": "live_host:https://epsolo.example.com",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://epsolo.example.com",
+        "target": "endpoint:https://unrelated-prefix.example.com/api",
+        "type": "HAS_ENDPOINT"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://unrelated-prefix.example.com/api": {
+        "metadata": {
+          "url": "https://unrelated-prefix.example.com/api"
+        },
+        "type": "endpoint",
+        "value": "https://unrelated-prefix.example.com/api"
+      },
+      "live_host:https://epsolo.example.com": {
+        "metadata": {
+          "url": "https://epsolo.example.com"
+        },
+        "type": "live_host",
+        "value": "https://epsolo.example.com"
+      },
+      "subdomain:epsolo.example.com": {
+        "metadata": {
+          "hostname": "epsolo.example.com"
+        },
+        "type": "subdomain",
+        "value": "epsolo.example.com"
+      },
+      "target:epsolo.example.com": {
+        "metadata": {
+          "target": "epsolo.example.com"
+        },
+        "type": "target",
+        "value": "epsolo.example.com"
+      }
+    }
+  },
+  "build::live_host_elif_no_prior_subdomain": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:build2.example.com",
+        "target": "live_host:None",
+        "type": "HOSTS"
+      }
+    ],
+    "nodes": {
+      "live_host:None": {
+        "metadata": {},
+        "type": "live_host",
+        "value": null
+      },
+      "target:build2.example.com": {
+        "metadata": {
+          "target": "build2.example.com"
+        },
+        "type": "target",
+        "value": "build2.example.com"
+      }
+    }
+  },
+  "build::live_host_elif_with_prior_subdomain": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:build.example.com",
+        "target": "subdomain:build.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:build.example.com",
+        "target": "live_host:None",
+        "type": "HOSTS"
+      }
+    ],
+    "nodes": {
+      "live_host:None": {
+        "metadata": {},
+        "type": "live_host",
+        "value": null
+      },
+      "subdomain:build.example.com": {
+        "metadata": {
+          "hostname": "build.example.com"
+        },
+        "type": "subdomain",
+        "value": "build.example.com"
+      },
+      "target:build.example.com": {
+        "metadata": {
+          "target": "build.example.com"
+        },
+        "type": "target",
+        "value": "build.example.com"
+      }
+    }
+  },
+  "build::mission_direct_dict_and_bare_variants": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:mission.example.com",
+        "target": "subdomain:www.mission.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "target:mission.example.com",
+        "target": "subdomain:bare-string-sub.mission.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:www.mission.example.com",
+        "target": "live_host:https://www.mission.example.com",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.mission.example.com",
+        "target": "technology:nginx",
+        "type": "RUNS_TECHNOLOGY"
+      },
+      {
+        "metadata": {},
+        "source": "target:mission.example.com",
+        "target": "subdomain:bare-string-host.mission.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:bare-string-host.mission.example.com",
+        "target": "live_host:https://bare-string-host.mission.example.com",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.mission.example.com",
+        "target": "endpoint:https://www.mission.example.com/api",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.mission.example.com",
+        "target": "endpoint:https://www.mission.example.com/other",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:www.mission.example.com",
+        "target": "vulnerability:generic:https://www.mission.example.com/api",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.mission.example.com",
+        "target": "vulnerability:generic:https://www.mission.example.com/api",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.mission.example.com/api",
+        "target": "vulnerability:generic:https://www.mission.example.com/api",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://www.mission.example.com/api": {
+        "metadata": {
+          "url": "https://www.mission.example.com/api"
+        },
+        "type": "endpoint",
+        "value": "https://www.mission.example.com/api"
+      },
+      "endpoint:https://www.mission.example.com/other": {
+        "metadata": {
+          "host": "www.mission.example.com",
+          "url": "https://www.mission.example.com/other"
+        },
+        "type": "endpoint",
+        "value": "https://www.mission.example.com/other"
+      },
+      "live_host:https://bare-string-host.mission.example.com": {
+        "metadata": {
+          "host": "bare-string-host.mission.example.com",
+          "url": "https://bare-string-host.mission.example.com"
+        },
+        "type": "live_host",
+        "value": "https://bare-string-host.mission.example.com"
+      },
+      "live_host:https://www.mission.example.com": {
+        "metadata": {
+          "host": "www.mission.example.com",
+          "technologies": [
+            "nginx"
+          ],
+          "url": "https://www.mission.example.com"
+        },
+        "type": "live_host",
+        "value": "https://www.mission.example.com"
+      },
+      "subdomain:bare-string-host.mission.example.com": {
+        "metadata": {
+          "hostname": "bare-string-host.mission.example.com"
+        },
+        "type": "subdomain",
+        "value": "bare-string-host.mission.example.com"
+      },
+      "subdomain:bare-string-sub.mission.example.com": {
+        "metadata": {
+          "hostname": "bare-string-sub.mission.example.com"
+        },
+        "type": "subdomain",
+        "value": "bare-string-sub.mission.example.com"
+      },
+      "subdomain:www.mission.example.com": {
+        "metadata": {
+          "hostname": "www.mission.example.com"
+        },
+        "type": "subdomain",
+        "value": "www.mission.example.com"
+      },
+      "target:mission.example.com": {
+        "metadata": {
+          "target": "mission.example.com"
+        },
+        "type": "target",
+        "value": "mission.example.com"
+      },
+      "technology:PHP": {
+        "metadata": {
+          "name": "PHP"
+        },
+        "type": "technology",
+        "value": "PHP"
+      },
+      "technology:bare-tech-string": {
+        "metadata": {
+          "name": "bare-tech-string"
+        },
+        "type": "technology",
+        "value": "bare-tech-string"
+      },
+      "technology:nginx": {
+        "metadata": {
+          "name": "nginx"
+        },
+        "type": "technology",
+        "value": "nginx"
+      },
+      "vulnerability:bare-vuln-string": {
+        "metadata": {
+          "name": "bare-vuln-string"
+        },
+        "type": "vulnerability",
+        "value": "bare-vuln-string"
+      },
+      "vulnerability:generic:https://www.mission.example.com/api": {
+        "metadata": {
+          "host": "www.mission.example.com",
+          "template_id": "generic",
+          "url": "https://www.mission.example.com/api"
+        },
+        "type": "vulnerability",
+        "value": "generic"
+      }
+    }
+  },
+  "build::mission_takeover_cname_direct": {
+    "edges": [],
+    "nodes": {
+      "cname:svc.herokudns.com": {
+        "metadata": {
+          "cname": "svc.herokudns.com",
+          "service": "Heroku"
+        },
+        "type": "cname",
+        "value": "svc.herokudns.com"
+      },
+      "target:takeover.example.com": {
+        "metadata": {
+          "target": "takeover.example.com"
+        },
+        "type": "target",
+        "value": "takeover.example.com"
+      },
+      "vulnerability:subdomain-takeover-heroku": {
+        "metadata": {
+          "cname": "svc.herokudns.com",
+          "host": "old.takeover.example.com",
+          "name": "Takeover",
+          "service": "Heroku",
+          "template_id": "subdomain-takeover-heroku"
+        },
+        "type": "vulnerability",
+        "value": "subdomain-takeover-heroku"
+      }
+    }
+  },
+  "build::mission_with_evidence_store": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:withev.example.com",
+        "target": "subdomain:www.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "target:withev.example.com",
+        "target": "subdomain:example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:www.example.com",
+        "target": "live_host:https://www.example.com",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "technology:nginx",
+        "type": "RUNS_TECHNOLOGY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "technology:php",
+        "type": "RUNS_TECHNOLOGY"
+      },
+      {
+        "metadata": {},
+        "source": "target:withev.example.com",
+        "target": "subdomain:api.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:api.example.com",
+        "target": "live_host:https://api.example.com",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "technology:Express",
+        "type": "RUNS_TECHNOLOGY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "technology:Apache",
+        "type": "RUNS_TECHNOLOGY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/login",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:generic-1",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "target:withev.example.com",
+        "target": "subdomain:old.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:old.example.com",
+        "target": "vulnerability:subdomain-takeover-heroku:old.example.com",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:old.example.com",
+        "target": "cname:svc.herokudns.com",
+        "type": "POINTS_TO_CNAME"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/.git/config",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:info-disclosure:https://www.example.com/.git/config",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/.git/config",
+        "target": "vulnerability:info-disclosure:https://www.example.com/.git/config",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "vulnerability:info-disclosure:https://www.example.com/.git/config",
+        "target": "secret:api_key:0:https://www.example.com/.git/config",
+        "type": "EXPOSES_SECRET"
+      },
+      {
+        "metadata": {},
+        "source": "vulnerability:info-disclosure:https://www.example.com/.git/config",
+        "target": "secret:secret:1:https://www.example.com/.git/config",
+        "type": "EXPOSES_SECRET"
+      },
+      {
+        "metadata": {},
+        "source": "target:withev.example.com",
+        "target": "subdomain:internal.corp.local",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "vulnerability:info-disclosure:https://www.example.com/.git/config",
+        "target": "subdomain:internal.corp.local",
+        "type": "DISCLOSED_SUBDOMAIN"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/admin/1",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:broken-access-control:https://www.example.com/admin/1",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/admin/1",
+        "target": "vulnerability:broken-access-control:https://www.example.com/admin/1",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/download?f=../../etc/passwd",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:path-traversal:https://www.example.com/download?f=../../etc/passwd",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/download?f=../../etc/passwd",
+        "target": "vulnerability:path-traversal:https://www.example.com/download?f=../../etc/passwd",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/search",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:sqli:https://www.example.com/search:q",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/search",
+        "target": "vulnerability:sqli:https://www.example.com/search:q",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/comment",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:xss:https://www.example.com/comment:msg",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/comment",
+        "target": "vulnerability:xss:https://www.example.com/comment:msg",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/ping",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:cmdi:https://api.example.com/ping:host",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/ping",
+        "target": "vulnerability:cmdi:https://api.example.com/ping:host",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/fetch",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:ssrf:https://api.example.com/fetch:url",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/fetch",
+        "target": "vulnerability:ssrf:https://api.example.com/fetch:url",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/oauth/callback",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:oauth-misconfiguration:https://www.example.com/oauth/callback",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/oauth/callback",
+        "target": "vulnerability:oauth-misconfiguration:https://www.example.com/oauth/callback",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/xml",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:xxe:https://api.example.com/xml",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/xml",
+        "target": "vulnerability:xxe:https://api.example.com/xml",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/load",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:deserialization:https://api.example.com/load",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/load",
+        "target": "vulnerability:deserialization:https://api.example.com/load",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/graphql",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:graphql-security:https://api.example.com/graphql",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/graphql",
+        "target": "vulnerability:graphql-security:https://api.example.com/graphql",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/ws",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:websocket-security:https://api.example.com/ws",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/ws",
+        "target": "vulnerability:websocket-security:https://api.example.com/ws",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:request-smuggling:https://www.example.com/",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/",
+        "target": "vulnerability:request-smuggling:https://www.example.com/",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/redeem",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:race-conditions:https://api.example.com/redeem",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/redeem",
+        "target": "vulnerability:race-conditions:https://api.example.com/redeem",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/checkout",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:business-logic:https://api.example.com/checkout",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/checkout",
+        "target": "vulnerability:business-logic:https://api.example.com/checkout",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/render",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:ssti:https://www.example.com/render:template",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/render",
+        "target": "vulnerability:ssti:https://www.example.com/render:template",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:web-cache-poisoning:https://www.example.com/",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/",
+        "target": "vulnerability:web-cache-poisoning:https://www.example.com/",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/data",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:cors-security-finding:https://api.example.com/data",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/data",
+        "target": "vulnerability:cors-security-finding:https://api.example.com/data",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "endpoint:https://www.example.com/upload",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:file-upload-finding:https://www.example.com/upload:shell.php.jpg",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/upload",
+        "target": "vulnerability:file-upload-finding:https://www.example.com/upload:shell.php.jpg",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/users/1",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:api-security-finding:https://api.example.com/users/1",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/users/1",
+        "target": "vulnerability:api-security-finding:https://api.example.com/users/1",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://www.example.com",
+        "target": "vulnerability:auth-bypass-finding:https://www.example.com/login",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://www.example.com/login",
+        "target": "vulnerability:auth-bypass-finding:https://www.example.com/login",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "endpoint:https://api.example.com/merge",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://api.example.com",
+        "target": "vulnerability:prototype-pollution-finding:https://api.example.com/merge",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://api.example.com/merge",
+        "target": "vulnerability:prototype-pollution-finding:https://api.example.com/merge",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "cname:svc.herokudns.com": {
+        "metadata": {
+          "cname": "svc.herokudns.com",
+          "service": "Heroku"
+        },
+        "type": "cname",
+        "value": "svc.herokudns.com"
+      },
+      "endpoint:https://api.example.com/checkout": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/checkout"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/checkout"
+      },
+      "endpoint:https://api.example.com/data": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/data"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/data"
+      },
+      "endpoint:https://api.example.com/fetch": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/fetch"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/fetch"
+      },
+      "endpoint:https://api.example.com/graphql": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/graphql"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/graphql"
+      },
+      "endpoint:https://api.example.com/load": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/load"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/load"
+      },
+      "endpoint:https://api.example.com/merge": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/merge"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/merge"
+      },
+      "endpoint:https://api.example.com/ping": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/ping"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/ping"
+      },
+      "endpoint:https://api.example.com/redeem": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/redeem"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/redeem"
+      },
+      "endpoint:https://api.example.com/users/1": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/users/1"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/users/1"
+      },
+      "endpoint:https://api.example.com/ws": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/ws"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/ws"
+      },
+      "endpoint:https://api.example.com/xml": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://api.example.com/xml"
+        },
+        "type": "endpoint",
+        "value": "https://api.example.com/xml"
+      },
+      "endpoint:https://www.example.com/": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://www.example.com/"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/"
+      },
+      "endpoint:https://www.example.com/.git/config": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://www.example.com/.git/config"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/.git/config"
+      },
+      "endpoint:https://www.example.com/admin/1": {
+        "metadata": {
+          "url": "https://www.example.com/admin/1"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/admin/1"
+      },
+      "endpoint:https://www.example.com/comment": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://www.example.com/comment"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/comment"
+      },
+      "endpoint:https://www.example.com/download?f=../../etc/passwd": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://www.example.com/download?f=../../etc/passwd"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/download?f=../../etc/passwd"
+      },
+      "endpoint:https://www.example.com/login": {
+        "metadata": {
+          "host": "www.example.com",
+          "url": "https://www.example.com/login"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/login"
+      },
+      "endpoint:https://www.example.com/oauth/callback": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://www.example.com/oauth/callback"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/oauth/callback"
+      },
+      "endpoint:https://www.example.com/render": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://www.example.com/render"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/render"
+      },
+      "endpoint:https://www.example.com/search": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://www.example.com/search"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/search"
+      },
+      "endpoint:https://www.example.com/upload": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://www.example.com/upload"
+        },
+        "type": "endpoint",
+        "value": "https://www.example.com/upload"
+      },
+      "live_host:https://api.example.com": {
+        "metadata": {
+          "host": "api.example.com",
+          "technologies": [
+            "Express"
+          ],
+          "url": "https://api.example.com"
+        },
+        "type": "live_host",
+        "value": "https://api.example.com"
+      },
+      "live_host:https://www.example.com": {
+        "metadata": {
+          "host": "www.example.com",
+          "technologies": "nginx, php",
+          "url": "https://www.example.com"
+        },
+        "type": "live_host",
+        "value": "https://www.example.com"
+      },
+      "secret:api_key:0:https://www.example.com/.git/config": {
+        "metadata": {
+          "type": "api_key",
+          "value": "abcd"
+        },
+        "type": "secret",
+        "value": "abcd"
+      },
+      "secret:secret:1:https://www.example.com/.git/config": {
+        "metadata": {
+          "value": "raw-secret"
+        },
+        "type": "secret",
+        "value": "raw-secret"
+      },
+      "subdomain:api.example.com": {
+        "metadata": {
+          "hostname": "api.example.com",
+          "source": ""
+        },
+        "type": "subdomain",
+        "value": "api.example.com"
+      },
+      "subdomain:example.com": {
+        "metadata": {
+          "hostname": "example.com",
+          "source": ""
+        },
+        "type": "subdomain",
+        "value": "example.com"
+      },
+      "subdomain:internal.corp.local": {
+        "metadata": {
+          "hostname": "internal.corp.local",
+          "source": "https://www.example.com/.git/config"
+        },
+        "type": "subdomain",
+        "value": "internal.corp.local"
+      },
+      "subdomain:old.example.com": {
+        "metadata": {
+          "hostname": "old.example.com"
+        },
+        "type": "subdomain",
+        "value": "old.example.com"
+      },
+      "subdomain:www.example.com": {
+        "metadata": {
+          "hostname": "www.example.com",
+          "source": "subfinder"
+        },
+        "type": "subdomain",
+        "value": "www.example.com"
+      },
+      "target:withev.example.com": {
+        "metadata": {
+          "target": "withev.example.com"
+        },
+        "type": "target",
+        "value": "withev.example.com"
+      },
+      "technology:Apache": {
+        "metadata": {
+          "name": "Apache",
+          "url": "https://www.example.com"
+        },
+        "type": "technology",
+        "value": "Apache"
+      },
+      "technology:Express": {
+        "metadata": {
+          "name": "Express"
+        },
+        "type": "technology",
+        "value": "Express"
+      },
+      "technology:nginx": {
+        "metadata": {
+          "name": "nginx"
+        },
+        "type": "technology",
+        "value": "nginx"
+      },
+      "technology:php": {
+        "metadata": {
+          "name": "php"
+        },
+        "type": "technology",
+        "value": "php"
+      },
+      "vulnerability:api-security-finding:https://api.example.com/users/1": {
+        "metadata": {
+          "name": "API Security Vulnerability (api_security)",
+          "severity": "info",
+          "url": "https://api.example.com/users/1"
+        },
+        "type": "vulnerability",
+        "value": "API Security Vulnerability (api_security)"
+      },
+      "vulnerability:auth-bypass-finding:https://www.example.com/login": {
+        "metadata": {
+          "name": "Authentication Vulnerability (auth_bypass)",
+          "severity": "info",
+          "url": "https://www.example.com/login"
+        },
+        "type": "vulnerability",
+        "value": "Authentication Vulnerability (auth_bypass)"
+      },
+      "vulnerability:broken-access-control:https://www.example.com/admin/1": {
+        "metadata": {
+          "name": "Broken Access Control (IDOR)",
+          "severity": "info",
+          "url": "https://www.example.com/admin/1"
+        },
+        "type": "vulnerability",
+        "value": "Broken Access Control (IDOR)"
+      },
+      "vulnerability:business-logic:https://api.example.com/checkout": {
+        "metadata": {
+          "name": "Business Logic Vulnerability (business_logic)",
+          "severity": "info",
+          "url": "https://api.example.com/checkout"
+        },
+        "type": "vulnerability",
+        "value": "Business Logic Vulnerability (business_logic)"
+      },
+      "vulnerability:cmdi:https://api.example.com/ping:host": {
+        "metadata": {
+          "name": "Command Injection (result_based)",
+          "parameter": "host",
+          "severity": "info",
+          "url": "https://api.example.com/ping"
+        },
+        "type": "vulnerability",
+        "value": "Command Injection (result_based)"
+      },
+      "vulnerability:cors-security-finding:https://api.example.com/data": {
+        "metadata": {
+          "name": "CORS / Security Header (cors_security)",
+          "severity": "info",
+          "url": "https://api.example.com/data"
+        },
+        "type": "vulnerability",
+        "value": "CORS / Security Header (cors_security)"
+      },
+      "vulnerability:deserialization:https://api.example.com/load": {
+        "metadata": {
+          "name": "Insecure Deserialization (deserialization)",
+          "severity": "info",
+          "url": "https://api.example.com/load"
+        },
+        "type": "vulnerability",
+        "value": "Insecure Deserialization (deserialization)"
+      },
+      "vulnerability:file-upload-finding:https://www.example.com/upload:shell.php.jpg": {
+        "metadata": {
+          "filename": "shell.php.jpg",
+          "name": "File Upload Vulnerability (file_upload)",
+          "severity": "info",
+          "url": "https://www.example.com/upload"
+        },
+        "type": "vulnerability",
+        "value": "File Upload Vulnerability (file_upload)"
+      },
+      "vulnerability:generic-1": {
+        "metadata": {
+          "host": "www.example.com",
+          "name": "generic-1",
+          "severity": "high",
+          "template_id": "generic-1"
+        },
+        "type": "vulnerability",
+        "value": "generic-1"
+      },
+      "vulnerability:graphql-security:https://api.example.com/graphql": {
+        "metadata": {
+          "name": "GraphQL Security (security_misconfiguration)",
+          "severity": "info",
+          "url": "https://api.example.com/graphql"
+        },
+        "type": "vulnerability",
+        "value": "GraphQL Security (security_misconfiguration)"
+      },
+      "vulnerability:info-disclosure:https://www.example.com/.git/config": {
+        "metadata": {
+          "host": "https://www.example.com",
+          "internal_domains": [
+            "internal.corp.local"
+          ],
+          "name": "Git Config Exposure",
+          "path": "/.git/config",
+          "secrets": [
+            {
+              "type": "api_key",
+              "value": "abcd"
+            },
+            "raw-secret"
+          ],
+          "severity": "info",
+          "url": "https://www.example.com/.git/config"
+        },
+        "type": "vulnerability",
+        "value": "Git Config Exposure"
+      },
+      "vulnerability:oauth-misconfiguration:https://www.example.com/oauth/callback": {
+        "metadata": {
+          "name": "OAuth / Stateful Auth Vulnerability (authentication)",
+          "severity": "info",
+          "url": "https://www.example.com/oauth/callback"
+        },
+        "type": "vulnerability",
+        "value": "OAuth / Stateful Auth Vulnerability (authentication)"
+      },
+      "vulnerability:path-traversal:https://www.example.com/download?f=../../etc/passwd": {
+        "metadata": {
+          "name": "Path Traversal",
+          "severity": "info",
+          "url": "https://www.example.com/download?f=../../etc/passwd"
+        },
+        "type": "vulnerability",
+        "value": "Path Traversal"
+      },
+      "vulnerability:prototype-pollution-finding:https://api.example.com/merge": {
+        "metadata": {
+          "name": "Client-Side Attack Vulnerability (prototype_pollution)",
+          "severity": "info",
+          "url": "https://api.example.com/merge"
+        },
+        "type": "vulnerability",
+        "value": "Client-Side Attack Vulnerability (prototype_pollution)"
+      },
+      "vulnerability:race-conditions:https://api.example.com/redeem": {
+        "metadata": {
+          "name": "Race Condition (race_condition)",
+          "severity": "info",
+          "url": "https://api.example.com/redeem"
+        },
+        "type": "vulnerability",
+        "value": "Race Condition (race_condition)"
+      },
+      "vulnerability:request-smuggling:https://www.example.com/": {
+        "metadata": {
+          "name": "HTTP Request Smuggling (request_smuggling)",
+          "severity": "info",
+          "url": "https://www.example.com/"
+        },
+        "type": "vulnerability",
+        "value": "HTTP Request Smuggling (request_smuggling)"
+      },
+      "vulnerability:sqli:https://www.example.com/search:q": {
+        "metadata": {
+          "name": "SQL Injection",
+          "parameter": "q",
+          "severity": "info",
+          "url": "https://www.example.com/search"
+        },
+        "type": "vulnerability",
+        "value": "SQL Injection"
+      },
+      "vulnerability:ssrf:https://api.example.com/fetch:url": {
+        "metadata": {
+          "name": "Server-Side Request Forgery (cloud_metadata)",
+          "parameter": "url",
+          "severity": "info",
+          "url": "https://api.example.com/fetch"
+        },
+        "type": "vulnerability",
+        "value": "Server-Side Request Forgery (cloud_metadata)"
+      },
+      "vulnerability:ssti:https://www.example.com/render:template": {
+        "metadata": {
+          "name": "Server-Side Template Injection (template_injection)",
+          "parameter": "template",
+          "severity": "info",
+          "url": "https://www.example.com/render"
+        },
+        "type": "vulnerability",
+        "value": "Server-Side Template Injection (template_injection)"
+      },
+      "vulnerability:subdomain-takeover-heroku:old.example.com": {
+        "metadata": {
+          "cname": "svc.herokudns.com",
+          "name": "Subdomain Takeover (Heroku)",
+          "service": "Heroku",
+          "severity": "info",
+          "subdomain": "old.example.com"
+        },
+        "type": "vulnerability",
+        "value": "Subdomain Takeover (Heroku)"
+      },
+      "vulnerability:web-cache-poisoning:https://www.example.com/": {
+        "metadata": {
+          "name": "Web Cache Security (cache_security)",
+          "severity": "info",
+          "url": "https://www.example.com/"
+        },
+        "type": "vulnerability",
+        "value": "Web Cache Security (cache_security)"
+      },
+      "vulnerability:websocket-security:https://api.example.com/ws": {
+        "metadata": {
+          "name": "WebSocket Security (security_misconfiguration)",
+          "severity": "info",
+          "url": "https://api.example.com/ws"
+        },
+        "type": "vulnerability",
+        "value": "WebSocket Security (security_misconfiguration)"
+      },
+      "vulnerability:xss:https://www.example.com/comment:msg": {
+        "metadata": {
+          "name": "Cross-Site Scripting (Stored)",
+          "parameter": "msg",
+          "severity": "critical",
+          "url": "https://www.example.com/comment",
+          "xss_type": "stored"
+        },
+        "type": "vulnerability",
+        "value": "Cross-Site Scripting (Stored)"
+      },
+      "vulnerability:xxe:https://api.example.com/xml": {
+        "metadata": {
+          "name": "XML Parser Misconfiguration (external_entity)",
+          "severity": "info",
+          "url": "https://api.example.com/xml"
+        },
+        "type": "vulnerability",
+        "value": "XML Parser Misconfiguration (external_entity)"
+      }
+    }
+  },
+  "build::technology_single_live_host_connect": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:techsolo.example.com",
+        "target": "subdomain:techsolo.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:techsolo.example.com",
+        "target": "live_host:https://techsolo.example.com",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://techsolo.example.com",
+        "target": "technology:Varnish",
+        "type": "RUNS_TECHNOLOGY"
+      }
+    ],
+    "nodes": {
+      "live_host:https://techsolo.example.com": {
+        "metadata": {
+          "url": "https://techsolo.example.com"
+        },
+        "type": "live_host",
+        "value": "https://techsolo.example.com"
+      },
+      "subdomain:techsolo.example.com": {
+        "metadata": {
+          "hostname": "techsolo.example.com"
+        },
+        "type": "subdomain",
+        "value": "techsolo.example.com"
+      },
+      "target:techsolo.example.com": {
+        "metadata": {
+          "target": "techsolo.example.com"
+        },
+        "type": "target",
+        "value": "techsolo.example.com"
+      },
+      "technology:Varnish": {
+        "metadata": {
+          "name": "Varnish"
+        },
+        "type": "technology",
+        "value": "Varnish"
+      }
+    }
+  },
+  "build::vulnerability_cname_existing_subdomain": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:vulncname.example.com",
+        "target": "subdomain:old.vulncname.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:old.vulncname.example.com",
+        "target": "vulnerability:takeover",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:old.vulncname.example.com",
+        "target": "cname:svc.example-cdn.com",
+        "type": "POINTS_TO_CNAME"
+      }
+    ],
+    "nodes": {
+      "cname:svc.example-cdn.com": {
+        "metadata": {
+          "cname": "svc.example-cdn.com",
+          "service": "CDN"
+        },
+        "type": "cname",
+        "value": "svc.example-cdn.com"
+      },
+      "subdomain:old.vulncname.example.com": {
+        "metadata": {
+          "hostname": "old.vulncname.example.com"
+        },
+        "type": "subdomain",
+        "value": "old.vulncname.example.com"
+      },
+      "target:vulncname.example.com": {
+        "metadata": {
+          "target": "vulncname.example.com"
+        },
+        "type": "target",
+        "value": "vulncname.example.com"
+      },
+      "vulnerability:takeover": {
+        "metadata": {
+          "cname": "svc.example-cdn.com",
+          "host": "old.vulncname.example.com",
+          "service": "CDN",
+          "template_id": "takeover"
+        },
+        "type": "vulnerability",
+        "value": "takeover"
+      }
+    }
+  },
+  "build::vulnerability_fuzzy_host_match": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:vulnfuzzy.example.com",
+        "target": "subdomain:vulnfuzzy.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:vulnfuzzy.example.com",
+        "target": "live_host:https://vulnfuzzy.example.com/base",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://vulnfuzzy.example.com/base",
+        "target": "vulnerability:generic",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "live_host:https://vulnfuzzy.example.com/base": {
+        "metadata": {
+          "host": "vulnfuzzy.example.com",
+          "url": "https://vulnfuzzy.example.com/base"
+        },
+        "type": "live_host",
+        "value": "https://vulnfuzzy.example.com/base"
+      },
+      "subdomain:vulnfuzzy.example.com": {
+        "metadata": {
+          "hostname": "vulnfuzzy.example.com"
+        },
+        "type": "subdomain",
+        "value": "vulnfuzzy.example.com"
+      },
+      "target:vulnfuzzy.example.com": {
+        "metadata": {
+          "target": "vulnfuzzy.example.com"
+        },
+        "type": "target",
+        "value": "vulnfuzzy.example.com"
+      },
+      "vulnerability:generic": {
+        "metadata": {
+          "host": "https://vulnfuzzy.example.com/some/other/path",
+          "template_id": "generic"
+        },
+        "type": "vulnerability",
+        "value": "generic"
+      }
+    }
+  },
+  "build::vulnerability_single_live_host_fallback": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:vulnsolo.example.com",
+        "target": "subdomain:vulnsolo.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:vulnsolo.example.com",
+        "target": "live_host:https://vulnsolo.example.com",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://vulnsolo.example.com",
+        "target": "vulnerability:generic",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "live_host:https://vulnsolo.example.com": {
+        "metadata": {
+          "url": "https://vulnsolo.example.com"
+        },
+        "type": "live_host",
+        "value": "https://vulnsolo.example.com"
+      },
+      "subdomain:vulnsolo.example.com": {
+        "metadata": {
+          "hostname": "vulnsolo.example.com"
+        },
+        "type": "subdomain",
+        "value": "vulnsolo.example.com"
+      },
+      "target:vulnsolo.example.com": {
+        "metadata": {
+          "target": "vulnsolo.example.com"
+        },
+        "type": "target",
+        "value": "vulnsolo.example.com"
+      },
+      "vulnerability:generic": {
+        "metadata": {
+          "host": "unrelated-host-not-matching.example.com",
+          "template_id": "generic"
+        },
+        "type": "vulnerability",
+        "value": "generic"
+      }
+    }
+  },
+  "edge::empty_store_no_target": {
+    "edges": [],
+    "nodes": {}
+  },
+  "edge::endpoint_missing_url_key": {
+    "edges": [],
+    "nodes": {
+      "endpoint:https://noturlkey.example.com/path": {
+        "metadata": {
+          "host": "noturlkey.example.com",
+          "url": "https://noturlkey.example.com/path"
+        },
+        "type": "endpoint",
+        "value": "https://noturlkey.example.com/path"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      }
+    }
+  },
+  "edge::information_disclosure_loop_fallback_match": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:bare-host.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:bare-host.example.com",
+        "target": "live_host:https://foo.example.com",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:second.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:second.example.com",
+        "target": "live_host:https://second.example.com",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://foo.example.com",
+        "target": "endpoint:https://foo.example.com/x",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://foo.example.com",
+        "target": "vulnerability:info-disclosure:https://foo.example.com/x",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://foo.example.com/x",
+        "target": "vulnerability:info-disclosure:https://foo.example.com/x",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://foo.example.com/x": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://foo.example.com/x"
+        },
+        "type": "endpoint",
+        "value": "https://foo.example.com/x"
+      },
+      "live_host:https://foo.example.com": {
+        "metadata": {
+          "host": "bare-host.example.com",
+          "url": "https://foo.example.com"
+        },
+        "type": "live_host",
+        "value": "https://foo.example.com"
+      },
+      "live_host:https://second.example.com": {
+        "metadata": {
+          "host": "second.example.com",
+          "url": "https://second.example.com"
+        },
+        "type": "live_host",
+        "value": "https://second.example.com"
+      },
+      "subdomain:bare-host.example.com": {
+        "metadata": {
+          "hostname": "bare-host.example.com",
+          "source": ""
+        },
+        "type": "subdomain",
+        "value": "bare-host.example.com"
+      },
+      "subdomain:second.example.com": {
+        "metadata": {
+          "hostname": "second.example.com",
+          "source": ""
+        },
+        "type": "subdomain",
+        "value": "second.example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:info-disclosure:https://foo.example.com/x": {
+        "metadata": {
+          "host": "bare-host.example.com",
+          "name": "Information Disclosure (/x)",
+          "path": "/x",
+          "severity": "info"
+        },
+        "type": "vulnerability",
+        "value": "Information Disclosure (/x)"
+      }
+    }
+  },
+  "edge::information_disclosure_no_live_hosts": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "endpoint:https://solo.example.com/config.yml",
+        "target": "vulnerability:info-disclosure:https://solo.example.com/config.yml",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://solo.example.com/config.yml": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://solo.example.com/config.yml"
+        },
+        "type": "endpoint",
+        "value": "https://solo.example.com/config.yml"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:info-disclosure:https://solo.example.com/config.yml": {
+        "metadata": {
+          "name": "Information Disclosure (/config.yml)",
+          "path": "/config.yml",
+          "severity": "info"
+        },
+        "type": "vulnerability",
+        "value": "Information Disclosure (/config.yml)"
+      }
+    }
+  },
+  "edge::information_disclosure_single_live_host_fallback": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:only.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:only.example.com",
+        "target": "live_host:https://only.example.com",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://only.example.com",
+        "target": "endpoint:https://different.example.com/secret",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://only.example.com",
+        "target": "vulnerability:info-disclosure:https://different.example.com/secret",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://different.example.com/secret",
+        "target": "vulnerability:info-disclosure:https://different.example.com/secret",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://different.example.com/secret": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://different.example.com/secret"
+        },
+        "type": "endpoint",
+        "value": "https://different.example.com/secret"
+      },
+      "live_host:https://only.example.com": {
+        "metadata": {
+          "host": "only.example.com",
+          "url": "https://only.example.com"
+        },
+        "type": "live_host",
+        "value": "https://only.example.com"
+      },
+      "subdomain:only.example.com": {
+        "metadata": {
+          "hostname": "only.example.com",
+          "source": ""
+        },
+        "type": "subdomain",
+        "value": "only.example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:info-disclosure:https://different.example.com/secret": {
+        "metadata": {
+          "name": "Information Disclosure (/secret)",
+          "path": "/secret",
+          "severity": "info"
+        },
+        "type": "vulnerability",
+        "value": "Information Disclosure (/secret)"
+      }
+    }
+  },
+  "edge::live_host_elif_no_prior_subdomain": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "live_host:standalone-nohost",
+        "type": "HOSTS"
+      }
+    ],
+    "nodes": {
+      "live_host:standalone-nohost": {
+        "metadata": {
+          "url": "standalone-nohost"
+        },
+        "type": "live_host",
+        "value": "standalone-nohost"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      }
+    }
+  },
+  "edge::live_host_elif_with_prior_subdomain": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:example.com",
+        "target": "live_host:standalone-nohost",
+        "type": "HOSTS"
+      }
+    ],
+    "nodes": {
+      "live_host:standalone-nohost": {
+        "metadata": {
+          "url": "standalone-nohost"
+        },
+        "type": "live_host",
+        "value": "standalone-nohost"
+      },
+      "subdomain:example.com": {
+        "metadata": {
+          "hostname": "example.com",
+          "source": ""
+        },
+        "type": "subdomain",
+        "value": "example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      }
+    }
+  },
+  "edge::none_evidence": {
+    "edges": [],
+    "nodes": {
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      }
+    }
+  },
+  "edge::path_traversal_creates_new_live_host": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "live_host:https://newhost.example.com",
+        "target": "endpoint:https://newhost.example.com/file?f=../etc/passwd",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://newhost.example.com",
+        "target": "vulnerability:path-traversal:https://newhost.example.com/file?f=../etc/passwd",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://newhost.example.com/file?f=../etc/passwd",
+        "target": "vulnerability:path-traversal:https://newhost.example.com/file?f=../etc/passwd",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://newhost.example.com/file?f=../etc/passwd": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://newhost.example.com/file?f=../etc/passwd"
+        },
+        "type": "endpoint",
+        "value": "https://newhost.example.com/file?f=../etc/passwd"
+      },
+      "live_host:https://newhost.example.com": {
+        "metadata": {
+          "host": "newhost.example.com",
+          "url": "https://newhost.example.com"
+        },
+        "type": "live_host",
+        "value": "https://newhost.example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:path-traversal:https://newhost.example.com/file?f=../etc/passwd": {
+        "metadata": {
+          "name": "Path Traversal",
+          "parameter": "f",
+          "severity": "info",
+          "url": "https://newhost.example.com/file?f=../etc/passwd"
+        },
+        "type": "vulnerability",
+        "value": "Path Traversal"
+      }
+    }
+  },
+  "edge::path_traversal_no_target_url": {
+    "edges": [],
+    "nodes": {
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:path-traversal": {
+        "metadata": {
+          "name": "Path Traversal",
+          "severity": "info"
+        },
+        "type": "vulnerability",
+        "value": "Path Traversal"
+      }
+    }
+  },
+  "edge::path_traversal_resolves_existing_live_host": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:target.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:target.example.com",
+        "target": "live_host:https://target.example.com",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://target.example.com",
+        "target": "endpoint:https://target.example.com/file?f=../etc/passwd",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://target.example.com",
+        "target": "vulnerability:path-traversal:https://target.example.com/file?f=../etc/passwd",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://target.example.com/file?f=../etc/passwd",
+        "target": "vulnerability:path-traversal:https://target.example.com/file?f=../etc/passwd",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://target.example.com/file?f=../etc/passwd": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://target.example.com/file?f=../etc/passwd"
+        },
+        "type": "endpoint",
+        "value": "https://target.example.com/file?f=../etc/passwd"
+      },
+      "live_host:https://target.example.com": {
+        "metadata": {
+          "host": "target.example.com",
+          "url": "https://target.example.com"
+        },
+        "type": "live_host",
+        "value": "https://target.example.com"
+      },
+      "subdomain:target.example.com": {
+        "metadata": {
+          "hostname": "target.example.com",
+          "source": ""
+        },
+        "type": "subdomain",
+        "value": "target.example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:path-traversal:https://target.example.com/file?f=../etc/passwd": {
+        "metadata": {
+          "name": "Path Traversal",
+          "parameter": "f",
+          "severity": "info",
+          "url": "https://target.example.com/file?f=../etc/passwd"
+        },
+        "type": "vulnerability",
+        "value": "Path Traversal"
+      }
+    }
+  },
+  "edge::preexisting_graph_reused": {
+    "edges": [],
+    "nodes": {
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      }
+    }
+  },
+  "edge::resolve_lh_fuzzy_fallbacks": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:fuzzy.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:fuzzy.example.com",
+        "target": "live_host:https://fuzzy.example.com/base",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://fuzzy.example.com/base",
+        "target": "vulnerability:broken-access-control",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://fuzzy.example.com/base",
+        "target": "endpoint:https://fuzzy.example.com/base/deep/path",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://fuzzy.example.com/base",
+        "target": "vulnerability:sqli:https://fuzzy.example.com/base/deep/path:id",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://fuzzy.example.com/base/deep/path",
+        "target": "vulnerability:sqli:https://fuzzy.example.com/base/deep/path:id",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://fuzzy.example.com/base/deep/path": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://fuzzy.example.com/base/deep/path"
+        },
+        "type": "endpoint",
+        "value": "https://fuzzy.example.com/base/deep/path"
+      },
+      "live_host:https://fuzzy.example.com/base": {
+        "metadata": {
+          "host": "fuzzy.example.com",
+          "url": "https://fuzzy.example.com/base"
+        },
+        "type": "live_host",
+        "value": "https://fuzzy.example.com/base"
+      },
+      "subdomain:fuzzy.example.com": {
+        "metadata": {
+          "hostname": "fuzzy.example.com",
+          "source": ""
+        },
+        "type": "subdomain",
+        "value": "fuzzy.example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:broken-access-control": {
+        "metadata": {
+          "host": "sub.fuzzy.example.com",
+          "name": "Broken Access Control (IDOR)",
+          "severity": "info"
+        },
+        "type": "vulnerability",
+        "value": "Broken Access Control (IDOR)"
+      },
+      "vulnerability:sqli:https://fuzzy.example.com/base/deep/path:id": {
+        "metadata": {
+          "name": "SQL Injection",
+          "parameter": "id",
+          "severity": "info",
+          "url": "https://fuzzy.example.com/base/deep/path"
+        },
+        "type": "vulnerability",
+        "value": "SQL Injection"
+      }
+    }
+  },
+  "edge::resolve_lh_host_val_containment_loop_match": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:my-real-host.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:my-real-host.example.com",
+        "target": "live_host:https://my-real-host.example.com/x",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://my-real-host.example.com/x",
+        "target": "vulnerability:broken-access-control",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "live_host:https://my-real-host.example.com/x": {
+        "metadata": {
+          "host": "my-real-host.example.com",
+          "url": "https://my-real-host.example.com/x"
+        },
+        "type": "live_host",
+        "value": "https://my-real-host.example.com/x"
+      },
+      "subdomain:my-real-host.example.com": {
+        "metadata": {
+          "hostname": "my-real-host.example.com",
+          "source": ""
+        },
+        "type": "subdomain",
+        "value": "my-real-host.example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:broken-access-control": {
+        "metadata": {
+          "host": "https://real-host.example.com:443/y",
+          "name": "Broken Access Control (IDOR)",
+          "severity": "info"
+        },
+        "type": "vulnerability",
+        "value": "Broken Access Control (IDOR)"
+      }
+    }
+  },
+  "edge::resolve_lh_host_val_exact_lh_by_host_match": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:directmatch.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:directmatch.example.com",
+        "target": "live_host:https://directmatch.example.com/x",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://directmatch.example.com/x",
+        "target": "vulnerability:broken-access-control",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "live_host:https://directmatch.example.com/x": {
+        "metadata": {
+          "host": "directmatch.example.com",
+          "url": "https://directmatch.example.com/x"
+        },
+        "type": "live_host",
+        "value": "https://directmatch.example.com/x"
+      },
+      "subdomain:directmatch.example.com": {
+        "metadata": {
+          "hostname": "directmatch.example.com",
+          "source": ""
+        },
+        "type": "subdomain",
+        "value": "directmatch.example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:broken-access-control": {
+        "metadata": {
+          "host": "directmatch.example.com",
+          "name": "Broken Access Control (IDOR)",
+          "severity": "info"
+        },
+        "type": "vulnerability",
+        "value": "Broken Access Control (IDOR)"
+      }
+    }
+  },
+  "edge::resolve_lh_host_val_parsed_hostname_match": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:parsedhost.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:parsedhost.example.com",
+        "target": "live_host:https://parsedhost.example.com/app",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://parsedhost.example.com/app",
+        "target": "vulnerability:path-traversal",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "live_host:https://parsedhost.example.com/app": {
+        "metadata": {
+          "host": "parsedhost.example.com",
+          "url": "https://parsedhost.example.com/app"
+        },
+        "type": "live_host",
+        "value": "https://parsedhost.example.com/app"
+      },
+      "subdomain:parsedhost.example.com": {
+        "metadata": {
+          "hostname": "parsedhost.example.com",
+          "source": ""
+        },
+        "type": "subdomain",
+        "value": "parsedhost.example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:path-traversal": {
+        "metadata": {
+          "host": "https://parsedhost.example.com:9443/ignored",
+          "name": "Path Traversal",
+          "severity": "info"
+        },
+        "type": "vulnerability",
+        "value": "Path Traversal"
+      }
+    }
+  },
+  "edge::resolve_lh_host_val_rstripped_url_match": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:trailingslash.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:trailingslash.example.com",
+        "target": "live_host:https://trailingslash.example.com/",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://trailingslash.example.com/",
+        "target": "vulnerability:broken-access-control",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "live_host:https://trailingslash.example.com/": {
+        "metadata": {
+          "host": "trailingslash.example.com",
+          "url": "https://trailingslash.example.com/"
+        },
+        "type": "live_host",
+        "value": "https://trailingslash.example.com/"
+      },
+      "subdomain:trailingslash.example.com": {
+        "metadata": {
+          "hostname": "trailingslash.example.com",
+          "source": ""
+        },
+        "type": "subdomain",
+        "value": "trailingslash.example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:broken-access-control": {
+        "metadata": {
+          "host": "https://trailingslash.example.com",
+          "name": "Broken Access Control (IDOR)",
+          "severity": "info"
+        },
+        "type": "vulnerability",
+        "value": "Broken Access Control (IDOR)"
+      }
+    }
+  },
+  "edge::resolve_lh_single_host_fallback": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:solo.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:solo.example.com",
+        "target": "live_host:https://solo.example.com",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://solo.example.com",
+        "target": "technology:Nginx",
+        "type": "RUNS_TECHNOLOGY"
+      }
+    ],
+    "nodes": {
+      "live_host:https://solo.example.com": {
+        "metadata": {
+          "host": "solo.example.com",
+          "url": "https://solo.example.com"
+        },
+        "type": "live_host",
+        "value": "https://solo.example.com"
+      },
+      "subdomain:solo.example.com": {
+        "metadata": {
+          "hostname": "solo.example.com",
+          "source": ""
+        },
+        "type": "subdomain",
+        "value": "solo.example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "technology:Nginx": {
+        "metadata": {
+          "name": "Nginx"
+        },
+        "type": "technology",
+        "value": "Nginx"
+      }
+    }
+  },
+  "edge::resolve_lh_target_url_hostname_vs_netloc": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:portendpoint.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:portendpoint.example.com",
+        "target": "live_host:https://portendpoint.example.com/app",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://portendpoint.example.com/app",
+        "target": "endpoint:https://portendpoint.example.com:8443/other/path",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://portendpoint.example.com/app",
+        "target": "vulnerability:cmdi:https://portendpoint.example.com:8443/other/path",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://portendpoint.example.com:8443/other/path",
+        "target": "vulnerability:cmdi:https://portendpoint.example.com:8443/other/path",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://portendpoint.example.com:8443/other/path": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://portendpoint.example.com:8443/other/path"
+        },
+        "type": "endpoint",
+        "value": "https://portendpoint.example.com:8443/other/path"
+      },
+      "live_host:https://portendpoint.example.com/app": {
+        "metadata": {
+          "host": "portendpoint.example.com",
+          "url": "https://portendpoint.example.com/app"
+        },
+        "type": "live_host",
+        "value": "https://portendpoint.example.com/app"
+      },
+      "subdomain:portendpoint.example.com": {
+        "metadata": {
+          "hostname": "portendpoint.example.com",
+          "source": ""
+        },
+        "type": "subdomain",
+        "value": "portendpoint.example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:cmdi:https://portendpoint.example.com:8443/other/path": {
+        "metadata": {
+          "name": "Command Injection (result_based)",
+          "severity": "info",
+          "url": "https://portendpoint.example.com:8443/other/path"
+        },
+        "type": "vulnerability",
+        "value": "Command Injection (result_based)"
+      }
+    }
+  },
+  "edge::resolve_lh_target_url_prefix_loop_only": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:customkey123",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:customkey123",
+        "target": "live_host:customkey123",
+        "type": "HOSTS"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:customkey123",
+        "target": "endpoint:customkey123-suffix-path-more-stuff",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:customkey123",
+        "target": "vulnerability:ssrf:customkey123-suffix-path-more-stuff",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:customkey123-suffix-path-more-stuff",
+        "target": "vulnerability:ssrf:customkey123-suffix-path-more-stuff",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "endpoint:customkey123-suffix-path-more-stuff": {
+        "metadata": {
+          "status_code": 200,
+          "url": "customkey123-suffix-path-more-stuff"
+        },
+        "type": "endpoint",
+        "value": "customkey123-suffix-path-more-stuff"
+      },
+      "live_host:customkey123": {
+        "metadata": {
+          "host": "customkey123"
+        },
+        "type": "live_host",
+        "value": "customkey123"
+      },
+      "subdomain:customkey123": {
+        "metadata": {
+          "hostname": "customkey123",
+          "source": ""
+        },
+        "type": "subdomain",
+        "value": "customkey123"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:ssrf:customkey123-suffix-path-more-stuff": {
+        "metadata": {
+          "name": "Server-Side Request Forgery (cloud_metadata)",
+          "severity": "info",
+          "url": "customkey123-suffix-path-more-stuff"
+        },
+        "type": "vulnerability",
+        "value": "Server-Side Request Forgery (cloud_metadata)"
+      }
+    }
+  },
+  "edge::subdomain_takeover_minimal_and_existing": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:already.example.com",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "target:example.com",
+        "target": "subdomain:fallback-value-only",
+        "type": "RESOLVES_TO"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:fallback-value-only",
+        "target": "vulnerability:subdomain-takeover-unknown:fallback-value-only",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "subdomain:already.example.com",
+        "target": "vulnerability:subdomain-takeover-unknown:already.example.com",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "subdomain:already.example.com": {
+        "metadata": {
+          "hostname": "already.example.com",
+          "source": ""
+        },
+        "type": "subdomain",
+        "value": "already.example.com"
+      },
+      "subdomain:fallback-value-only": {
+        "metadata": {
+          "hostname": "fallback-value-only"
+        },
+        "type": "subdomain",
+        "value": "fallback-value-only"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:subdomain-takeover-unknown:already.example.com": {
+        "metadata": {
+          "name": "Subdomain Takeover (Unknown)",
+          "severity": "info",
+          "subdomain": "already.example.com"
+        },
+        "type": "vulnerability",
+        "value": "Subdomain Takeover (Unknown)"
+      },
+      "vulnerability:subdomain-takeover-unknown:fallback-value-only": {
+        "metadata": {
+          "name": "Subdomain Takeover (Unknown)",
+          "severity": "info"
+        },
+        "type": "vulnerability",
+        "value": "Subdomain Takeover (Unknown)"
+      }
+    }
+  },
+  "edge::technology_missing_name_key": {
+    "edges": [],
+    "nodes": {
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "technology:Redis": {
+        "metadata": {
+          "name": "Redis",
+          "source_note": "banner-grab"
+        },
+        "type": "technology",
+        "value": "Redis"
+      }
+    }
+  },
+  "edge::technology_unresolved_live_host": {
+    "edges": [],
+    "nodes": {
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "technology:Redis": {
+        "metadata": {
+          "name": "Redis",
+          "url": "https://unmatched.example.com"
+        },
+        "type": "technology",
+        "value": "Redis"
+      }
+    }
+  },
+  "edge::vulnerability_matched_at_and_severity_preset": {
+    "edges": [],
+    "nodes": {
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:generic-2": {
+        "metadata": {
+          "matched_at": "www.example.com",
+          "name": "generic-2",
+          "severity": "info",
+          "template_id": "generic-2"
+        },
+        "type": "vulnerability",
+        "value": "generic-2"
+      },
+      "vulnerability:generic-3": {
+        "metadata": {
+          "host": "www.example.com",
+          "name": "generic-3",
+          "severity": "low",
+          "template_id": "generic-3"
+        },
+        "type": "vulnerability",
+        "value": "generic-3"
+      }
+    }
+  },
+  "edge::xss_cross_site_scripting_alias": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "live_host:https://example.com",
+        "target": "endpoint:https://example.com/x",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://example.com",
+        "target": "vulnerability:xss:https://example.com/x",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://example.com/x",
+        "target": "vulnerability:xss:https://example.com/x",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://example.com/x": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://example.com/x"
+        },
+        "type": "endpoint",
+        "value": "https://example.com/x"
+      },
+      "live_host:https://example.com": {
+        "metadata": {
+          "host": "example.com",
+          "url": "https://example.com"
+        },
+        "type": "live_host",
+        "value": "https://example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:xss:https://example.com/x": {
+        "metadata": {
+          "name": "Cross-Site Scripting (Reflected)",
+          "severity": "high",
+          "url": "https://example.com/x"
+        },
+        "type": "vulnerability",
+        "value": "Cross-Site Scripting (Reflected)"
+      }
+    }
+  },
+  "edge::xss_dom_default_medium": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "live_host:https://example.com",
+        "target": "endpoint:https://example.com/x",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://example.com",
+        "target": "vulnerability:xss:https://example.com/x",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://example.com/x",
+        "target": "vulnerability:xss:https://example.com/x",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://example.com/x": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://example.com/x"
+        },
+        "type": "endpoint",
+        "value": "https://example.com/x"
+      },
+      "live_host:https://example.com": {
+        "metadata": {
+          "host": "example.com",
+          "url": "https://example.com"
+        },
+        "type": "live_host",
+        "value": "https://example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:xss:https://example.com/x": {
+        "metadata": {
+          "name": "Cross-Site Scripting (Dom_based)",
+          "severity": "medium",
+          "url": "https://example.com/x",
+          "xss_type": "dom_based"
+        },
+        "type": "vulnerability",
+        "value": "Cross-Site Scripting (Dom_based)"
+      }
+    }
+  },
+  "edge::xss_explicit_non_info_severity_kept": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "live_host:https://example.com",
+        "target": "endpoint:https://example.com/x",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://example.com",
+        "target": "vulnerability:xss:https://example.com/x",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://example.com/x",
+        "target": "vulnerability:xss:https://example.com/x",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://example.com/x": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://example.com/x"
+        },
+        "type": "endpoint",
+        "value": "https://example.com/x"
+      },
+      "live_host:https://example.com": {
+        "metadata": {
+          "host": "example.com",
+          "url": "https://example.com"
+        },
+        "type": "live_host",
+        "value": "https://example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:xss:https://example.com/x": {
+        "metadata": {
+          "name": "Cross-Site Scripting (Reflected)",
+          "severity": "low",
+          "url": "https://example.com/x",
+          "xss_type": "reflected"
+        },
+        "type": "vulnerability",
+        "value": "Cross-Site Scripting (Reflected)"
+      }
+    }
+  },
+  "edge::xss_header_default_medium": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "live_host:https://example.com",
+        "target": "endpoint:https://example.com/x",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://example.com",
+        "target": "vulnerability:xss:https://example.com/x",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://example.com/x",
+        "target": "vulnerability:xss:https://example.com/x",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://example.com/x": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://example.com/x"
+        },
+        "type": "endpoint",
+        "value": "https://example.com/x"
+      },
+      "live_host:https://example.com": {
+        "metadata": {
+          "host": "example.com",
+          "url": "https://example.com"
+        },
+        "type": "live_host",
+        "value": "https://example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:xss:https://example.com/x": {
+        "metadata": {
+          "name": "Cross-Site Scripting (Header_injection)",
+          "severity": "medium",
+          "url": "https://example.com/x",
+          "xss_type": "header_injection"
+        },
+        "type": "vulnerability",
+        "value": "Cross-Site Scripting (Header_injection)"
+      }
+    }
+  },
+  "edge::xss_metadata_severity_info_overridden": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "live_host:https://example.com",
+        "target": "endpoint:https://example.com/x",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://example.com",
+        "target": "vulnerability:xss:https://example.com/x",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://example.com/x",
+        "target": "vulnerability:xss:https://example.com/x",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://example.com/x": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://example.com/x"
+        },
+        "type": "endpoint",
+        "value": "https://example.com/x"
+      },
+      "live_host:https://example.com": {
+        "metadata": {
+          "host": "example.com",
+          "url": "https://example.com"
+        },
+        "type": "live_host",
+        "value": "https://example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:xss:https://example.com/x": {
+        "metadata": {
+          "name": "Cross-Site Scripting (Stored)",
+          "severity": "critical",
+          "url": "https://example.com/x",
+          "xss_type": "stored"
+        },
+        "type": "vulnerability",
+        "value": "Cross-Site Scripting (Stored)"
+      }
+    }
+  },
+  "edge::xss_reflected_default_high": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "live_host:https://example.com",
+        "target": "endpoint:https://example.com/x",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://example.com",
+        "target": "vulnerability:xss:https://example.com/x",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://example.com/x",
+        "target": "vulnerability:xss:https://example.com/x",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://example.com/x": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://example.com/x"
+        },
+        "type": "endpoint",
+        "value": "https://example.com/x"
+      },
+      "live_host:https://example.com": {
+        "metadata": {
+          "host": "example.com",
+          "url": "https://example.com"
+        },
+        "type": "live_host",
+        "value": "https://example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:xss:https://example.com/x": {
+        "metadata": {
+          "name": "Cross-Site Scripting (Reflected)",
+          "severity": "high",
+          "url": "https://example.com/x",
+          "xss_type": "reflected"
+        },
+        "type": "vulnerability",
+        "value": "Cross-Site Scripting (Reflected)"
+      }
+    }
+  },
+  "edge::xss_stored_default_critical": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "live_host:https://example.com",
+        "target": "endpoint:https://example.com/x",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://example.com",
+        "target": "vulnerability:xss:https://example.com/x",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://example.com/x",
+        "target": "vulnerability:xss:https://example.com/x",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://example.com/x": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://example.com/x"
+        },
+        "type": "endpoint",
+        "value": "https://example.com/x"
+      },
+      "live_host:https://example.com": {
+        "metadata": {
+          "host": "example.com",
+          "url": "https://example.com"
+        },
+        "type": "live_host",
+        "value": "https://example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:xss:https://example.com/x": {
+        "metadata": {
+          "name": "Cross-Site Scripting (Stored)",
+          "severity": "critical",
+          "url": "https://example.com/x",
+          "xss_type": "stored"
+        },
+        "type": "vulnerability",
+        "value": "Cross-Site Scripting (Stored)"
+      }
+    }
+  },
+  "edge::xss_unknown_type_default_high": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "live_host:https://example.com",
+        "target": "endpoint:https://example.com/x",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://example.com",
+        "target": "vulnerability:xss:https://example.com/x",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://example.com/x",
+        "target": "vulnerability:xss:https://example.com/x",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://example.com/x": {
+        "metadata": {
+          "status_code": 200,
+          "url": "https://example.com/x"
+        },
+        "type": "endpoint",
+        "value": "https://example.com/x"
+      },
+      "live_host:https://example.com": {
+        "metadata": {
+          "host": "example.com",
+          "url": "https://example.com"
+        },
+        "type": "live_host",
+        "value": "https://example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:xss:https://example.com/x": {
+        "metadata": {
+          "name": "Cross-Site Scripting (Reflected)",
+          "severity": "high",
+          "url": "https://example.com/x"
+        },
+        "type": "vulnerability",
+        "value": "Cross-Site Scripting (Reflected)"
+      }
+    }
+  }
+}
