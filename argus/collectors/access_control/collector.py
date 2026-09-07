@@ -1,59 +1,20 @@
-"""
-Access Control & IDOR Collector.
-
-Performs active authorization testing across configured TestIdentities to detect:
-1. Horizontal Privilege Escalation / Insecure Direct Object References (IDOR).
-2. Vertical Privilege Escalation (unprivileged/guest access to administrative routes).
-3. Reverse Proxy / WAF Access Control Header Bypasses (X-Original-URL, X-Rewrite-URL, X-Forwarded-Host).
-
-Emits high-confidence Evidence(category="broken_access_control"), updates mission state,
-and connects attack surface graph nodes with HAS_VULNERABILITY edges.
-"""
+"""access_control: Collector orchestration."""
 from __future__ import annotations
 
 import logging
-import re
 import urllib.parse
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set
 
-from argus.analyzers.response_discrepancy import (
-    ResponseDiscrepancyAnalyzer,
-    DiscrepancyVerdict,
-)
+from argus.analyzers.response_discrepancy import DiscrepancyVerdict, ResponseDiscrepancyAnalyzer
 from argus.collectors.base import BaseCollector
 from argus.evidence.model import Evidence, ProvenanceData
 from argus.graph.node import Node
 from argus.http.client import HttpResponse
 from argus.http.coordinator import MultiIdentitySessionCoordinator
 from argus.models.test_identity import TestIdentity
+from argus.collectors.access_control.models import DEFAULT_ADMIN_PROBE_PATHS, HORIZONTAL_PATH_PATTERNS, QUERY_ID_PARAM_REGEX, VERTICAL_ADMIN_PATTERNS
 
 logger = logging.getLogger(__name__)
-
-# Patterns identifying candidate endpoints with resource/user identifiers
-HORIZONTAL_PATH_PATTERNS = [
-    re.compile(r"/(?:(?:api(?:/v\d+)?/)?|(?:[a-zA-Z0-9_\-]+/)+)?(?:users?|accounts?|profiles?|orders?|invoices?|customers?|documents?|items?|patients?|members?)/([^/?#]+)", re.IGNORECASE),
-    re.compile(r"/(?:[a-zA-Z0-9_\-]+)/([a-zA-Z0-9_\-]+|\d+)(?:/|$|\?)", re.IGNORECASE),
-]
-
-QUERY_ID_PARAM_REGEX = re.compile(
-    r"[?&](?:id|ids|user_id|userId|account_id|accountId|order_id|orderId|uid|doc_id|docId|customer_id)(?:\[\])?=([^&#]+)",
-    re.IGNORECASE,
-)
-
-# Patterns identifying administrative / restricted routes
-VERTICAL_ADMIN_PATTERNS = [
-    re.compile(r"/(?:api(?:/v\d+)?)?/(?:admin|management|superuser|root|system|settings/admin|dashboard/admin)(?:/.*)?$", re.IGNORECASE),
-    re.compile(r"/(?:admin|dashboard|management|console|superuser|root|system-settings)(?:/.*)?$", re.IGNORECASE),
-]
-
-DEFAULT_ADMIN_PROBE_PATHS = [
-    "/admin",
-    "/admin/dashboard",
-    "/admin/users",
-    "/api/admin/users",
-    "/api/admin/system",
-    "/management/users",
-]
 
 
 class AccessControlCollector(BaseCollector):
