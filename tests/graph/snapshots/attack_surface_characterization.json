@@ -2637,6 +2637,62 @@
       }
     }
   },
+  "edge::broken_access_control_has_param_false_pinned": {
+    "edges": [
+      {
+        "metadata": {},
+        "source": "live_host:https://ac.example.com",
+        "target": "endpoint:https://ac.example.com/admin/1",
+        "type": "HAS_ENDPOINT"
+      },
+      {
+        "metadata": {},
+        "source": "live_host:https://ac.example.com",
+        "target": "vulnerability:broken-access-control:https://ac.example.com/admin/1",
+        "type": "HAS_VULNERABILITY"
+      },
+      {
+        "metadata": {},
+        "source": "endpoint:https://ac.example.com/admin/1",
+        "target": "vulnerability:broken-access-control:https://ac.example.com/admin/1",
+        "type": "HAS_VULNERABILITY"
+      }
+    ],
+    "nodes": {
+      "endpoint:https://ac.example.com/admin/1": {
+        "metadata": {
+          "url": "https://ac.example.com/admin/1"
+        },
+        "type": "endpoint",
+        "value": "https://ac.example.com/admin/1"
+      },
+      "live_host:https://ac.example.com": {
+        "metadata": {
+          "host": "ac.example.com",
+          "url": "https://ac.example.com"
+        },
+        "type": "live_host",
+        "value": "https://ac.example.com"
+      },
+      "target:example.com": {
+        "metadata": {
+          "target": "example.com"
+        },
+        "type": "target",
+        "value": "example.com"
+      },
+      "vulnerability:broken-access-control:https://ac.example.com/admin/1": {
+        "metadata": {
+          "name": "Broken Access Control (IDOR)",
+          "parameter": "paramSentinel9",
+          "severity": "info",
+          "url": "https://ac.example.com/admin/1"
+        },
+        "type": "vulnerability",
+        "value": "Broken Access Control (IDOR)"
+      }
+    }
+  },
   "edge::empty_store_no_target": {
     "edges": [],
     "nodes": {}

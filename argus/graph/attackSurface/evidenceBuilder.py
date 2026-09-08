@@ -14,17 +14,11 @@ from argus.graph.graph import KnowledgeGraph
 from argus.graph.node import Node
 from argus.graph.attackSurface.lookupHelpers import buildCategoryIndex, buildLiveHostIndex, makeGetItems, makeResolveLiveHost
 from argus.graph.attackSurface.reconSections import addEndpoints, addLiveHosts, addSubdomains, addTechnologies
-from argus.graph.attackSurface.vulnSections1 import (
-    addBrokenAccessControl, addGenericVulnerabilities, addInformationDisclosure, addPathTraversal, addSubdomainTakeover,
+from argus.graph.attackSurface.bespokeVulnSections import (
+    addGenericVulnerabilities, addInformationDisclosure, addSubdomainTakeover, addXss,
 )
-from argus.graph.attackSurface.vulnSections2 import addCommandInjection, addOauth, addSqlInjection, addSsrf, addXss
-from argus.graph.attackSurface.vulnSections3 import (
-    addDeserialization, addGraphqlSecurity, addRequestSmuggling, addWebsocketSecurity, addXmlParserSecurity,
-)
-from argus.graph.attackSurface.vulnSections4 import addBusinessLogic, addCacheSecurity, addRaceConditions, addSsti
-from argus.graph.attackSurface.vulnSections5 import (
-    addApiSecurity, addAuthBypass, addCorsSecurity, addFileUpload, addPrototypePollution,
-)
+from argus.graph.attackSurface.genericVulnRule import addGenericVulnRule
+from argus.graph.attackSurface.genericVulnRules import GENERIC_VULN_RULES_PART1, GENERIC_VULN_RULES_PART2
 
 
 def buildFromEvidence(evidence: Optional[EvidenceStore], target: str = "", graph: Optional[KnowledgeGraph] = None) -> KnowledgeGraph:
@@ -65,26 +59,14 @@ def buildFromEvidence(evidence: Optional[EvidenceStore], target: str = "", graph
     addGenericVulnerabilities(graph, get_items, resolve_lh)
     addSubdomainTakeover(graph, get_items, target)
     addInformationDisclosure(graph, get_items, target)
-    addBrokenAccessControl(graph, get_items, resolve_lh)
-    addPathTraversal(graph, get_items, resolve_lh)
-    addSqlInjection(graph, get_items, resolve_lh)
+
+    # Sections 9,10,11, then bespoke XSS (12), then 13-29 -- split around XSS
+    # to preserve the exact original section order (load-bearing: a later
+    # section's live-host resolution can see a node an earlier one created).
+    for rule in GENERIC_VULN_RULES_PART1:
+        addGenericVulnRule(graph, get_items, resolve_lh, rule)
     addXss(graph, get_items, resolve_lh)
-    addCommandInjection(graph, get_items, resolve_lh)
-    addSsrf(graph, get_items, resolve_lh)
-    addOauth(graph, get_items, resolve_lh)
-    addXmlParserSecurity(graph, get_items, resolve_lh)
-    addDeserialization(graph, get_items, resolve_lh)
-    addGraphqlSecurity(graph, get_items, resolve_lh)
-    addWebsocketSecurity(graph, get_items, resolve_lh)
-    addRequestSmuggling(graph, get_items, resolve_lh)
-    addRaceConditions(graph, get_items, resolve_lh)
-    addBusinessLogic(graph, get_items, resolve_lh)
-    addSsti(graph, get_items, resolve_lh)
-    addCacheSecurity(graph, get_items, resolve_lh)
-    addCorsSecurity(graph, get_items, resolve_lh)
-    addFileUpload(graph, get_items, resolve_lh)
-    addApiSecurity(graph, get_items, resolve_lh)
-    addAuthBypass(graph, get_items, resolve_lh)
-    addPrototypePollution(graph, get_items, resolve_lh)
+    for rule in GENERIC_VULN_RULES_PART2:
+        addGenericVulnRule(graph, get_items, resolve_lh, rule)
 
     return graph
