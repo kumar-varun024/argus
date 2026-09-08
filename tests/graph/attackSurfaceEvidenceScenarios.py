@@ -102,6 +102,27 @@ def _runVulnerabilityEdgeCases(builder, results):
     results["edge::vulnerability_matched_at_and_severity_preset"] = graphSnapshot(graph)
 
 
+def _runHasParamFalseSectionPinnedWithParameter(builder, results):
+    """Pin §9 (broken_access_control) has_param=False: a `parameter` in metadata
+    must NOT leak into vuln_id, because §9 (like §10) never computes a param
+    component -- unlike every other generic section from §11 on. §10 is already
+    exercised by the path-traversal deep dive (which carries parameter="f"), but
+    §9 had no fixture giving it a parameter, so a regression flipping it to
+    has_param=True would have gone uncaught. Both a direct assertion and the
+    snapshot pin it."""
+    param_sentinel = "paramSentinel9"
+    store = EvidenceStore()
+    store.add(ev("broken_access_control", metadata={"url": "https://ac.example.com/admin/1", "parameter": param_sentinel}))
+    graph = builder.build_from_evidence(store, target="example.com")
+    vuln_ids = [nid for nid, node in graph.nodes.items() if node.type == "vulnerability"]
+    assert len(vuln_ids) == 1, f"expected one vulnerability node, got {vuln_ids}"
+    assert param_sentinel not in vuln_ids[0], (
+        f"§9 broken_access_control must not include the parameter in vuln_id "
+        f"(has_param=False); got {vuln_ids[0]!r}"
+    )
+    results["edge::broken_access_control_has_param_false_pinned"] = graphSnapshot(graph)
+
+
 def _runSubdomainTakeoverEdgeCases(builder, results):
     store = EvidenceStore()
     store.add(ev("subdomain", value="already.example.com"))
@@ -245,6 +266,7 @@ def runAll(builder, results):
     _runTechnologyEdgeCases(builder, results)
     _runEndpointMissingUrlKey(builder, results)
     _runVulnerabilityEdgeCases(builder, results)
+    _runHasParamFalseSectionPinnedWithParameter(builder, results)
     _runSubdomainTakeoverEdgeCases(builder, results)
     _runInformationDisclosureEdgeCases(builder, results)
     _runResolveLhFuzzyFallbacks(builder, results)
