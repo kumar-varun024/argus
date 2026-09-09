@@ -80,6 +80,13 @@ def test_extract_targets_skips_flags_and_values():
     assert targets == ["example.com"]  # "80,443" is a value of -p, not a target
 
 
+def test_extract_targets_includes_value_flag_target():
+    # the actual target is the value of -u (a value flag); it MUST still be
+    # extracted for the scope check, not skipped as an option value.
+    assert extractTargets("httpx", ["-u", "https://example.com", "-json"]) == ["https://example.com"]
+    assert extractTargets("nuclei", ["-u", "https://example.com", "-severity", "high"]) == ["https://example.com"]
+
+
 def test_extract_targets_multiple_and_urls():
     targets = extractTargets("curl", ["-X", "POST", "https://a.example.com/x"])
     assert targets == ["https://a.example.com/x"]  # "POST" is the -X value, skipped

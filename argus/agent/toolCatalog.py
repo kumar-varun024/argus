@@ -101,25 +101,14 @@ def _looksLikeTarget(arg: str) -> bool:
 
 
 def extractTargets(tool_id: str, args: List[str]) -> List[str]:
-    """Return the argument tokens that are hosts/URLs/IPs (to be scope-checked).
-    Values consumed by value-flags are skipped -- they are options, not targets."""
-    spec = ALLOWED_TOOLS.get(tool_id)
-    if spec is None:
+    """Return every argument token that is a host/URL/IP, so the scope gate can
+    verify all of them. Crucially this includes targets passed as a value-flag
+    value (e.g. `httpx -u https://example.com`), not just bare positionals --
+    scope-checking must never skip the actual target. Non-target values like
+    `-p 80,443` or `-X POST` are ignored because they are not host-shaped."""
+    if tool_id not in ALLOWED_TOOLS:
         return []
-    targets: List[str] = []
-    skip_next = False
-    for arg in args:
-        if skip_next:
-            skip_next = False
-            continue
-        if arg.startswith("-") or arg in spec.allowed_flags:
-            base = arg.split("=", 1)[0]
-            if base in spec.value_flags and "=" not in arg:
-                skip_next = True
-            continue
-        if _looksLikeTarget(arg):
-            targets.append(arg)
-    return targets
+    return [arg for arg in args if _looksLikeTarget(arg)]
 
 
 def validateArgs(tool_id: str, args: List[str]) -> Tuple[bool, str]:
