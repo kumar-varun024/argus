@@ -106,6 +106,27 @@
         .modal-content { background:var(--bg-panel); padding:24px; border-radius:12px; border: 1px solid var(--border-color); color: #e0e0e0; width: 500px; max-width: 90%; }
         .modal-content input, .modal-content textarea { width:100%; padding:12px; border-radius:6px; border: 1px solid var(--border-color); background: var(--bg-main); color: white; margin-bottom:15px; font-family: 'Inter', sans-serif; box-sizing: border-box; outline: none; }
         .modal-content input:focus, .modal-content textarea:focus { border-color: var(--accent); }
+        /* --- Hunt console + approval cards --- */
+        .hunt-card { background: var(--bg-main); border: 1px solid #007acc; border-radius: 10px; padding: 14px 16px; margin: 6px 0; }
+        .hunt-card.denied { border-color: #f44336; }
+        .hunt-card h4 { margin: 0 0 8px; color: #4fc3f7; font-size: 14px; }
+        .hunt-row { font-size: 13px; color: var(--text-muted); margin: 3px 0; }
+        .hunt-row b { color: #e0e0e0; }
+        .hunt-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+        .hunt-badge.in { background: #1b5e20; color: #a5d6a7; }
+        .hunt-badge.out { background: #4a1c1c; color: #ef9a9a; }
+        .hunt-badge.new { background: #0d3c61; color: #90caf9; }
+        .hunt-actions { margin-top: 10px; display: flex; gap: 8px; }
+        .hunt-btn { border: none; border-radius: 6px; padding: 6px 14px; font-size: 13px; cursor: pointer; font-weight: 600; }
+        .hunt-btn.confirm { background: #007acc; color: #fff; }
+        .hunt-btn.deny { background: #333; color: #ccc; }
+        .hunt-btn:disabled { opacity: 0.5; cursor: default; }
+        #hunt-console { display: none; }
+        #hunt-feed { max-height: 200px; overflow-y: auto; font-size: 12px; font-family: monospace; margin-top: 6px; }
+        .hunt-ev { padding: 3px 0; border-bottom: 1px solid var(--border-color); color: var(--text-muted); }
+        .hunt-ev .et { color: #4fc3f7; font-weight: 600; }
+        #hunt-graph { height: 220px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; margin-top: 8px; }
+        .hunt-status { font-size: 12px; color: #90caf9; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -315,6 +336,13 @@
             </div>
         </div>
         
+        <div class="panel-section" id="hunt-console">
+            <h3>⚡ Hunt Console</h3>
+            <div class="hunt-status" id="hunt-status">Idle.</div>
+            <div id="hunt-feed"></div>
+            <div id="hunt-graph"></div>
+        </div>
+
         <div class="panel-section" id="panel-opportunities-section" style="display: none;">
             <h3>Research Opportunities</h3>
             <div id="panel-opportunities">
@@ -435,6 +463,14 @@
             document.getElementById('file-previews').innerHTML = '';
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
             
+            // 3b. Hunt-intent interception: if this is a hunt command, show an
+            // approval card instead of a chat answer (the server re-verifies scope).
+            const huntHandled = await tryProposeHunt(cid, message, messagesContainer);
+            if (huntHandled) {
+                submitBtn.disabled = false;
+                return;
+            }
+
             // 4. Create Assistant Placeholder Bubble
             const assistantBubbleId = 'msg-' + Date.now();
             const assistantMsgHtml = `
@@ -892,6 +928,135 @@
                 console.error(err);
                 alert(err.message);
             }
+        }
+
+        // ===== Hunt bridge: propose -> approval card -> confirm -> live console =====
+        function huntEscape(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => (
+                { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+            ));
+        }
+
+        async function tryProposeHunt(cid, message, container) {
+            let data;
+            try {
+                const fd = new FormData();
+                fd.set('cid', cid || '');
+                fd.set('message', message);
+                const res = await fetch('/hunt/propose', { method: 'POST', body: fd });
+                if (!res.ok) return false;
+                data = await res.json();
+            } catch (err) {
+                console.error(err);
+                return false;
+            }
+            if (!data || !data.is_hunt) return false;
+            renderHuntCard(container, data);
+            return true;
+        }
+
+        function renderHuntCard(container, data) {
+            const cardId = 'hunt-' + Date.now();
+            let inner;
+            if (!data.allowed) {
+                inner = `
+                    <div class="hunt-card denied" id="${cardId}">
+                        <h4>Hunt blocked</h4>
+                        <div class="hunt-row">Target: <b>${huntEscape(data.target)}</b> <span class="hunt-badge out">${huntEscape(data.scope_state || 'DENIED')}</span></div>
+                        <div class="hunt-row">${huntEscape(data.reason)}</div>
+                    </div>`;
+            } else {
+                const badge = data.establishes_scope
+                    ? '<span class="hunt-badge new">NEW SCOPE</span>'
+                    : '<span class="hunt-badge in">IN SCOPE</span>';
+                inner = `
+                    <div class="hunt-card" id="${cardId}">
+                        <h4>Confirm hunt</h4>
+                        <div class="hunt-row">Target: <b>${huntEscape(data.target)}</b> ${badge}</div>
+                        <div class="hunt-row">Profile: <b>${huntEscape(data.profile)}</b></div>
+                        <div class="hunt-row">${huntEscape(data.reason)}</div>
+                        <div class="hunt-actions">
+                            <button class="hunt-btn confirm" onclick="confirmHunt('${data.nonce}', '${cardId}')">Confirm &amp; launch</button>
+                            <button class="hunt-btn deny" onclick="document.getElementById('${cardId}').remove()">Cancel</button>
+                        </div>
+                    </div>`;
+            }
+            const wrap = `<div class="message-container assistant-message-container"><div class="message assistant-message">${inner}</div></div>`;
+            container.insertAdjacentHTML('beforeend', wrap);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function confirmHunt(nonce, cardId) {
+            const card = document.getElementById(cardId);
+            if (card) card.querySelectorAll('button').forEach(b => b.disabled = true);
+            try {
+                const fd = new FormData();
+                fd.set('nonce', nonce);
+                const res = await fetch('/hunt/confirm', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (!data.started) {
+                    if (card) card.insertAdjacentHTML('beforeend', `<div class="hunt-row" style="color:#ef9a9a;">${huntEscape(data.reason)}</div>`);
+                    return;
+                }
+                if (card) card.insertAdjacentHTML('beforeend', `<div class="hunt-row" style="color:#a5d6a7;">Launched mission ${huntEscape(data.mission_id)}.</div>`);
+                startHuntConsole(data.mission_id);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        let huntEventSource = null;
+        let huntGraphTimer = null;
+        let huntNetwork = null;
+        const HUNT_TERMINAL = ['MissionCompleted', 'MissionFailed', 'MissionCancelled'];
+
+        function stopHuntStream() {
+            if (huntEventSource) { huntEventSource.close(); huntEventSource = null; }
+            if (huntGraphTimer) { clearInterval(huntGraphTimer); huntGraphTimer = null; }
+        }
+
+        function startHuntConsole(missionId) {
+            stopHuntStream();
+            document.getElementById('hunt-console').style.display = 'block';
+            document.getElementById('hunt-status').textContent = 'Hunting (mission ' + missionId + ')...';
+            document.getElementById('hunt-feed').innerHTML = '';
+
+            huntEventSource = new EventSource('/hunt/stream/' + encodeURIComponent(missionId));
+            huntEventSource.onmessage = (e) => {
+                let evt; try { evt = JSON.parse(e.data); } catch (_) { return; }
+                appendHuntEvent(evt);
+                if (HUNT_TERMINAL.includes(evt.type)) {
+                    document.getElementById('hunt-status').textContent = 'Finished: ' + evt.type;
+                    pollHuntGraph(missionId);
+                    stopHuntStream();
+                }
+            };
+
+            pollHuntGraph(missionId);
+            huntGraphTimer = setInterval(() => pollHuntGraph(missionId), 3000);
+        }
+
+        function appendHuntEvent(evt) {
+            const feed = document.getElementById('hunt-feed');
+            const detail = evt.details && Object.keys(evt.details).length ? ' ' + huntEscape(JSON.stringify(evt.details)) : '';
+            feed.insertAdjacentHTML('beforeend', `<div class="hunt-ev"><span class="et">${huntEscape(evt.type)}</span>${detail}</div>`);
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        async function pollHuntGraph(missionId) {
+            try {
+                const res = await fetch('/api/investigations/default/graph?mission_id=' + encodeURIComponent(missionId));
+                if (!res.ok) return;
+                const data = await res.json();
+                const graphData = { nodes: new vis.DataSet(data.nodes), edges: new vis.DataSet(data.edges) };
+                const options = {
+                    nodes: { shape: 'dot', size: 12, font: { color: '#ffffff', size: 11 } },
+                    edges: { color: { color: '#888888' }, arrows: { to: { enabled: true, scaleFactor: 0.4 } } },
+                    physics: { barnesHut: { gravitationalConstant: -2000, centralGravity: 0.3, springLength: 80 } }
+                };
+                if (huntNetwork) huntNetwork.destroy();
+                huntNetwork = new vis.Network(document.getElementById('hunt-graph'), graphData, options);
+            } catch (err) { console.error(err); }
         }
 
         loadProjects();
