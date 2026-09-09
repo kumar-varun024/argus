@@ -99,3 +99,23 @@ class EventBus:
     def get_history(self) -> List[RuntimeEvent]:
         """Return the event history."""
         return self.history
+
+
+_event_bus = EventBus()
+
+
+def get_event_bus() -> EventBus:
+    """Return the process-wide shared runtime event bus.
+
+    Publishers and observers (e.g. the workspace hunt-console SSE stream) must
+    rendezvous on ONE instance. Lifecycle publishers that previously did
+    ``EventBus().publish(...)`` created throwaway buses whose subscribers and
+    history went nowhere; routing them through this shared instance makes their
+    events observable without changing what gets logged (the default
+    observability logger is still attached exactly once, here).
+
+    NOTE: this is intentionally NOT used by the task executor, whose private bus
+    drives per-mission storage via a subscriber that is not mission-scoped;
+    globalizing that bus would cross-contaminate missions.
+    """
+    return _event_bus

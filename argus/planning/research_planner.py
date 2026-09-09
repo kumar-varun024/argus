@@ -117,8 +117,8 @@ class ResearchPlanner:
                 if hints:
                     task.context["knowledge_base_hints"] = list(hints)[:5] # limit to top 5
                     
-            from argus.runtime.events import EventBus, RuntimeEventType
-            EventBus().publish(RuntimeEventType.KNOWLEDGE_RETRIEVED, str(self.mission.id), details={"knowledge_count": len(knowledge_context)})
+            from argus.runtime.events import get_event_bus, RuntimeEventType
+            get_event_bus().publish(RuntimeEventType.KNOWLEDGE_RETRIEVED, str(self.mission.id), details={"knowledge_count": len(knowledge_context)})
                     
         except Exception as e:
             logger.warning(f"Failed to query KnowledgeManager: {e}")

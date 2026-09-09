@@ -207,8 +207,8 @@ class AutonomousMissionRuntime:
 
         # 4. Investigation & Hypothesis
         elif mission.status == MissionState.BUILDING_INVESTIGATIONS:
-            from argus.runtime.events import EventBus, RuntimeEventType
-            EventBus().publish(RuntimeEventType.INVESTIGATION_STARTED, mission.id)
+            from argus.runtime.events import get_event_bus, RuntimeEventType
+            get_event_bus().publish(RuntimeEventType.INVESTIGATION_STARTED, mission.id)
             self.investigation_builder.build_all(mission)
             self.investigation_builder.prioritize_all(mission)
             self.state_machine.transition_to(MissionState.GENERATING_HYPOTHESES, "Generating hypotheses")
@@ -236,8 +236,8 @@ class AutonomousMissionRuntime:
                                 mission.reports.append(path)
                     except Exception as e:
                         logger.warning(f"Report generation failed on mission complete: {e}")
-                    from argus.runtime.events import EventBus, RuntimeEventType
-                    EventBus().publish(RuntimeEventType.MISSION_COMPLETED, mission.id)
+                    from argus.runtime.events import get_event_bus, RuntimeEventType
+                    get_event_bus().publish(RuntimeEventType.MISSION_COMPLETED, mission.id)
                 elif action == CheckpointAction.MODIFY_PLAN:
                     self.state_machine.transition_to(MissionState.PLANNING, "Checkpoint triggered replanning")
                 else:
@@ -264,8 +264,8 @@ class AutonomousMissionRuntime:
             logger.error(f"Mission {self.context.mission.id} failed unexpectedly: {e}", exc_info=True)
             try:
                 self.state_machine.transition_to(MissionState.FAILED, str(e))
-                from argus.runtime.events import EventBus, RuntimeEventType
-                EventBus().publish(RuntimeEventType.MISSION_FAILED, self.context.mission.id, details={"error": str(e)})
+                from argus.runtime.events import get_event_bus, RuntimeEventType
+                get_event_bus().publish(RuntimeEventType.MISSION_FAILED, self.context.mission.id, details={"error": str(e)})
             except TransitionError:
                 pass # Already terminal
         finally:

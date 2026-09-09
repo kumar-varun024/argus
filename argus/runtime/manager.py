@@ -21,8 +21,8 @@ class MissionManager:
         self._active_missions[mission.id] = mission
         self.checkpointer.checkpoint(mission)
         
-        from argus.runtime.events import EventBus, RuntimeEventType
-        EventBus().publish(RuntimeEventType.MISSION_CREATED, mission.id, details={"target": target})
+        from argus.runtime.events import get_event_bus, RuntimeEventType
+        get_event_bus().publish(RuntimeEventType.MISSION_CREATED, mission.id, details={"target": target})
         
         return mission
 
