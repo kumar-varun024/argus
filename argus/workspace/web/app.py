@@ -4,12 +4,14 @@ from typing import List
 from fastapi import FastAPI, Request, Form, UploadFile, File, Query, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse, JSONResponse
 import uvicorn
 
 from argus.workspace.models import Conversation, ImageAttachment
 from argus.workspace.engine import ConversationEngine
 from argus.workspace.api import router as api_router, repository, storage, vision
+from argus.workspace import huntOrchestrator
+from argus.workspace.huntBridge import hunt_bridge
 
 app = FastAPI(title="Argus Multimodal Workspace")
 app.include_router(api_router)
@@ -221,6 +223,40 @@ def get_provider_status():
         "model": provider.model_name(),
         "configured": True
     }
+
+@app.post("/hunt/propose")
+async def post_hunt_propose(cid: str = Form(""), message: str = Form(...)):
+    """Classify a chat message: if it's a hunt command, return an approval-card
+    proposal (scope decision + single-use nonce); otherwise {is_hunt: false}."""
+    current_user = "local_user"
+    mission_id = ""
+    if cid:
+        conversation = repository.get(cid)
+        if conversation and conversation.user_id == current_user:
+            mission_id = conversation.mission_id or ""
+    proposal = huntOrchestrator.maybeProposeHunt(message, mission_id, current_user, bridge=hunt_bridge)
+    if proposal is None:
+        return JSONResponse({"is_hunt": False})
+    return JSONResponse(huntOrchestrator.proposalToDict(proposal))
+
+
+@app.post("/hunt/confirm")
+async def post_hunt_confirm(nonce: str = Form(...)):
+    """Consume a confirmation nonce and dispatch the hunt (authorization is
+    re-verified inside the bridge). Returns the started mission id."""
+    dispatch = hunt_bridge.confirmHunt(nonce, "local_user")
+    return JSONResponse(huntOrchestrator.dispatchToDict(dispatch))
+
+
+@app.get("/hunt/stream/{mission_id}")
+async def get_hunt_stream(mission_id: str, request: Request):
+    """Server-Sent Events stream of one mission's live lifecycle events."""
+    return StreamingResponse(
+        huntOrchestrator.streamMissionEvents(mission_id, request=request),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
 
 def start_server(host: str = "127.0.0.1", port: int = 8000):
     """Starts the Uvicorn web server for the workspace."""

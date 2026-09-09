@@ -81,6 +81,15 @@ class EventBus:
         """Register a callback for all events."""
         self.subscribers.append(callback)
 
+    def unsubscribe(self, callback: Callable[[RuntimeEvent], None]):
+        """Remove a previously-registered callback (no-op if absent). Lets
+        transient observers, e.g. an SSE stream per HTTP request, detach on
+        disconnect so the subscriber list does not grow unbounded."""
+        try:
+            self.subscribers.remove(callback)
+        except ValueError:
+            pass
+
     def publish(self, event_type: RuntimeEventType, mission_id: str, details: Any = None):
         """Create and publish an event to all subscribers."""
         event = RuntimeEvent(
