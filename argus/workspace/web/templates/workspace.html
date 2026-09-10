@@ -125,6 +125,7 @@
         #hunt-feed { max-height: 200px; overflow-y: auto; font-size: 12px; font-family: monospace; margin-top: 6px; }
         .hunt-ev { padding: 3px 0; border-bottom: 1px solid var(--border-color); color: var(--text-muted); }
         .hunt-ev .et { color: #4fc3f7; font-weight: 600; }
+        .hunt-snip { white-space: pre-wrap; color: #8a8a8a; font-size: 11px; margin: 2px 0 4px 10px; max-height: 120px; overflow-y: auto; }
         #hunt-graph { height: 220px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; margin-top: 8px; }
         .hunt-status { font-size: 12px; color: #90caf9; }
     </style>
@@ -1038,9 +1039,50 @@
 
         function appendHuntEvent(evt) {
             const feed = document.getElementById('hunt-feed');
-            const detail = evt.details && Object.keys(evt.details).length ? ' ' + huntEscape(JSON.stringify(evt.details)) : '';
-            feed.insertAdjacentHTML('beforeend', `<div class="hunt-ev"><span class="et">${huntEscape(evt.type)}</span>${detail}</div>`);
+            const d = evt.details || {};
+            if (evt.type === 'CheckpointReached' && d.kind === 'command_approval') {
+                renderCommandApproval(feed, d);
+            } else if (evt.type === 'ToolStarted') {
+                feed.insertAdjacentHTML('beforeend', `<div class="hunt-ev"><span class="et">&#9654; ${huntEscape(d.tool || '')}</span> ${huntEscape((d.args || []).join(' '))}</div>`);
+            } else if (evt.type === 'ToolCompleted') {
+                const snip = d.snippet ? `<div class="hunt-snip">${huntEscape(d.snippet)}</div>` : '';
+                feed.insertAdjacentHTML('beforeend', `<div class="hunt-ev"><span class="et">&#10003; ${huntEscape(d.tool || '')}</span> exit ${huntEscape(String(d.returncode))}${snip}</div>`);
+            } else if (evt.type === 'ToolFailed') {
+                feed.insertAdjacentHTML('beforeend', `<div class="hunt-ev"><span class="et" style="color:#ef9a9a;">&#10007; ${huntEscape(d.tool || '')}</span> ${huntEscape(d.error || '')}</div>`);
+            } else {
+                const detail = Object.keys(d).length ? ' ' + huntEscape(JSON.stringify(d)) : '';
+                feed.insertAdjacentHTML('beforeend', `<div class="hunt-ev"><span class="et">${huntEscape(evt.type)}</span>${detail}</div>`);
+            }
             feed.scrollTop = feed.scrollHeight;
+        }
+
+        function renderCommandApproval(feed, d) {
+            const cardId = 'cmdapp-' + d.nonce;
+            if (document.getElementById(cardId)) return;  // dedupe replays
+            const args = huntEscape((d.args || []).join(' '));
+            feed.insertAdjacentHTML('beforeend', `
+                <div class="hunt-card" id="${cardId}" style="margin:6px 0;">
+                    <h4>Approve command?</h4>
+                    <div class="hunt-row"><b>${huntEscape(d.tool || '')}</b> ${args}</div>
+                    <div class="hunt-row">${huntEscape(d.reason || '')}</div>
+                    <div class="hunt-actions">
+                        <button class="hunt-btn confirm" onclick="confirmCommand('${d.nonce}', true, '${cardId}')">Approve</button>
+                        <button class="hunt-btn deny" onclick="confirmCommand('${d.nonce}', false, '${cardId}')">Deny</button>
+                    </div>
+                </div>`);
+            feed.scrollTop = feed.scrollHeight;
+        }
+
+        async function confirmCommand(nonce, approve, cardId) {
+            const card = document.getElementById(cardId);
+            if (card) card.querySelectorAll('button').forEach(b => b.disabled = true);
+            try {
+                const fd = new FormData();
+                fd.set('nonce', nonce);
+                fd.set('approve', approve ? 'true' : 'false');
+                await fetch('/hunt/command/confirm', { method: 'POST', body: fd });
+                if (card) card.insertAdjacentHTML('beforeend', `<div class="hunt-row" style="color:${approve ? '#a5d6a7' : '#ef9a9a'};">${approve ? 'Approved' : 'Denied'}.</div>`);
+            } catch (err) { console.error(err); }
         }
 
         async function pollHuntGraph(missionId) {
