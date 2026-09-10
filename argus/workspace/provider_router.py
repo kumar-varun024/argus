@@ -14,6 +14,13 @@ from argus.workspace.provider import (
 
 logger = logging.getLogger("argus.workspace.provider_router")
 
+# A 400 is a malformed request: our own bug, it would fail identically on every
+# provider, so it aborts the whole chain. Every other status (auth, quota,
+# model-not-found, rate-limit, 5xx, timeout) is per-provider -- the next route
+# may succeed -- so it must fail over, never abort.
+MALFORMED_REQUEST_STATUS: int = 400
+DEAD_CREDENTIAL_STATUSES: tuple = (401, 403)
+
 @dataclass
 class ProviderRoute:
     provider_name: str
@@ -62,6 +69,21 @@ class ProviderRouter(AIModelProvider):
     def _log_failover(self, route: ProviderRoute, error: Exception):
         logger.warning(f"provider={route.provider_name} model={route.model_name} error=\"{str(error)}\" action=failover")
 
+    def _note_route_failure(self, route: ProviderRoute, error: ProviderError) -> None:
+        """Record one route's failure so the chain can fail over to the next
+        route. Raises only for a universal (malformed-request) failure that
+        would recur identically on every provider; every per-provider failure
+        marks the route (dead credential -> disabled; anything else -> cooldown)
+        and returns so the caller continues down the chain."""
+        if error.status_code == MALFORMED_REQUEST_STATUS:
+            logger.error(f"provider={route.provider_name} model={route.model_name} error=\"{str(error)}\" action=fatal")
+            raise error
+        self._log_failover(route, error)
+        if error.status_code in DEAD_CREDENTIAL_STATUSES:
+            route.enabled = False
+        else:
+            route.unhealthy_until = time.time() + self.cooldown_seconds
+
     def generate(self, messages: List[Message], system_prompt: str = "", **kwargs) -> str:
         last_error = None
         for route in self._get_healthy_routes():
@@ -70,19 +92,9 @@ class ProviderRouter(AIModelProvider):
                 self._log_success(route)
                 return result
             except ProviderError as e:
-                if e.status_code in (401, 403):
-                    self._log_failover(route, e)
-                    route.enabled = False
-                    last_error = e
-                    continue
-                elif getattr(e, 'retryable', False):
-                    self._log_failover(route, e)
-                    route.unhealthy_until = time.time() + self.cooldown_seconds
-                    last_error = e
-                    continue
-                else:
-                    logger.error(f"provider={route.provider_name} model={route.model_name} error=\"{str(e)}\" action=fatal")
-                    raise
+                self._note_route_failure(route, e)
+                last_error = e
+                continue
         if last_error:
             raise ProviderError(f"All providers exhausted. Last error: {last_error}", retryable=True)
         raise ProviderError("No healthy providers available", retryable=True)
@@ -101,20 +113,9 @@ class ProviderRouter(AIModelProvider):
                 if yielded:
                     logger.error(f"provider={route.provider_name} model={route.model_name} error=\"{str(e)}\" action=fatal_mid_stream")
                     raise
-                if e.status_code in (401, 403):
-                    self._log_failover(route, e)
-                    route.enabled = False
-                    last_error = e
-                    continue
-                elif getattr(e, 'retryable', False):
-                    self._log_failover(route, e)
-                    route.unhealthy_until = time.time() + self.cooldown_seconds
-                    last_error = e
-                    continue
-                else:
-                    logger.error(f"provider={route.provider_name} model={route.model_name} error=\"{str(e)}\" action=fatal")
-                    raise
-                    
+                self._note_route_failure(route, e)
+                last_error = e
+                continue
         if last_error:
             raise ProviderError(f"All providers exhausted. Last error: {last_error}", retryable=True)
         raise ProviderError("No healthy providers available", retryable=True)
@@ -127,19 +128,9 @@ class ProviderRouter(AIModelProvider):
                 self._log_success(route)
                 return result
             except ProviderError as e:
-                if e.status_code in (401, 403):
-                    self._log_failover(route, e)
-                    route.enabled = False
-                    last_error = e
-                    continue
-                elif getattr(e, 'retryable', False):
-                    self._log_failover(route, e)
-                    route.unhealthy_until = time.time() + self.cooldown_seconds
-                    last_error = e
-                    continue
-                else:
-                    logger.error(f"provider={route.provider_name} model={route.model_name} error=\"{str(e)}\" action=fatal")
-                    raise
+                self._note_route_failure(route, e)
+                last_error = e
+                continue
         if last_error:
             raise ProviderError(f"All providers exhausted. Last error: {last_error}", retryable=True)
         raise ProviderError("No healthy providers available", retryable=True)
@@ -166,7 +157,7 @@ def _build_gemini_route(priority: int) -> Optional[ProviderRoute]:
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         return None
-    model = os.environ.get("GEMINI_MODEL_NAME", "gemini-1.5-flash")
+    model = os.environ.get("GEMINI_MODEL_NAME", "gemini-2.5-flash")
     route = ProviderRoute(
         provider_name="gemini",
         api_base="https://generativelanguage.googleapis.com",

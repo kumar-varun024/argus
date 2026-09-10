@@ -8,6 +8,12 @@ from abc import ABC, abstractmethod
 from typing import List, Dict, Any, AsyncGenerator, Optional
 from argus.workspace.models import Message, ImageAttachment
 
+# Per-request HTTP timeout for LLM calls. 30s is too short for a reasoning model
+# on a large system prompt (e.g. the hunt-agent tool catalog), so the default is
+# generous and overridable per environment.
+LLM_TIMEOUT_SECONDS: float = float(os.environ.get("ARGUS_LLM_TIMEOUT_SECONDS", "60"))
+
+
 class ProviderError(Exception):
     """Exception raised for provider-specific failures."""
     def __init__(self, message: str, retryable: bool = False, status_code: Optional[int] = None):
@@ -18,9 +24,13 @@ class ProviderError(Exception):
 def _is_retryable_httpx_error(e: httpx.HTTPError) -> bool:
     if isinstance(e, httpx.HTTPStatusError):
         code = e.response.status_code
-        if code in (400, 404):
+        # 400 is a malformed request -- it would fail identically on every
+        # provider, so it is fatal. 404 is provider-specific (this provider does
+        # not have that model); the next route has a different model and may
+        # succeed, so it must fail over, not abort the chain.
+        if code == 400:
             return False
-        return code in (401, 403, 429) or 500 <= code < 600
+        return code in (401, 403, 404, 429) or 500 <= code < 600
     if isinstance(e, httpx.RequestError):
         return True
     return False
@@ -135,7 +145,7 @@ class OpenAICompatibleProvider(AIModelProvider):
             "messages": self._format_messages(messages, system_prompt)
         }
         try:
-            with httpx.Client(timeout=30.0) as client:
+            with httpx.Client(timeout=LLM_TIMEOUT_SECONDS) as client:
                 resp = client.post(url, headers=headers, json=payload)
                 resp.raise_for_status()
                 data = resp.json()
@@ -155,7 +165,7 @@ class OpenAICompatibleProvider(AIModelProvider):
             "stream": True
         }
         try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            async with httpx.AsyncClient(timeout=LLM_TIMEOUT_SECONDS) as client:
                 async with client.stream("POST", url, headers=headers, json=payload) as resp:
                     resp.raise_for_status()
                     async for line in resp.aiter_lines():
@@ -184,7 +194,7 @@ class OpenAICompatibleProvider(AIModelProvider):
             "messages": self._format_messages(messages, system_prompt, images)
         }
         try:
-            with httpx.Client(timeout=30.0) as client:
+            with httpx.Client(timeout=LLM_TIMEOUT_SECONDS) as client:
                 resp = client.post(url, headers=headers, json=payload)
                 resp.raise_for_status()
                 data = resp.json()
@@ -248,7 +258,7 @@ class GeminiProvider(AIModelProvider):
         url = f"{self.api_base}:generateContent?key={self.api_key}"
         payload = self._format_messages(messages, system_prompt)
         try:
-            with httpx.Client(timeout=30.0) as client:
+            with httpx.Client(timeout=LLM_TIMEOUT_SECONDS) as client:
                 resp = client.post(url, json=payload)
                 resp.raise_for_status()
                 data = resp.json()
@@ -263,7 +273,7 @@ class GeminiProvider(AIModelProvider):
         url = f"{self.api_base}:streamGenerateContent?alt=sse&key={self.api_key}"
         payload = self._format_messages(messages, system_prompt)
         try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            async with httpx.AsyncClient(timeout=LLM_TIMEOUT_SECONDS) as client:
                 async with client.stream("POST", url, json=payload) as resp:
                     resp.raise_for_status()
                     async for line in resp.aiter_lines():
@@ -287,7 +297,7 @@ class GeminiProvider(AIModelProvider):
         url = f"{self.api_base}:generateContent?key={self.api_key}"
         payload = self._format_messages(messages, system_prompt, images)
         try:
-            with httpx.Client(timeout=30.0) as client:
+            with httpx.Client(timeout=LLM_TIMEOUT_SECONDS) as client:
                 resp = client.post(url, json=payload)
                 resp.raise_for_status()
                 data = resp.json()

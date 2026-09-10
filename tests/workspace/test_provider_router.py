@@ -75,21 +75,63 @@ def test_failover_429(mock_env, monkeypatch):
         assert not router.routes[0].is_healthy()
         assert router.routes[1].is_healthy()
 
-def test_non_retryable_errors(mock_env, monkeypatch):
+def test_per_provider_error_fails_over(mock_env, monkeypatch):
+    """A per-provider non-retryable error (e.g. 402 Payment Required, a dead
+    quota on ONE provider) must fail over to the next route -- it says nothing
+    about the other providers. This is the router's whole purpose."""
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
     monkeypatch.setenv("DEEPSEEK_API_KEY", "test-key-2")
-    
+
     router = get_default_provider()
-    
+
     with patch.object(router.routes[0].provider_instance, 'generate') as mock_1, \
          patch.object(router.routes[1].provider_instance, 'generate') as mock_2:
-         
-        # Non-retryable
-        mock_1.side_effect = ProviderError("401 Unauthorized", retryable=False)
-        
+
+        mock_1.side_effect = ProviderError("402 Payment Required", retryable=False, status_code=402)
+        mock_2.return_value = "Success from second provider"
+
+        result = router.generate([Message(role="user", text="hello")])
+        assert result == "Success from second provider"
+        assert mock_1.call_count == 1
+        assert mock_2.call_count == 1
+
+
+def test_dead_credential_disables_route_then_fails_over(mock_env, monkeypatch):
+    """A 401/403 disables that route for the session (dead credential) but still
+    fails over to the next healthy route."""
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "test-key-2")
+
+    router = get_default_provider()
+
+    with patch.object(router.routes[0].provider_instance, 'generate') as mock_1, \
+         patch.object(router.routes[1].provider_instance, 'generate') as mock_2:
+
+        mock_1.side_effect = ProviderError("401 Unauthorized", retryable=False, status_code=401)
+        mock_2.return_value = "Success from second provider"
+
+        result = router.generate([Message(role="user", text="hello")])
+        assert result == "Success from second provider"
+        assert router.routes[0].enabled is False
+        assert mock_2.call_count == 1
+
+
+def test_malformed_request_400_is_fatal(mock_env, monkeypatch):
+    """A 400 is our own malformed request -- it would fail identically on every
+    provider, so it aborts the chain immediately without trying the next one."""
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "test-key-2")
+
+    router = get_default_provider()
+
+    with patch.object(router.routes[0].provider_instance, 'generate') as mock_1, \
+         patch.object(router.routes[1].provider_instance, 'generate') as mock_2:
+
+        mock_1.side_effect = ProviderError("400 Bad Request", retryable=False, status_code=400)
+
         with pytest.raises(ProviderError):
             router.generate([Message(role="user", text="hello")])
-            
+
         assert mock_1.call_count == 1
         assert mock_2.call_count == 0
 
