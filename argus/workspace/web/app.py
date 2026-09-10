@@ -12,6 +12,7 @@ from argus.workspace.engine import ConversationEngine
 from argus.workspace.api import router as api_router, repository, storage, vision
 from argus.workspace import huntOrchestrator
 from argus.workspace.huntBridge import hunt_bridge
+from argus.agent.agentRunner import hunt_agent_runner, resolveCommandApproval
 
 app = FastAPI(title="Argus Multimodal Workspace")
 app.include_router(api_router)
@@ -256,6 +257,21 @@ async def get_hunt_stream(mission_id: str, request: Request):
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+@app.post("/hunt/command/confirm")
+async def post_hunt_command_confirm(nonce: str = Form(...), approve: bool = Form(True)):
+    """Resolve a mid-hunt command-approval request (active tool). The agent
+    thread is blocked on this nonce; resolving it lets the command run or skip."""
+    resolved = resolveCommandApproval(nonce, approve)
+    return JSONResponse({"resolved": resolved})
+
+
+@app.post("/hunt/cancel")
+async def post_hunt_cancel(mission_id: str = Form(...)):
+    """Kill switch: signal the agent loop for this mission to stop."""
+    hunt_agent_runner.cancel(mission_id)
+    return JSONResponse({"cancelled": True})
 
 
 def start_server(host: str = "127.0.0.1", port: int = 8000):

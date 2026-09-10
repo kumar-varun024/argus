@@ -99,10 +99,13 @@ class HuntBridge:
         self._lock = threading.Lock()
 
     def _getController(self):
+        # Default hunt engine is the agentic loop (AgentHuntEngine exposes the
+        # same .start(mission) interface). Lazy import avoids a workspace<->agent
+        # import cycle. Injecting `controller` (e.g. a fake or the deterministic
+        # MissionController) still overrides this.
         if self._controller is None:
-            from argus.runtime.checkpoint import MissionCheckpointer
-            from argus.runtime.controller import MissionController
-            self._controller = MissionController(MissionCheckpointer())
+            from argus.agent.agentRunner import AgentHuntEngine
+            self._controller = AgentHuntEngine()
         return self._controller
 
     def _mint(self, request: HuntRequest, mission_id: Optional[str], user_id: str, establishes_scope: bool) -> str:
