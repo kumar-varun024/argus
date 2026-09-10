@@ -304,6 +304,19 @@ def get_default_provider() -> AIModelProvider:
         apply_primary_model(openrouter_route)
         routes.append(openrouter_route)
 
+    # Groq: free, OpenAI-compatible, very fast open-model host. Serves as the
+    # fast TEXT fallback in place of NVIDIA's endpoint (whose serverless models
+    # are unprovisioned / capacity-exhausted / time out for most accounts).
+    groq_route = _build_openai_compatible_route(
+        "groq",
+        get_priority("groq", 15),
+        "https://api.groq.com/openai/v1",
+        "llama-3.3-70b-versatile",
+    )
+    if groq_route:
+        apply_primary_model(groq_route)
+        routes.append(groq_route)
+
     # Generic Local / Custom OpenAI Compatible
     local_route = _build_openai_compatible_route("local", get_priority("local", 50), "http://localhost:8000/v1", "local-model")
     if local_route:
