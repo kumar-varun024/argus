@@ -2,17 +2,15 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from uuid import uuid4
 from datetime import datetime
-from enum import Enum
-import ipaddress
 import typing
 from typing import Any, Optional
-from urllib.parse import urlparse
 
 from argus.evidence import EvidenceStore
 from argus.facts import FactStore
 from argus.models import AuthenticationModel, TestIdentity
 from argus.reporting.queue import ResearchQueue
 from argus.graph.graph import KnowledgeGraph
+from argus.runtime.mission_state import MissionState, GraphQLState, JavaScriptState
 
 if typing.TYPE_CHECKING:
     from argus.ai.models import AIResponse
@@ -23,130 +21,10 @@ if typing.TYPE_CHECKING:
     from argus.agents.results import AgentResult, AgentHealth, AgentMetric
     from argus.execution.results import ExecutionPlanResult
 
-class MissionState(str, Enum):
-    CREATED = "CREATED"
-    READY = "READY"
-    RUNNING = "RUNNING"
-    PLANNING = "PLANNING"
-    RESEARCHING = "RESEARCHING"
-    COLLECTING_EVIDENCE = "COLLECTING_EVIDENCE"
-    CORRELATING = "CORRELATING"
-    BUILDING_INVESTIGATIONS = "BUILDING_INVESTIGATIONS"
-    GENERATING_HYPOTHESES = "GENERATING_HYPOTHESES"
-    WAITING_FOR_APPROVAL = "WAITING_FOR_APPROVAL"
-    COMPLETED = "COMPLETED"
-    PAUSED = "PAUSED"
-    CANCELLED = "CANCELLED"
-    FAILED = "FAILED"
-    RECOVERING = "RECOVERING"
 
-@dataclass
-class GraphQLState:
-    endpoints: list = field(default_factory=list)
-    schemas: list = field(default_factory=list)
-    types: dict = field(default_factory=dict)
-    operations: list = field(default_factory=list)
-    enums: list = field(default_factory=list)
-    interfaces: list = field(default_factory=list)
-    unions: list = field(default_factory=list)
-    relationships: list = field(default_factory=list)
-    workflows: list = field(default_factory=list)
-    business_objects: list = field(default_factory=list)
-    crud: list = field(default_factory=list)
-    relationship_graph: Any = None
-    investigations: list = field(default_factory=list)
-    priority_queue: list = field(default_factory=list)
-    reasoning: list = field(default_factory=list)
-
-@dataclass
-class JavaScriptState:
-    files: list = field(default_factory=list)
-    manifests: list = field(default_factory=list)
-    sourcemaps: list = field(default_factory=list)
-    endpoints: list = field(default_factory=list)
-    frameworks: list = field(default_factory=list)
-    observations: list = field(default_factory=list)
-    investigations: list = field(default_factory=list)
-    ast: list = field(default_factory=list)
-    modules: list = field(default_factory=list)
-    symbols: list = field(default_factory=list)
-    routes: list = field(default_factory=list)
-    websocket: list = field(default_factory=list)
-    processed_hashes: set = field(default_factory=set)
-
-
-def _derive_default_scope(target: str) -> list[str]:
-    """Derives default authorization scope rules from a mission target string."""
-    if not target or not isinstance(target, str):
-        return []
-    target = target.strip()
-    if not target:
-        return []
-
-    # Check if target is a wildcard domain like *.example.com
-    if target.startswith("*."):
-        base = target[2:].strip()
-        return [target, base] if base else [target]
-
-    # Check if target is a full URL with scheme
-    if "://" in target or target.startswith(("http://", "https://")):
-        try:
-            parsed = urlparse(target)
-            host = parsed.hostname or parsed.netloc.split(":")[0]
-        except Exception:
-            host = target
-    else:
-        # Check CIDR notation first (e.g., 10.0.0.0/24)
-        if "/" in target:
-            try:
-                ipaddress.ip_network(target, strict=False)
-                return [target]
-            except ValueError:
-                # Path without scheme, e.g. example.com/api or 192.168.1.1/api
-                host = target.split("/")[0]
-        else:
-            host = target
-
-        # Handle host:port notation (excluding pure IPv6 addresses)
-        if ":" in host and not host.startswith("["):
-            try:
-                ipaddress.ip_address(host)
-            except ValueError:
-                # Check if it has a port at the end (e.g., api.example.com:8080)
-                parts = host.rsplit(":", 1)
-                if len(parts) == 2 and parts[1].isdigit():
-                    host = parts[0]
-
-    if not host:
-        return []
-
-    # Strip IPv6 enclosing brackets if present (e.g., [::1] or [::1]:9000)
-    if host.startswith("[") and "]" in host:
-        host = host[1:host.index("]")]
-    elif host.startswith("[") and host.endswith("]"):
-        host = host[1:-1]
-
-    # Check if host is a valid IP address (IPv4 or IPv6)
-    try:
-        ipaddress.ip_address(host)
-        return [host]
-    except ValueError:
-        pass
-
-    # Check if host is a valid CIDR network
-    try:
-        ipaddress.ip_network(host, strict=False)
-        return [host]
-    except ValueError:
-        pass
-
-    # Check if host is wildcard
-    if host.startswith("*."):
-        base = host[2:].strip()
-        return [host, base] if base else [host]
-
-    # Domain or hostname
-    return [host, f"*.{host}"]
+# Scope derivation now lives in argus.mission.scope (pure, unit-tested helper).
+# Imported here under its historical name to preserve existing behavior/callers.
+from argus.mission.scope import derive_default_scope as _derive_default_scope
 
 
 @dataclass

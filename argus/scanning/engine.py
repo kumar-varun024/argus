@@ -54,104 +54,18 @@ class ScanEngine:
         """
         Dynamically resolves and instantiates the collector for a given ScanTask
         without hardcoded imports in the caller.
+
+        Delegates to the canonical
+        :class:`argus.core.execution.resolver.CollectorResolver`, which owns the
+        single id -> collector mapping shared with the plugin adapter.
         """
-        if self.collector_factory is not None:
-            inst = self.collector_factory(task)
-            if inst is not None:
-                return inst
-
-        tool_id = task.tool_id or task.key
-
-        # 1. Specialist fallback instantiation from PluginExecutorAdapter
-        inst = self.adapter._instantiate_specialist_fallback(tool_id)
-        if inst is not None:
-            return inst
-
-        if task.key != tool_id:
-            inst = self.adapter._instantiate_specialist_fallback(task.key)
-            if inst is not None:
-                return inst
-
-        # 2. Dynamic lookup from argus.collectors
-        collector_class_map = {
-            "subfinder": "SubfinderCollector",
-            "httpx": "HttpxCollector",
-            "katana_crawler": "KatanaCollector",
-            "katana": "KatanaCollector",
-            "crawler": "KatanaCollector",
-            "nuclei": "NucleiCollector",
-            "javascript": "JavaScriptCollector",
-            "technology": "TechnologyCollector",
-            "takeover": "SubdomainTakeoverCollector",
-            "subdomain_takeover": "SubdomainTakeoverCollector",
-            "info_disclosure": "InformationDisclosureCollector",
-            "information_disclosure": "InformationDisclosureCollector",
-            "access_control": "AccessControlCollector",
-            "path_traversal": "PathTraversalCollector",
-            "sql_injection": "SQLInjectionCollector",
-            "xss": "XSSCollector",
-            "command_injection": "CommandInjectionCollector",
-            "ssrf": "SSRFCollector",
-            "oauth": "OAuthCollector",
-            "xml_parser_validation": "XMLParserSecurityCollector",
-            "xml_parser": "XMLParserSecurityCollector",
-            "deserialization": "DeserializationCollector",
-            "graphql_security": "GraphQLSecurityCollector",
-            "websocket_security": "WebSocketSecurityCollector",
-            "request_smuggling": "HTTPRequestSmugglingCollector",
-            "race_conditions": "RaceConditionsCollector",
-            "business_logic": "BusinessLogicCollector",
-            "ssti": "SSTICollector",
-            "cache_security": "CacheSecurityCollector",
-            "cors_security": "CORSSecurityCollector",
-            "file_upload": "FileUploadCollector",
-            "api_security": "APISecurityCollector",
-            "auth_bypass": "AuthBypassCollector",
-            "authentication_bypass": "AuthBypassCollector",
-            "credential_attack": "AuthBypassCollector",
-            "brute_force": "AuthBypassCollector",
-            "mfa_bypass": "AuthBypassCollector",
-            "session_fixation": "AuthBypassCollector",
-            "jwt_manipulation": "AuthBypassCollector",
-            "default_credentials": "AuthBypassCollector",
-            "prototype_pollution": "PrototypePollutionCollector",
-            "proto_pollution": "PrototypePollutionCollector",
-            "client_side_attacks": "PrototypePollutionCollector",
-            "dom_clobbering": "PrototypePollutionCollector",
-            "open_redirect": "PrototypePollutionCollector",
-            "clickjacking": "PrototypePollutionCollector",
-            "server_side_prototype_pollution": "PrototypePollutionCollector",
-            "client_side_prototype_pollution": "PrototypePollutionCollector",
-        }
-
-        # Resolve aliases via ToolRegistry
-        tool = self.registry.get(tool_id)
-        resolved_tool_id = tool.id if tool else tool_id
-
-        class_name = (
-            collector_class_map.get(resolved_tool_id)
-            or collector_class_map.get(tool_id)
-            or collector_class_map.get(task.key)
+        from argus.core.execution.resolver import default_resolver
+        return default_resolver.resolve(
+            task,
+            adapter=self.adapter,
+            registry=self.registry,
+            factory=self.collector_factory,
         )
-
-        if class_name:
-            try:
-                import argus.collectors as collectors_mod
-                cls = getattr(collectors_mod, class_name, None)
-                if cls is not None:
-                    return cls()
-            except Exception as e:
-                logger.debug(f"Failed to instantiate {class_name} from argus.collectors: {e}")
-
-        # 3. Lookup in plugin manager registry
-        try:
-            plugin = self.adapter.manager.registry.get_plugin(tool_id)
-            if plugin:
-                return plugin
-        except Exception:
-            pass
-
-        return None
 
     def _transition_mission(
         self,
