@@ -320,6 +320,22 @@ def get_default_provider() -> AIModelProvider:
         apply_primary_model(groq_route)
         routes.append(groq_route)
 
+    # Groq vision: the SAME Groq key with a vision-capable Qwen model, as a
+    # reliable vision fallback behind Gemini. Groq's quota is far more generous
+    # than the free Gemini / OpenRouter vision tiers (which rate-limit under any
+    # real load), so this is what actually keeps attach-image chat working.
+    groq_vision_key = os.environ.get("GROQ_API_KEY")
+    if groq_vision_key:
+        gv_base = os.environ.get("GROQ_API_BASE", "https://api.groq.com/openai/v1")
+        gv_model = os.environ.get("GROQ_VISION_MODEL", "qwen/qwen3.8-27b")
+        groq_vision = ProviderRoute(
+            provider_name="groq_vision", api_base=gv_base, api_key=groq_vision_key,
+            model_name=gv_model, priority=get_priority("groq_vision", 16),
+            supports_vision=True,
+        )
+        groq_vision.provider_instance = OpenAICompatibleProvider(api_base=gv_base, api_key=groq_vision_key, model=gv_model)
+        routes.append(groq_vision)
+
     # Generic Local / Custom OpenAI Compatible
     local_route = _build_openai_compatible_route("local", get_priority("local", 50), "http://localhost:8000/v1", "local-model")
     if local_route:

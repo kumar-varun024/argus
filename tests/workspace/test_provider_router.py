@@ -15,7 +15,7 @@ def mock_env(monkeypatch):
         "NVIDIA_API_KEY", "NVIDIA_MODEL_NAME", "NVIDIA_API_BASE",
         "NVIDIA_ULTRA_API_KEY", "NVIDIA_ULTRA_MODEL_NAME", "NVIDIA_ULTRA_API_BASE",
         "OPENROUTER_API_KEY", "OPENROUTER_MODEL_NAME", "OPENROUTER_API_BASE",
-        "GROQ_API_KEY", "GROQ_MODEL_NAME", "GROQ_API_BASE",
+        "GROQ_API_KEY", "GROQ_MODEL_NAME", "GROQ_API_BASE", "GROQ_VISION_MODEL",
         "LOCAL_API_KEY", "LOCAL_MODEL_NAME", "LOCAL_API_BASE",
         "ARGUS_PRIMARY_PROVIDER", "ARGUS_PRIMARY_MODEL", "ARGUS_PROVIDER_ORDER", "ARGUS_LLM_PROVIDER"
     ]
@@ -185,6 +185,21 @@ def test_groq_route_built_as_text_fallback(mock_env, monkeypatch):
     groq = next(r for r in router.routes if r.provider_name == "groq")
     assert "api.groq.com" in groq.api_base
     assert groq.supports_vision is False
+
+
+def test_groq_provides_a_vision_route(mock_env, monkeypatch):
+    """The Groq key also builds a vision-capable route (Qwen) so attach-image
+    chat has a reliable fallback when the free Gemini/OpenRouter tiers throttle."""
+    monkeypatch.setenv("GROQ_API_KEY", "gq-key")
+    router = get_default_provider()
+    gv = next((r for r in router.routes if r.provider_name == "groq_vision"), None)
+    assert gv is not None
+    assert gv.supports_vision is True
+    assert "api.groq.com" in gv.api_base
+    # and it participates in the vision-only multimodal path
+    with patch.object(gv.provider_instance, "multimodal_generate") as mm:
+        mm.return_value = "groq saw it"
+        assert router.multimodal_generate([Message(role="user", text="hi")], []) == "groq saw it"
 
 
 def test_multimodal_fails_over_between_vision_routes(mock_env, monkeypatch):
