@@ -14,6 +14,7 @@ def mock_env(monkeypatch):
         "GITHUB_API_KEY", "GITHUB_TOKEN", "GITHUB_MODEL", "GITHUB_MODEL_NAME", "GITHUB_API_BASE",
         "NVIDIA_API_KEY", "NVIDIA_MODEL_NAME", "NVIDIA_API_BASE",
         "NVIDIA_ULTRA_API_KEY", "NVIDIA_ULTRA_MODEL_NAME", "NVIDIA_ULTRA_API_BASE",
+        "OPENROUTER_API_KEY", "OPENROUTER_MODEL_NAME", "OPENROUTER_API_BASE",
         "LOCAL_API_KEY", "LOCAL_MODEL_NAME", "LOCAL_API_BASE",
         "ARGUS_PRIMARY_PROVIDER", "ARGUS_PRIMARY_MODEL", "ARGUS_PROVIDER_ORDER", "ARGUS_LLM_PROVIDER"
     ]
@@ -134,6 +135,66 @@ def test_malformed_request_400_is_fatal(mock_env, monkeypatch):
 
         assert mock_1.call_count == 1
         assert mock_2.call_count == 0
+
+def test_multimodal_uses_only_vision_routes(mock_env, monkeypatch):
+    """An image request must never be sent to a text-only route (e.g. nvidia
+    nemotron); it should skip straight to a vision-capable route."""
+    monkeypatch.setenv("NVIDIA_API_KEY", "k1")
+    monkeypatch.setenv("GEMINI_API_KEY", "k2")
+    router = get_default_provider()
+    nvidia = next(r for r in router.routes if r.provider_name == "nvidia")
+    gemini = next(r for r in router.routes if r.provider_name == "gemini")
+    assert nvidia.supports_vision is False
+    assert gemini.supports_vision is True
+
+    with patch.object(nvidia.provider_instance, 'multimodal_generate') as mm_nvidia, \
+         patch.object(gemini.provider_instance, 'multimodal_generate') as mm_gemini:
+        mm_gemini.return_value = "saw the image"
+        result = router.multimodal_generate([Message(role="user", text="hi")], [])
+        assert result == "saw the image"
+        mm_nvidia.assert_not_called()
+        mm_gemini.assert_called_once()
+
+
+def test_multimodal_no_vision_route_errors_clearly(mock_env, monkeypatch):
+    """With only text-only routes, an image request must fail with a clear
+    'no vision-capable provider' message, not a confusing downstream 400."""
+    monkeypatch.setenv("NVIDIA_API_KEY", "k1")
+    router = get_default_provider()
+    assert all(not r.supports_vision for r in router.routes)
+    with pytest.raises(ProviderError, match="vision-capable"):
+        router.multimodal_generate([Message(role="user", text="hi")], [])
+
+
+def test_openrouter_route_is_vision_capable(mock_env, monkeypatch):
+    """The OpenRouter slot is built as a vision-capable route so it can back up
+    Gemini for image requests."""
+    monkeypatch.setenv("OPENROUTER_API_KEY", "or-key")
+    router = get_default_provider()
+    orr = next(r for r in router.routes if r.provider_name == "openrouter")
+    assert orr.supports_vision is True
+    assert "openrouter.ai" in orr.api_base
+
+
+def test_multimodal_fails_over_between_vision_routes(mock_env, monkeypatch):
+    """When the primary vision route (Gemini) throttles, the image request fails
+    over to the OpenRouter vision route rather than aborting."""
+    monkeypatch.setenv("GEMINI_API_KEY", "k2")
+    monkeypatch.setenv("OPENROUTER_API_KEY", "or-key")
+    monkeypatch.setenv("ARGUS_PRIMARY_PROVIDER", "gemini")
+    router = get_default_provider()
+    gemini = next(r for r in router.routes if r.provider_name == "gemini")
+    orr = next(r for r in router.routes if r.provider_name == "openrouter")
+
+    with patch.object(gemini.provider_instance, 'multimodal_generate') as mm_gemini, \
+         patch.object(orr.provider_instance, 'multimodal_generate') as mm_or:
+        mm_gemini.side_effect = ProviderError("throttled", retryable=True, status_code=429)
+        mm_or.return_value = "openrouter saw it"
+        result = router.multimodal_generate([Message(role="user", text="hi")], [])
+        assert result == "openrouter saw it"
+        mm_gemini.assert_called_once()
+        mm_or.assert_called_once()
+
 
 def test_cooldown_behavior(mock_env, monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")

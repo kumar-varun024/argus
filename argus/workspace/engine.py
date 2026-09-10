@@ -140,9 +140,22 @@ class ConversationEngine:
         
         full_response = ""
         try:
-            async for chunk in self.provider.stream(conversation.messages[:-1], system_prompt=full_system_prompt):
-                full_response += chunk
-                yield chunk
+            if latest_msg and latest_msg.attachments:
+                # Streaming providers are text-only; a message with images must go
+                # through the multimodal path or the model never sees the image.
+                # There is no multimodal streaming API, so emit the whole answer as
+                # a single chunk. conversation.messages[:-1] includes the user
+                # message (with its attachments) but excludes the empty assistant
+                # placeholder appended above.
+                full_response = self.provider.multimodal_generate(
+                    conversation.messages[:-1], latest_msg.attachments,
+                    system_prompt=full_system_prompt,
+                )
+                yield full_response
+            else:
+                async for chunk in self.provider.stream(conversation.messages[:-1], system_prompt=full_system_prompt):
+                    full_response += chunk
+                    yield chunk
         except Exception as e:
             full_response += f"\n\n[Error generating response: {str(e)}]"
             yield f"\n\n[Error generating response: {str(e)}]"

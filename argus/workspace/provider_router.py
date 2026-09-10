@@ -31,6 +31,11 @@ class ProviderRoute:
     enabled: bool = True
     provider_instance: Optional[AIModelProvider] = None
     unhealthy_until: float = 0.0
+    # Whether this route's model can actually accept image input. Image chat must
+    # only ever be routed to vision-capable models -- failing an image request
+    # over to a text-only model (e.g. nvidia nemotron) just yields a confusing
+    # 400 and masks the real cause.
+    supports_vision: bool = False
 
     def is_healthy(self) -> bool:
         return self.enabled and time.time() > self.unhealthy_until
@@ -121,34 +126,49 @@ class ProviderRouter(AIModelProvider):
         raise ProviderError("No healthy providers available", retryable=True)
 
     def multimodal_generate(self, messages: List[Message], images: List[ImageAttachment], system_prompt: str = "", **kwargs) -> str:
+        # Image requests only ever go to vision-capable routes. Every failure --
+        # even a 400 -- fails over to the next vision route rather than aborting,
+        # because the few vision models (e.g. Gemini) return 400/429/503 all as
+        # transient throttle signals on free tiers.
+        vision_routes = [r for r in self._get_healthy_routes() if r.supports_vision]
+        if not vision_routes:
+            raise ProviderError(
+                "No vision-capable provider is available. Attach-image chat needs a "
+                "vision model (e.g. Gemini, or an OpenRouter vision model via "
+                "OPENROUTER_API_KEY); all configured vision routes are unhealthy or unset.",
+                retryable=False,
+            )
         last_error = None
-        for route in self._get_healthy_routes():
+        for route in vision_routes:
             try:
                 result = route.provider_instance.multimodal_generate(messages, images, system_prompt=system_prompt, **kwargs)
                 self._log_success(route)
                 return result
             except ProviderError as e:
-                self._note_route_failure(route, e)
+                self._log_failover(route, e)
+                if e.status_code in DEAD_CREDENTIAL_STATUSES:
+                    route.enabled = False
+                else:
+                    route.unhealthy_until = time.time() + self.cooldown_seconds
                 last_error = e
                 continue
-        if last_error:
-            raise ProviderError(f"All providers exhausted. Last error: {last_error}", retryable=True)
-        raise ProviderError("No healthy providers available", retryable=True)
+        raise ProviderError(f"All vision providers exhausted. Last error: {last_error}", retryable=True)
 
-def _build_openai_compatible_route(name: str, priority: int, default_base: str, default_model: str) -> Optional[ProviderRoute]:
+def _build_openai_compatible_route(name: str, priority: int, default_base: str, default_model: str, supports_vision: bool = False) -> Optional[ProviderRoute]:
     prefix = name.upper()
     api_key = os.environ.get(f"{prefix}_API_KEY")
     if not api_key:
         return None
     api_base = os.environ.get(f"{prefix}_API_BASE", default_base)
     model = os.environ.get(f"{prefix}_MODEL_NAME", default_model)
-    
+
     route = ProviderRoute(
         provider_name=name.lower(),
         api_base=api_base,
         api_key=api_key,
         model_name=model,
-        priority=priority
+        priority=priority,
+        supports_vision=supports_vision,
     )
     route.provider_instance = OpenAICompatibleProvider(api_base=api_base, api_key=api_key, model=model)
     return route
@@ -163,7 +183,8 @@ def _build_gemini_route(priority: int) -> Optional[ProviderRoute]:
         api_base="https://generativelanguage.googleapis.com",
         api_key=api_key,
         model_name=model,
-        priority=priority
+        priority=priority,
+        supports_vision=True,
     )
     route.provider_instance = GeminiProvider(api_key=api_key, model=model)
     return route
@@ -234,7 +255,7 @@ def get_default_provider() -> AIModelProvider:
         apply_primary_model(github_route)
         routes.append(github_route)
 
-    openai_route = _build_openai_compatible_route("openai", get_priority("openai", 10), "https://api.openai.com/v1", "gpt-4o-mini")
+    openai_route = _build_openai_compatible_route("openai", get_priority("openai", 10), "https://api.openai.com/v1", "gpt-4o-mini", supports_vision=True)
     if openai_route:
         apply_primary_model(openai_route)
         routes.append(openai_route)
@@ -268,7 +289,21 @@ def get_default_provider() -> AIModelProvider:
     if gemini_route:
         apply_primary_model(gemini_route)
         routes.append(gemini_route)
-        
+
+    # OpenRouter: an OpenAI-compatible aggregator. Its main job here is to be a
+    # vision-capable FALLBACK behind Gemini (default model is a free vision
+    # model), so attach-image chat still works when Gemini's free tier throttles.
+    openrouter_route = _build_openai_compatible_route(
+        "openrouter",
+        get_priority("openrouter", 35),
+        "https://openrouter.ai/api/v1",
+        "google/gemma-4-31b-it:free",
+        supports_vision=True,
+    )
+    if openrouter_route:
+        apply_primary_model(openrouter_route)
+        routes.append(openrouter_route)
+
     # Generic Local / Custom OpenAI Compatible
     local_route = _build_openai_compatible_route("local", get_priority("local", 50), "http://localhost:8000/v1", "local-model")
     if local_route:

@@ -20,6 +20,11 @@ repository = ConversationRepository()
 project_repo = ProjectRepository()
 task_repo = WorkspaceTaskRepository()
 storage = AttachmentStorage()
+# NOTE: the upload-time analysis provider is intentionally left as the default.
+# The chat itself reads the image via the multimodal path (see
+# ConversationEngine.generate_response_stream), so wiring a real provider here
+# would add a SECOND model call per image and, on a rate-limited free tier,
+# starve the chat read of quota. Real on-demand analysis is a separate follow-up.
 vision = VisionPipeline()
 
 class ProjectUpdate(BaseModel):
