@@ -311,7 +311,10 @@ def get_default_provider() -> AIModelProvider:
         "groq",
         get_priority("groq", 15),
         "https://api.groq.com/openai/v1",
-        "llama-3.3-70b-versatile",
+        # Groq's current production flagship (MoE 120B, ~500 tok/s, 131k ctx).
+        # Groq deprecated llama-3.3-70b-versatile / llama-3.1-8b-instant in
+        # 2026-06 and recommends gpt-oss-120b as the migration target.
+        "openai/gpt-oss-120b",
     )
     if groq_route:
         apply_primary_model(groq_route)
