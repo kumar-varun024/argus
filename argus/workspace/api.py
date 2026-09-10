@@ -528,15 +528,17 @@ def _extract_and_ingest_graph(ev: Evidence, req: EvidenceCreate, conversation: C
     # 2. URLs
     urls = re.findall(r"https?://[a-zA-Z0-9_\-\.]+", text)
     
-    ev_node_id = f"ev_{ev.id}"
+    ev_node_id = f"ev_{ev.evidence_id}"
     ev_node = graph.get(ev_node_id)
     if not ev_node:
-        ev_node = Node(id=ev_node_id, type="Evidence", value=ev.title, metadata={"evidence_id": ev.id})
+        ev_node = Node(id=ev_node_id, type="Evidence", value=ev.title, metadata={"evidence_id": ev.evidence_id})
         graph.add(ev_node)
         
     for ep in set(endpoints):
         ep = ep.strip()
-        if len(ep) < 2: continue
+        # Skip URL artifacts like "//example.com" captured from a full URL -- those
+        # are hosts (handled by the URL pass below), not request endpoints.
+        if len(ep) < 2 or ep.startswith("//"): continue
         ep_id = f"ep_{ep}"
         ep_node = graph.get(ep_id)
         if not ep_node:
