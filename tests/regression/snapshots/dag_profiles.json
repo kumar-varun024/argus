@@ -1,0 +1,589 @@
+{
+  "full": [
+    {
+      "dependencies": [],
+      "key": "subfinder",
+      "phase": "recon",
+      "priority": 0.95,
+      "tool_id": "subfinder"
+    },
+    {
+      "dependencies": [
+        "Discover Subdomains"
+      ],
+      "key": "httpx",
+      "phase": "recon",
+      "priority": 0.9,
+      "tool_id": "httpx"
+    },
+    {
+      "dependencies": [
+        "Fingerprint Live Hosts"
+      ],
+      "key": "katana_crawler",
+      "phase": "recon",
+      "priority": 0.85,
+      "tool_id": "katana_crawler"
+    },
+    {
+      "dependencies": [
+        "Fingerprint Live Hosts"
+      ],
+      "key": "info_disclosure",
+      "phase": "recon",
+      "priority": 0.82,
+      "tool_id": "info_disclosure"
+    },
+    {
+      "dependencies": [
+        "Fingerprint Live Hosts"
+      ],
+      "key": "nuclei",
+      "phase": "recon",
+      "priority": 0.8,
+      "tool_id": "nuclei"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "cors_security",
+      "phase": "vulnerability",
+      "priority": 0.83,
+      "tool_id": "cors_security"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "cache_security",
+      "phase": "vulnerability",
+      "priority": 0.82,
+      "tool_id": "cache_security"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "access_control",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "access_control"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "path_traversal",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "path_traversal"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "sql_injection",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "sql_injection"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "xss",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "xss"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "command_injection",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "command_injection"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "ssrf",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "ssrf"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "oauth",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "oauth"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "xml_parser_validation",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "xml_parser_validation"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "deserialization",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "deserialization"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "graphql_security",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "graphql_security"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "websocket_security",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "websocket_security"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "request_smuggling",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "request_smuggling"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "race_conditions",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "race_conditions"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "business_logic",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "business_logic"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "ssti",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "ssti"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "file_upload",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "file_upload"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "api_security",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "api_security"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "auth_bypass",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "auth_bypass"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "prototype_pollution",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "prototype_pollution"
+    }
+  ],
+  "quick": [
+    {
+      "dependencies": [],
+      "key": "subfinder",
+      "phase": "recon",
+      "priority": 0.95,
+      "tool_id": "subfinder"
+    },
+    {
+      "dependencies": [
+        "Discover Subdomains"
+      ],
+      "key": "httpx",
+      "phase": "recon",
+      "priority": 0.9,
+      "tool_id": "httpx"
+    },
+    {
+      "dependencies": [
+        "Fingerprint Live Hosts"
+      ],
+      "key": "katana_crawler",
+      "phase": "recon",
+      "priority": 0.85,
+      "tool_id": "katana_crawler"
+    },
+    {
+      "dependencies": [
+        "Fingerprint Live Hosts"
+      ],
+      "key": "info_disclosure",
+      "phase": "recon",
+      "priority": 0.82,
+      "tool_id": "info_disclosure"
+    },
+    {
+      "dependencies": [
+        "Fingerprint Live Hosts"
+      ],
+      "key": "nuclei",
+      "phase": "recon",
+      "priority": 0.8,
+      "tool_id": "nuclei"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "cors_security",
+      "phase": "vulnerability",
+      "priority": 0.83,
+      "tool_id": "cors_security"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "cache_security",
+      "phase": "vulnerability",
+      "priority": 0.82,
+      "tool_id": "cache_security"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "access_control",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "access_control"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "sql_injection",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "sql_injection"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "xss",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "xss"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "command_injection",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "command_injection"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "ssrf",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "ssrf"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "auth_bypass",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "auth_bypass"
+    }
+  ],
+  "recon": [
+    {
+      "dependencies": [],
+      "key": "subfinder",
+      "phase": "recon",
+      "priority": 0.95,
+      "tool_id": "subfinder"
+    },
+    {
+      "dependencies": [
+        "Discover Subdomains"
+      ],
+      "key": "httpx",
+      "phase": "recon",
+      "priority": 0.9,
+      "tool_id": "httpx"
+    },
+    {
+      "dependencies": [
+        "Fingerprint Live Hosts"
+      ],
+      "key": "katana_crawler",
+      "phase": "recon",
+      "priority": 0.85,
+      "tool_id": "katana_crawler"
+    },
+    {
+      "dependencies": [
+        "Fingerprint Live Hosts"
+      ],
+      "key": "info_disclosure",
+      "phase": "recon",
+      "priority": 0.82,
+      "tool_id": "info_disclosure"
+    },
+    {
+      "dependencies": [
+        "Fingerprint Live Hosts"
+      ],
+      "key": "nuclei",
+      "phase": "recon",
+      "priority": 0.8,
+      "tool_id": "nuclei"
+    }
+  ],
+  "vuln": [
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "cors_security",
+      "phase": "vulnerability",
+      "priority": 0.83,
+      "tool_id": "cors_security"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "cache_security",
+      "phase": "vulnerability",
+      "priority": 0.82,
+      "tool_id": "cache_security"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "access_control",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "access_control"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "path_traversal",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "path_traversal"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "sql_injection",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "sql_injection"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "xss",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "xss"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "command_injection",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "command_injection"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "ssrf",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "ssrf"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "oauth",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "oauth"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "xml_parser_validation",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "xml_parser_validation"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "deserialization",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "deserialization"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "graphql_security",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "graphql_security"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "websocket_security",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "websocket_security"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "request_smuggling",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "request_smuggling"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "race_conditions",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "race_conditions"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "business_logic",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "business_logic"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "ssti",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "ssti"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "file_upload",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "file_upload"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "api_security",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "api_security"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "auth_bypass",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "auth_bypass"
+    },
+    {
+      "dependencies": [
+        "Discover API Endpoints"
+      ],
+      "key": "prototype_pollution",
+      "phase": "vulnerability",
+      "priority": 0.81,
+      "tool_id": "prototype_pollution"
+    }
+  ]
+}

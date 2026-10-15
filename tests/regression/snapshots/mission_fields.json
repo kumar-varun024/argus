@@ -1,0 +1,373 @@
+{
+  "count": 92,
+  "fields": [
+    {
+      "name": "target",
+      "type": "str"
+    },
+    {
+      "name": "id",
+      "type": "str"
+    },
+    {
+      "name": "name",
+      "type": "str"
+    },
+    {
+      "name": "workspace",
+      "type": "str"
+    },
+    {
+      "name": "created_at",
+      "type": "str"
+    },
+    {
+      "name": "updated_at",
+      "type": "str"
+    },
+    {
+      "name": "status",
+      "type": "MissionState"
+    },
+    {
+      "name": "phase",
+      "type": "str"
+    },
+    {
+      "name": "scope",
+      "type": "list[str]"
+    },
+    {
+      "name": "policy",
+      "type": "dict"
+    },
+    {
+      "name": "credentials",
+      "type": "list[dict]"
+    },
+    {
+      "name": "configuration",
+      "type": "dict"
+    },
+    {
+      "name": "test_identities",
+      "type": "list[TestIdentity]"
+    },
+    {
+      "name": "active_identity_id",
+      "type": "Optional[str]"
+    },
+    {
+      "name": "environment",
+      "type": "dict"
+    },
+    {
+      "name": "subdomains",
+      "type": "list[str]"
+    },
+    {
+      "name": "live_hosts",
+      "type": "list[dict]"
+    },
+    {
+      "name": "technologies",
+      "type": "list[str]"
+    },
+    {
+      "name": "endpoints",
+      "type": "list[dict]"
+    },
+    {
+      "name": "vulnerabilities",
+      "type": "list[dict]"
+    },
+    {
+      "name": "evidence",
+      "type": "EvidenceStore"
+    },
+    {
+      "name": "attack_surface_graph",
+      "type": "KnowledgeGraph"
+    },
+    {
+      "name": "plan",
+      "type": "Optional[Any]"
+    },
+    {
+      "name": "plan_steps",
+      "type": "list"
+    },
+    {
+      "name": "plan_dependencies",
+      "type": "list"
+    },
+    {
+      "name": "research_tasks",
+      "type": "list"
+    },
+    {
+      "name": "research_queue",
+      "type": "list"
+    },
+    {
+      "name": "coverage",
+      "type": "dict"
+    },
+    {
+      "name": "coverage_gaps",
+      "type": "list"
+    },
+    {
+      "name": "execution_queue",
+      "type": "dict"
+    },
+    {
+      "name": "execution_history",
+      "type": "list['ExecutionPlanResult']"
+    },
+    {
+      "name": "task_states",
+      "type": "dict"
+    },
+    {
+      "name": "retry_history",
+      "type": "list"
+    },
+    {
+      "name": "state_transitions",
+      "type": "list"
+    },
+    {
+      "name": "findings",
+      "type": "list"
+    },
+    {
+      "name": "api_inventory",
+      "type": "list"
+    },
+    {
+      "name": "business_objects",
+      "type": "list"
+    },
+    {
+      "name": "business_logic",
+      "type": "list"
+    },
+    {
+      "name": "priority_queue",
+      "type": "list"
+    },
+    {
+      "name": "priority_scores",
+      "type": "dict"
+    },
+    {
+      "name": "observations",
+      "type": "Any"
+    },
+    {
+      "name": "correlations",
+      "type": "Any"
+    },
+    {
+      "name": "correlation_graph",
+      "type": "Any"
+    },
+    {
+      "name": "evidence_bundles",
+      "type": "Any"
+    },
+    {
+      "name": "evidence_strength",
+      "type": "dict"
+    },
+    {
+      "name": "investigations",
+      "type": "Any"
+    },
+    {
+      "name": "investigation_queue",
+      "type": "list"
+    },
+    {
+      "name": "reasoning_tree",
+      "type": "dict"
+    },
+    {
+      "name": "explanations",
+      "type": "dict"
+    },
+    {
+      "name": "reasoning_chains",
+      "type": "dict"
+    },
+    {
+      "name": "explanation_graph",
+      "type": "dict"
+    },
+    {
+      "name": "hypotheses",
+      "type": "Any"
+    },
+    {
+      "name": "hypothesis_history",
+      "type": "list"
+    },
+    {
+      "name": "hypothesis_queue",
+      "type": "list"
+    },
+    {
+      "name": "learning",
+      "type": "Any"
+    },
+    {
+      "name": "feedback",
+      "type": "list"
+    },
+    {
+      "name": "patterns",
+      "type": "list"
+    },
+    {
+      "name": "playbooks",
+      "type": "list[str]"
+    },
+    {
+      "name": "active_playbooks",
+      "type": "list[str]"
+    },
+    {
+      "name": "completed_playbooks",
+      "type": "list[str]"
+    },
+    {
+      "name": "playbook_results",
+      "type": "dict"
+    },
+    {
+      "name": "authorization_investigations",
+      "type": "list"
+    },
+    {
+      "name": "authorization_metrics",
+      "type": "dict"
+    },
+    {
+      "name": "state_machines",
+      "type": "dict"
+    },
+    {
+      "name": "workflow_rules",
+      "type": "list"
+    },
+    {
+      "name": "authentication",
+      "type": "AuthenticationModel"
+    },
+    {
+      "name": "api_intelligence",
+      "type": "list"
+    },
+    {
+      "name": "resources",
+      "type": "dict"
+    },
+    {
+      "name": "operations",
+      "type": "list"
+    },
+    {
+      "name": "relationships",
+      "type": "list"
+    },
+    {
+      "name": "identities",
+      "type": "list"
+    },
+    {
+      "name": "sessions",
+      "type": "list"
+    },
+    {
+      "name": "authentication_workflows",
+      "type": "list"
+    },
+    {
+      "name": "identity_graph",
+      "type": "dict"
+    },
+    {
+      "name": "file_inventory",
+      "type": "list"
+    },
+    {
+      "name": "upload_workflows",
+      "type": "list"
+    },
+    {
+      "name": "file_relationships",
+      "type": "list"
+    },
+    {
+      "name": "graphql",
+      "type": "GraphQLState"
+    },
+    {
+      "name": "workflows",
+      "type": "list['Workflow']"
+    },
+    {
+      "name": "authorization_graph",
+      "type": "'AuthorizationGraph'"
+    },
+    {
+      "name": "ai_research",
+      "type": "'AIResponse'"
+    },
+    {
+      "name": "facts",
+      "type": "FactStore"
+    },
+    {
+      "name": "research_cards",
+      "type": "ResearchQueue"
+    },
+    {
+      "name": "planner",
+      "type": "dict"
+    },
+    {
+      "name": "agent_results",
+      "type": "dict[str, 'AgentResult']"
+    },
+    {
+      "name": "agent_health",
+      "type": "dict[str, 'AgentHealth']"
+    },
+    {
+      "name": "agent_metrics",
+      "type": "dict[str, 'AgentMetric']"
+    },
+    {
+      "name": "execution_results",
+      "type": "dict[str, 'ExecutionPlanResult']"
+    },
+    {
+      "name": "execution_metrics",
+      "type": "dict[str, dict]"
+    },
+    {
+      "name": "reports",
+      "type": "list[str]"
+    },
+    {
+      "name": "metrics",
+      "type": "dict"
+    },
+    {
+      "name": "plugins",
+      "type": "list[str]"
+    }
+  ]
+}

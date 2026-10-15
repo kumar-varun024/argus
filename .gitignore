@@ -20,6 +20,32 @@ Thumbs.db
 # Logs
 *.log
 
+# Argus runtime artifacts (checkpoints, cache, reports, tool/learning history)
+.argus/
+
+# Agent sprint scratch / handoff workspace
+.agents/
+
+# Analysis & tool-output dumps
+bandit*.txt
+radon_*.txt
+coverage.txt
+test_failures.txt
+pytest_errors.txt
+sprint*-test-results.txt
+ast_dump.json
+
+# Root scratch / debug / verification scripts (not part of the test suite)
+/debug_*.py
+/scratch_*.py
+/verify_*.py
+/test.py
+/test_parser.py
+/test_rank.py
+/test_research.py
+/test_jinja_render.py
+/generate_ppt.py
+
 # Coverage
 .coverage
 htmlcov/
@@ -43,3 +69,5 @@ docker-data/
 
 # Neo4j
 neo4j-data/
+/json
+/touch

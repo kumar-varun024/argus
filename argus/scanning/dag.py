@@ -105,11 +105,11 @@ class ScanDAG:
             self._load_default_recon_templates()
 
     def _load_default_recon_templates(self) -> None:
-        """Loads default task definitions from argus.planning.task_generator._RECON_TEMPLATES."""
+        """Loads default task definitions from argus.planning.templates.RECON_TEMPLATES."""
         try:
-            from argus.planning.task_generator import _RECON_TEMPLATES
+            from argus.planning.templates import RECON_TEMPLATES as _RECON_TEMPLATES
         except ImportError as e:
-            logger.error(f"Failed to import _RECON_TEMPLATES: {e}")
+            logger.error(f"Failed to import RECON_TEMPLATES: {e}")
             return
 
         recon_keys = {"subfinder", "httpx", "katana_crawler", "nuclei", "info_disclosure"}

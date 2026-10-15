@@ -146,32 +146,30 @@ from .cache_security import (
     CacheSecurityMutationStrategy,
     CacheSecuritySeverity,
 )
-from .cors_headers import (
+# CORS / security-header detection is provided by the canonical, tested collector
+# in cors_security.py. The former cors_headers.py rewrite had no consumers and no
+# tests; it is retired to a deprecation shim. The historical collector-variant
+# names are kept as backward-compatible aliases of the single CORSSecurityCollector.
+from .cors_security import (
     CORSSecurityCollector,
-    CORSHeadersCollector,
-    CORSCollector,
-    CORSMisconfigurationCollector,
-    HTTPHeaderAuditorCollector,
-    SecurityHeadersCollector,
-    HTTPHeaderCollector,
+    CORSSecurityAnalyzer,
     CORSPayloadGenerator,
-    CORSMutationGenerator,
-    CORSProber,
-    CORSAnalyzer,
-    HTTPHeaderAuditor,
-    HeaderAuditor,
     CORSProbe,
     CORSProbeResponse,
     CORSSecurityResult,
     HeaderAuditResult,
     CORSVulnerabilityType,
-    CORSTechnique,
     HeaderVulnerabilityType,
-    SecurityHeaderTechnique,
     CORSMutationStrategy,
-    CORSStrategy,
-    CORSSeverity,
 )
+
+CORSHeadersCollector = CORSSecurityCollector
+CORSCollector = CORSSecurityCollector
+CORSMisconfigurationCollector = CORSSecurityCollector
+HTTPHeaderAuditorCollector = CORSSecurityCollector
+SecurityHeadersCollector = CORSSecurityCollector
+HTTPHeaderCollector = CORSSecurityCollector
+CORSAnalyzer = CORSSecurityAnalyzer
 from .auth_bypass import (
     AuthBypassCollector,
     AuthenticationBypassCollector,
@@ -359,6 +357,7 @@ __all__ = [
     "CacheSecurityMutationStrategy",
     "CacheSecuritySeverity",
     "CORSSecurityCollector",
+    "CORSSecurityAnalyzer",
     "CORSHeadersCollector",
     "CORSCollector",
     "CORSMisconfigurationCollector",
@@ -366,22 +365,14 @@ __all__ = [
     "SecurityHeadersCollector",
     "HTTPHeaderCollector",
     "CORSPayloadGenerator",
-    "CORSMutationGenerator",
-    "CORSProber",
     "CORSAnalyzer",
-    "HTTPHeaderAuditor",
-    "HeaderAuditor",
     "CORSProbe",
     "CORSProbeResponse",
     "CORSSecurityResult",
     "HeaderAuditResult",
     "CORSVulnerabilityType",
-    "CORSTechnique",
     "HeaderVulnerabilityType",
-    "SecurityHeaderTechnique",
     "CORSMutationStrategy",
-    "CORSStrategy",
-    "CORSSeverity",
     "AuthBypassCollector",
     "AuthenticationBypassCollector",
     "CredentialAttackCollector",

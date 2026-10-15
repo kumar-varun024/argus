@@ -46,6 +46,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
 from argus.collectors.base import BaseCollector
+from argus.collectors.toolkit.enums import Severity
 from argus.evidence.model import Evidence, ProvenanceData
 from argus.graph.node import Node
 from argus.http.client import AuthenticatedHttpClient, HttpResponse
@@ -53,13 +54,8 @@ from argus.http.client import AuthenticatedHttpClient, HttpResponse
 logger = logging.getLogger(__name__)
 
 
-class WebSocketSeverity(str, Enum):
-    """WebSocket vulnerability severity levels."""
-    CRITICAL = "critical"
-    HIGH = "high"
-    MEDIUM = "medium"
-    LOW = "low"
-    INFO = "info"
+# Canonical severity scale (see argus.collectors.toolkit.enums.Severity).
+WebSocketSeverity = Severity
 
 
 # Backwards compatibility alias
