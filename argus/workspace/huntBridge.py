@@ -31,9 +31,11 @@ from argus.authorization.gate import authorization_gate
 from argus.authorization.scope import ScopeState
 from argus.runtime.manager import mission_manager
 from argus.workspace.huntIntent import HuntRequest
+from argus.workspace.pendingProposalInspection import PendingProposalSummary, summarize_pending_proposal
 
 HUNT_ACTION: str = "hunt"
 DEFAULT_NONCE_TTL_SECONDS: float = 300.0
+_PENDING_PROPOSAL_LIMIT = 50
 
 
 @dataclass(frozen=True)
@@ -120,6 +122,27 @@ class HuntBridge:
                 establishes_scope=establishes_scope,
             )
         return nonce
+
+    def pending_proposals(self, operator_id: str, mission_id: str | None) -> list[PendingProposalSummary]:
+        """Read a bounded snapshot of active proposals owned by this operator and mission."""
+        with self._lock:
+            now = self._now()
+            entries: list[tuple[str, str, str, float]] = []
+            for nonce, pending in reversed(self._pending.items()):
+                if pending.consumed or pending.user_id != operator_id or pending.mission_id != mission_id:
+                    continue
+                expires_at = pending.created_at + self._ttl
+                if expires_at <= now:
+                    continue
+                entries.append((nonce, pending.target, pending.profile, expires_at))
+                if len(entries) == _PENDING_PROPOSAL_LIMIT:
+                    break
+        return [
+            summarize_pending_proposal(
+                nonce, target=target, profile=profile, mission_id=mission_id, expires_at=expires_at,
+            )
+            for nonce, target, profile, expires_at in entries
+        ]
 
     def _claim(self, nonce: str, user_id: str) -> Tuple[Optional[_PendingHunt], str]:
         """Atomically validate and consume a nonce (single-use, replay-proof)."""

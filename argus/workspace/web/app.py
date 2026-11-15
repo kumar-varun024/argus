@@ -12,6 +12,7 @@ from argus.workspace.engine import ConversationEngine
 from argus.workspace.api import router as api_router, repository, storage, vision
 from argus.workspace import huntOrchestrator
 from argus.workspace.huntBridge import hunt_bridge
+from argus.workspace.web.pendingProposalAccess import PENDING_PROPOSAL_HEADERS, require_pending_proposal_operator
 from argus.agent.agentRunner import hunt_agent_runner, resolveCommandApproval
 
 app = FastAPI(title="Argus Multimodal Workspace")
@@ -224,6 +225,28 @@ def get_provider_status():
         "model": provider.model_name(),
         "configured": True
     }
+
+def _pending_conversation_mission(cid: str, operator_id: str) -> str | None:
+    conversation = repository.get(cid)
+    if conversation is None or conversation.user_id != operator_id:
+        raise HTTPException(404, "Conversation not found.", headers=PENDING_PROPOSAL_HEADERS)
+    return conversation.mission_id or None
+
+
+@app.get("/hunt/pending")
+def get_hunt_pending(request: Request, cid: str = "") -> JSONResponse:
+    """List local proposals without issuing or consuming approval credentials."""
+    operator_id = require_pending_proposal_operator(request)
+    mission_id = _pending_conversation_mission(cid, operator_id) if cid else None
+
+    # A missionless chat cannot be matched to a proposal in the legacy store.
+    proposals = hunt_bridge.pending_proposals(operator_id, mission_id) if not cid or mission_id else []
+    if cid and _pending_conversation_mission(cid, operator_id) != mission_id:
+        raise HTTPException(404, "Conversation not found.", headers=PENDING_PROPOSAL_HEADERS)
+    if require_pending_proposal_operator(request) != operator_id:
+        raise HTTPException(401, "Valid operator bearer credential required.", headers=PENDING_PROPOSAL_HEADERS)
+    return JSONResponse({"proposals": proposals}, headers=PENDING_PROPOSAL_HEADERS)
+
 
 @app.post("/hunt/propose")
 async def post_hunt_propose(cid: str = Form(""), message: str = Form(...)):
