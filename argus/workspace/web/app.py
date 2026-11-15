@@ -13,6 +13,7 @@ from argus.workspace.api import router as api_router, repository, storage, visio
 from argus.workspace import huntOrchestrator
 from argus.workspace.huntBridge import hunt_bridge
 from argus.workspace.web.pendingProposalAccess import PENDING_PROPOSAL_HEADERS, require_pending_proposal_operator
+from argus.workspace.web.streamResponse import ClosingStreamingResponse
 from argus.agent.agentRunner import hunt_agent_runner, resolveCommandApproval
 
 app = FastAPI(title="Argus Multimodal Workspace")
@@ -210,7 +211,7 @@ async def post_chat_stream(
     # Process user message
     engine.add_user_message(conversation, message, attachments)
     
-    return StreamingResponse(
+    return ClosingStreamingResponse(
         engine.generate_response_stream(conversation), 
         media_type="text/event-stream",
         headers={"X-Conversation-Id": conversation.conversation_id}
